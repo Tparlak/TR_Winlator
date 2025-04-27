@@ -225,7 +225,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         // Construct the command without Box64 to the Wine executable
         String command = "";
         String overriddenCommand = envVars.get("GUEST_PROGRAM_LAUNCHER_COMMAND");
-        if (overriddenCommand != null) {
+        if (!overriddenCommand.isEmpty()) {
             String[] parts = overriddenCommand.split(";");
             for (String part : parts)
                 command += part + " ";
