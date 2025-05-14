@@ -337,6 +337,8 @@ public abstract class WineUtils {
                     registryEditor.setStringValue("Software\\Classes\\Wow6432Node\\CLSID\\{32D186A7-218F-4C75-8876-DD77273A8999}\\InprocServer32", null, "C:\\windows\\syswow64\\msmpeg2adec.dll");
                     registryEditor.setStringValue("Software\\Classes\\Wow6432Node\\CLSID\\{62CE7E72-4C71-4D20-B15D-452831A87D9D}\\InprocServer32", null, "C:\\windows\\syswow64\\msmpeg2vdec.dll");
                 } else {
+                    registryEditor.removeKey("Software\\Wine\\LicenseInformation");
+                    registryEditor.removeKey("Software\\Microsoft\\Windows Media Foundation\\ByteStreamHandlers\\HardwareMFT");
                     registryEditor.setStringValue("Software\\Classes\\CLSID\\{271C3902-6095-4C45-A22F-20091816EE9E}\\InprocServer32", null, "C:\\windows\\system32\\winegstreamer.dll");
                     registryEditor.setStringValue("Software\\Classes\\CLSID\\{2EEB4ADF-4578-4D10-BCA7-BB955F56320A}\\InprocServer32", null, "C:\\windows\\system32\\winegstreamer.dll");
                     registryEditor.setStringValue("Software\\Classes\\CLSID\\{5210F8E4-B0BB-47C3-A8D9-7B2282CC79ED}\\InprocServer32", null, "C:\\windows\\system32\\winegstreamer.dll");
