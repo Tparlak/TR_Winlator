@@ -1,7 +1,10 @@
 package com.winlator.cmod.xenvironment.components;
 
+import android.app.Service;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.InetAddresses;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,6 +33,9 @@ import com.winlator.cmod.xenvironment.ImageFs;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BionicProgramLauncherComponent extends GuestProgramLauncherComponent {
     private String guestExecutable;
@@ -294,13 +300,14 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         envVars.put("WINE_DISABLE_FULLSCREEN_HACK", "1");
         envVars.put("ENABLE_UTIL_LAYER", "1");
         envVars.put("GST_PLUGIN_FEATURE_RANK", "ximagesink:3000");
-        envVars.put("WINE_DO_NOT_UPDATE_IF_TABLE", "1");
         envVars.put("ALSA_CONFIG_PATH", rootDir.getPath() + "/usr/share/alsa/alsa.conf" + ":" + rootDir.getPath() + "/usr/etc/alsa/conf.d/android_aserver.conf");
         envVars.put("ALSA_PLUGIN_DIR", rootDir.getPath() + "/usr/lib/alsa-lib");
         envVars.put("OPENSSL_CONF", rootDir.getPath() + "/usr/etc/tls/openssl.cnf");
         envVars.put("SSL_CERT_FILE", rootDir.getPath() + "/usr/etc/tls/cert.pem");
         envVars.put("SSL_CERT_DIR", rootDir.getPath() + "/usr/etc/tls/certs");
         envVars.put("WINE_X11FORCEGLX", "1");
+        envVars.put("WINE_GST_NO_GL", "1");
+        envVars.put("SteamGameId", "0");
 
         String winePath = imageFs.getWinePath() + "/bin";
 
@@ -311,6 +318,15 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
  
         envVars.put("ANDROID_SYSVSHM_SERVER", rootDir.getPath() + UnixSocketConfig.SYSVSHM_SERVER_PATH);
+
+        String primaryDNS = "8.8.4.4";
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Service.CONNECTIVITY_SERVICE);
+        if (connectivityManager.getActiveNetwork() != null) {
+            ArrayList<InetAddress> dnsServers = new ArrayList<>(connectivityManager.getLinkProperties(connectivityManager.getActiveNetwork()).getDnsServers());
+            primaryDNS = dnsServers.get(0).toString().substring(1);
+        }
+        envVars.put("ANDROID_RESOLV_DNS", primaryDNS);
+        envVars.put("WINE_NEW_NDIS", "1");
         
         String ld_preload = "";
         
