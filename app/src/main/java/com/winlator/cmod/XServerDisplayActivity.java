@@ -102,6 +102,7 @@ import com.winlator.cmod.widget.MagnifierView;
 import com.winlator.cmod.widget.TouchpadView;
 import com.winlator.cmod.widget.WinetricksFloatingView;
 import com.winlator.cmod.widget.XServerView;
+import com.winlator.cmod.winhandler.MouseEventFlags;
 import com.winlator.cmod.winhandler.TaskManagerDialog;
 import com.winlator.cmod.winhandler.WinHandler;
 import com.winlator.cmod.xconnector.UnixSocketConfig;
@@ -735,50 +736,73 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
     // Inside XServerDisplayActivity class
     private void handleCapturedPointer(MotionEvent event) {
-
         boolean handled = false;
-
-        // Update XServer pointer position
-        float dx = event.getX();
-        float dy = event.getY();
-
-        xServer.injectPointerMoveDelta((int) dx, (int) dy);
 
         int actionButton = event.getActionButton();
         switch (event.getAction()) {
             case MotionEvent.ACTION_BUTTON_PRESS:
                 if (actionButton == MotionEvent.BUTTON_PRIMARY) {
-                    xServer.injectPointerButtonPress(Pointer.Button.BUTTON_LEFT);
+                    if (xServer.isForceMouseControl() || xServer.isRelativeMouseMovement())
+                        xServer.getWinHandler().mouseEvent(MouseEventFlags.LEFTDOWN, 0, 0, 0);
+                    else
+                        xServer.injectPointerButtonPress(Pointer.Button.BUTTON_LEFT);
                 } else if (actionButton == MotionEvent.BUTTON_SECONDARY) {
-                    xServer.injectPointerButtonPress(Pointer.Button.BUTTON_RIGHT);
+                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                        xServer.getWinHandler().mouseEvent(MouseEventFlags.RIGHTDOWN, 0, 0, 0);
+                    else
+                        xServer.injectPointerButtonPress(Pointer.Button.BUTTON_RIGHT);
                 } else if (actionButton == MotionEvent.BUTTON_TERTIARY) {
-                    xServer.injectPointerButtonPress(Pointer.Button.BUTTON_MIDDLE); // Handle middle mouse button press
+                    if (xServer.isForceMouseControl() || xServer.isRelativeMouseMovement())
+                        xServer.getWinHandler().mouseEvent(MouseEventFlags.MIDDLEDOWN, 0, 0, 0);
+                    else
+                        xServer.injectPointerButtonPress(Pointer.Button.BUTTON_MIDDLE); // Add this line for middle mouse button press
                 }
                 handled = true;
                 break;
             case MotionEvent.ACTION_BUTTON_RELEASE:
                 if (actionButton == MotionEvent.BUTTON_PRIMARY) {
-                    xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_LEFT);
+                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                        xServer.getWinHandler().mouseEvent(MouseEventFlags.LEFTUP, 0, 0, 0);
+                    else
+                        xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_LEFT);
                 } else if (actionButton == MotionEvent.BUTTON_SECONDARY) {
-                    xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_RIGHT);
+                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                        xServer.getWinHandler().mouseEvent(MouseEventFlags.RIGHTUP, 0, 0, 0);
+                    else
+                        xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_RIGHT);
                 } else if (actionButton == MotionEvent.BUTTON_TERTIARY) {
-                    xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_MIDDLE); // Handle middle mouse button release
+                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                        xServer.getWinHandler().mouseEvent(MouseEventFlags.MIDDLEUP, 0, 0, 0);
+                    else
+                        xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_MIDDLE); // Add this line for middle mouse button release
                 }
                 handled = true;
                 break;
+            case MotionEvent.ACTION_MOVE:
             case MotionEvent.ACTION_HOVER_MOVE:
                 float[] transformedPoint = XForm.transformPoint(xform, event.getX(), event.getY());
-                xServer.injectPointerMove((int)transformedPoint[0], (int)transformedPoint[1]);
+                if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                    xServer.getWinHandler().mouseEvent(MouseEventFlags.MOVE, (int)transformedPoint[0], (int)transformedPoint[1], 0);
+                else
+                    xServer.injectPointerMove((int)transformedPoint[0], (int)transformedPoint[1]);
                 handled = true;
                 break;
             case MotionEvent.ACTION_SCROLL:
                 float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
                 if (scrollY <= -1.0f) {
-                    xServer.injectPointerButtonPress(Pointer.Button.BUTTON_SCROLL_DOWN);
-                    xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_SCROLL_DOWN);
+                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                        xServer.getWinHandler().mouseEvent(MouseEventFlags.WHEEL, 0, 0, (int)scrollY * 270);
+                    else {
+                        xServer.injectPointerButtonPress(Pointer.Button.BUTTON_SCROLL_DOWN);
+                        xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_SCROLL_DOWN);
+                    }
                 } else if (scrollY >= 1.0f) {
-                    xServer.injectPointerButtonPress(Pointer.Button.BUTTON_SCROLL_UP);
-                    xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_SCROLL_UP);
+                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                        xServer.getWinHandler().mouseEvent(MouseEventFlags.WHEEL, 0, 0,(int)scrollY * 270);
+                    else {
+                        xServer.injectPointerButtonPress(Pointer.Button.BUTTON_SCROLL_UP);
+                        xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_SCROLL_UP);
+                    }
                 }
                 handled = true;
                 break;
