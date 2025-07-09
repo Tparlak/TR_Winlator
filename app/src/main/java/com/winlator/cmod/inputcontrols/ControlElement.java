@@ -13,6 +13,8 @@ import com.winlator.cmod.core.CubicBezierInterpolator;
 import com.winlator.cmod.math.Mathf;
 import com.winlator.cmod.widget.InputControlsView;
 import com.winlator.cmod.widget.TouchpadView;
+import com.winlator.cmod.winhandler.MouseEventFlags;
+import com.winlator.cmod.xserver.XServer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -704,7 +706,13 @@ public class ControlElement {
                     }
                 }
 
-                if (cursorDx != 0 || cursorDy != 0) inputControlsView.getXServer().injectPointerMoveDelta(cursorDx, cursorDy);
+                if (cursorDx != 0 || cursorDy != 0)  {
+                    XServer xServer = inputControlsView.getXServer();
+                    if (xServer.isForceMouseControl() || xServer.isRelativeMouseMovement())
+                        xServer.getWinHandler().mouseEvent(MouseEventFlags.MOVE, cursorDx, cursorDy, 0);
+                    else
+                        inputControlsView.getXServer().injectPointerMoveDelta(cursorDx, cursorDy);
+                }
             }
             else {
                 final boolean[] states = {deltaY <= -DPAD_DEAD_ZONE, deltaX >= DPAD_DEAD_ZONE, deltaY >= DPAD_DEAD_ZONE, deltaX <= -DPAD_DEAD_ZONE};
