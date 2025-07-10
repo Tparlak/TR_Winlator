@@ -173,6 +173,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     private String dxwrapper = Container.DEFAULT_DXWRAPPER;
     private String ddrawrapper = Container.DEFAULT_DDRAWRAPPER;
     private KeyValueSet dxwrapperConfig;
+    private String startupSelection;
     private WineInfo wineInfo;
     private final EnvVars envVars = new EnvVars();
     private boolean firstTimeBoot = false;
@@ -1206,9 +1207,13 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         WineStartMenuCreator.create(this, container);
         WineUtils.createDosdevicesSymlinks(container);
 
-        String startupSelection = String.valueOf(container.getStartupSelection());
+        if (shortcut != null)
+            startupSelection = shortcut.getExtra("startupSelection", String.valueOf(container.getStartupSelection()));
+        else
+            startupSelection = String.valueOf(container.getStartupSelection());
+
         if (!startupSelection.equals(container.getExtra("startupSelection"))) {
-            WineUtils.changeServicesStatus(container, container.getStartupSelection() != Container.STARTUP_SELECTION_NORMAL);
+            WineUtils.changeServicesStatus(container, Byte.parseByte(startupSelection) != Container.STARTUP_SELECTION_NORMAL);
             container.putExtra("startupSelection", startupSelection);
             containerDataChanged = true;
         }
@@ -1265,7 +1270,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
         // Additional container checks and environment configuration
         if (container != null) {
-            if (container.getStartupSelection() == Container.STARTUP_SELECTION_AGGRESSIVE) {
+            if (Byte.parseByte(startupSelection) == Container.STARTUP_SELECTION_AGGRESSIVE) {
                 winHandler.killProcess("services.exe");
             }
             bionicLauncher.setContainer(this.container);

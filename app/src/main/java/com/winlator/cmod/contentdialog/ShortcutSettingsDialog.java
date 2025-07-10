@@ -323,6 +323,9 @@ public class ShortcutSettingsDialog extends ContentDialog {
         sGraphicsDriver.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, sGraphicsItemsList));
         AppUtils.setSpinnerSelectionFromValue(sGraphicsDriver, selectedDriver);
 
+        final Spinner sStartupSelection = findViewById(R.id.SStartupSelection);
+        sStartupSelection.setSelection(Integer.parseInt(shortcut.getExtra("startupSelection", String.valueOf(shortcut.container.getStartupSelection()))));
+
         setOnConfirmCallback(() -> {
             String name = etName.getText().toString().trim();
             boolean nameChanged = !shortcut.name.equals(name) && !name.isEmpty();
@@ -396,6 +399,9 @@ public class ShortcutSettingsDialog extends ContentDialog {
 
                 String fexcoreVersion = sFEXCoreVersion.getSelectedItem().toString();
                 shortcut.putExtra("fexcoreVersion", !fexcoreVersion.equals(shortcut.container.getFEXCoreVersion()) ? fexcoreVersion : null);
+
+                byte startupSelection = (byte)sStartupSelection.getSelectedItemPosition();
+                shortcut.putExtra("startupSelection", (startupSelection != shortcut.container.getStartupSelection()) ? String.valueOf(startupSelection) : null);
 
                 ArrayList<ControlsProfile> profiles = inputControlsManager.getProfiles(true);
                 int controlsProfile = sControlsProfile.getSelectedItemPosition() > 0 ? profiles.get(sControlsProfile.getSelectedItemPosition() - 1).id : 0;
@@ -493,6 +499,7 @@ public class ShortcutSettingsDialog extends ContentDialog {
         Spinner sFEXCoreTSOPreset = findViewById(R.id.SFEXCoreTSOPreset);
         Spinner sFEXCoreMultiBlock = findViewById(R.id.SFEXCoreMultiblock);
         Spinner sFEXCoreX87ReducedPrecision = findViewById(R.id.SFEXCoreX87ReducedPrecision);
+        Spinner sStartupSelection = findViewById(R.id.SStartupSelection);
         
 
         // Set dark or light mode background for spinners
@@ -511,6 +518,7 @@ public class ShortcutSettingsDialog extends ContentDialog {
         sFEXCoreMultiBlock.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
         sFEXCoreX87ReducedPrecision.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
         sFEXCoreVersion.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
+        sStartupSelection.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
 
 //        EditText etLC_ALL = view.findViewById(R.id.ETlcall);
         EditText etExecArgs = view.findViewById(R.id.ETExecArgs);
