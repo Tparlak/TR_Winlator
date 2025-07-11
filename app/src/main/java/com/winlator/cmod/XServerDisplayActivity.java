@@ -196,6 +196,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     private String lc_all = "";
     PreloaderDialog preloaderDialog = null;
     private Runnable configChangedCallback = null;
+    private boolean isPaused = false;
 
     // Inside the XServerDisplayActivity class
     private SensorManager sensorManager;
@@ -987,6 +988,18 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 renderer.toggleFullscreen();
                 drawerLayout.closeDrawers();
                 touchpadView.toggleFullscreen();
+                break;
+            case R.id.main_menu_pause:
+                if (isPaused) {
+                    ProcessHelper.resumeAllWineProcesses();
+                    item.setIcon(R.drawable.icon_pause);
+                }
+                else {
+                    ProcessHelper.pauseAllWineProcesses();
+                    item.setIcon(R.drawable.icon_play);
+                }
+                isPaused = !isPaused;
+                drawerLayout.closeDrawers();
                 break;
             case R.id.main_menu_pip_mode:
                 enterPictureInPictureMode();
