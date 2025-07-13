@@ -276,13 +276,6 @@
                         android:text="True Mouse Control (Deactivate with Volume Down)"
                         android:layout_marginTop="8dp" />
 
-                    <CheckBox
-                        android:id="@+id/CBForceMouseControl"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Force Mouse Control"
-                        android:layout_marginTop="8dp" />
-
                     <!-- New Xinput Toggle Checkbox -->
                     <CheckBox
                         android:id="@+id/CBXinputToggle"

@@ -197,6 +197,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     PreloaderDialog preloaderDialog = null;
     private Runnable configChangedCallback = null;
     private boolean isPaused = false;
+    private boolean isRelativeMouseMovement;
 
     // Inside the XServerDisplayActivity class
     private SensorManager sensorManager;
@@ -536,6 +537,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             screenSize = container.getScreenSize();
             winHandler.setInputType((byte) container.getInputType());
             lc_all = container.getLC_ALL();
+            isRelativeMouseMovement = container.isRelativeMouseMovement();
 
             // Log the entire intent to verify the extras
             Intent intent = getIntent();
@@ -554,6 +556,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 String inputType = shortcut.getExtra("inputType");
                 if (!inputType.isEmpty()) winHandler.setInputType(Byte.parseByte(inputType));
                 String xinputDisabledString = shortcut.getExtra("disableXinput", "false");
+                isRelativeMouseMovement = shortcut.getExtra("relativeMouseMovement", container.isRelativeMouseMovement() ? "1" : "0").equals("1") ? true : false;
                 xinputDisabledFromShortcut = parseBoolean(xinputDisabledString);
                 // Pass the value to WinHandler
                 winHandler.setXInputDisabled(xinputDisabledFromShortcut);
@@ -586,8 +589,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
         boolean[] winStarted = {false};
 
-//        startProcessDetection();
-
         // Add the OnWindowModificationListener for dynamic workarounds
         xServer.windowManager.addOnWindowModificationListener(new WindowManager.OnWindowModificationListener() {
             @Override
@@ -596,6 +597,12 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                     xServerView.getRenderer().setCursorVisible(true);
                     preloaderDialog.closeOnUiThread();
                     winStarted[0] = true;
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            xServer.setRelativeMouseMovement(isRelativeMouseMovement);
+                        }
+                    }, 2000);
                 }
                     
                 if (frameRatingWindowId == window.id) frameRating.update();
@@ -752,17 +759,17 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         switch (event.getAction()) {
             case MotionEvent.ACTION_BUTTON_PRESS:
                 if (actionButton == MotionEvent.BUTTON_PRIMARY) {
-                    if (xServer.isForceMouseControl() || xServer.isRelativeMouseMovement())
+                    if (xServer.isRelativeMouseMovement())
                         xServer.getWinHandler().mouseEvent(MouseEventFlags.LEFTDOWN, 0, 0, 0);
                     else
                         xServer.injectPointerButtonPress(Pointer.Button.BUTTON_LEFT);
                 } else if (actionButton == MotionEvent.BUTTON_SECONDARY) {
-                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                    if (xServer.isRelativeMouseMovement())
                         xServer.getWinHandler().mouseEvent(MouseEventFlags.RIGHTDOWN, 0, 0, 0);
                     else
                         xServer.injectPointerButtonPress(Pointer.Button.BUTTON_RIGHT);
                 } else if (actionButton == MotionEvent.BUTTON_TERTIARY) {
-                    if (xServer.isForceMouseControl() || xServer.isRelativeMouseMovement())
+                    if (xServer.isRelativeMouseMovement())
                         xServer.getWinHandler().mouseEvent(MouseEventFlags.MIDDLEDOWN, 0, 0, 0);
                     else
                         xServer.injectPointerButtonPress(Pointer.Button.BUTTON_MIDDLE); // Add this line for middle mouse button press
@@ -771,17 +778,17 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 break;
             case MotionEvent.ACTION_BUTTON_RELEASE:
                 if (actionButton == MotionEvent.BUTTON_PRIMARY) {
-                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                    if (xServer.isRelativeMouseMovement())
                         xServer.getWinHandler().mouseEvent(MouseEventFlags.LEFTUP, 0, 0, 0);
                     else
                         xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_LEFT);
                 } else if (actionButton == MotionEvent.BUTTON_SECONDARY) {
-                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                    if (xServer.isRelativeMouseMovement())
                         xServer.getWinHandler().mouseEvent(MouseEventFlags.RIGHTUP, 0, 0, 0);
                     else
                         xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_RIGHT);
                 } else if (actionButton == MotionEvent.BUTTON_TERTIARY) {
-                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                    if (xServer.isRelativeMouseMovement())
                         xServer.getWinHandler().mouseEvent(MouseEventFlags.MIDDLEUP, 0, 0, 0);
                     else
                         xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_MIDDLE); // Add this line for middle mouse button release
@@ -791,7 +798,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             case MotionEvent.ACTION_MOVE:
             case MotionEvent.ACTION_HOVER_MOVE:
                 float[] transformedPoint = XForm.transformPoint(xform, event.getX(), event.getY());
-                if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                if (xServer.isRelativeMouseMovement())
                     xServer.getWinHandler().mouseEvent(MouseEventFlags.MOVE, (int)transformedPoint[0], (int)transformedPoint[1], 0);
                 else
                     xServer.injectPointerMove((int)transformedPoint[0], (int)transformedPoint[1]);
@@ -800,14 +807,14 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             case MotionEvent.ACTION_SCROLL:
                 float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
                 if (scrollY <= -1.0f) {
-                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                    if (xServer.isRelativeMouseMovement())
                         xServer.getWinHandler().mouseEvent(MouseEventFlags.WHEEL, 0, 0, (int)scrollY * 270);
                     else {
                         xServer.injectPointerButtonPress(Pointer.Button.BUTTON_SCROLL_DOWN);
                         xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_SCROLL_DOWN);
                     }
                 } else if (scrollY >= 1.0f) {
-                    if (xServer.isRelativeMouseMovement() || xServer.isForceMouseControl())
+                    if (xServer.isRelativeMouseMovement())
                         xServer.getWinHandler().mouseEvent(MouseEventFlags.WHEEL, 0, 0,(int)scrollY * 270);
                     else {
                         xServer.injectPointerButtonPress(Pointer.Button.BUTTON_SCROLL_UP);
@@ -1906,9 +1913,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         };
         loadProfileSpinner.run();
 
-        final CheckBox cbRelativeMouseMovement = dialog.findViewById(R.id.CBRelativeMouseMovement);
-        cbRelativeMouseMovement.setChecked(xServer.isRelativeMouseMovement());
-
         final CheckBox cbSimTouchScreen = dialog.findViewById(R.id.CBSimulateTouchScreen);
         cbSimTouchScreen.setChecked(touchpadView.isSimTouchScreen());
 
@@ -1944,7 +1948,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         });
 
         dialog.setOnConfirmCallback(() -> {
-            xServer.setRelativeMouseMovement(cbRelativeMouseMovement.isChecked());
             inputControlsView.setShowTouchscreenControls(cbShowTouchscreenControls.isChecked());
             boolean isTimeoutEnabled = cbEnableTimeout.isChecked();
             boolean isHapticsEnabled = cbEnableHaptics.isChecked();
@@ -1975,10 +1978,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
     private void simulateConfirmInputControlsDialog() {
         // Simulate setting the relative mouse movement and touchscreen controls from preferences
-        boolean isRelativeMouseMovement = preferences.getBoolean("relative_mouse_movement_enabled", false);
-        boolean isForceMouseControl = preferences.getBoolean("force_mouse_control_enabled", false);
-        xServer.setRelativeMouseMovement(isRelativeMouseMovement);
-        xServer.setForceMouseControl(isForceMouseControl);
 
         boolean isShowTouchscreenControls = preferences.getBoolean("show_touchscreen_controls_enabled", false); // default is false (hidden)
         inputControlsView.setShowTouchscreenControls(isShowTouchscreenControls);

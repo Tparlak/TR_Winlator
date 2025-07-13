@@ -55,12 +55,6 @@
             android:checked="false" />
 
         <CheckBox
-            android:id="@+id/CBRelativeMouseMovement"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/relative_mouse_movement" />
-
-        <CheckBox
             android:id="@+id/CBSimulateTouchScreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
