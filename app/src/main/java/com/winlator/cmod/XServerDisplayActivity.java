@@ -499,7 +499,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             firstTimeBoot = container.getExtra("appVersion").isEmpty();
 
             String wineVersion = container.getWineVersion();
-            wineInfo = WineInfo.fromIdentifier(this, wineVersion);
+            wineInfo = WineInfo.fromIdentifier(this, contentsManager, wineVersion);
 
             imageFs.setWinePath(wineInfo.path);
 

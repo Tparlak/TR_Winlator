@@ -148,7 +148,7 @@ public class ShortcutSettingsDialog extends ContentDialog {
 
         FrameLayout fexcoreFL = findViewById(R.id.fexcoreFrame);
         String wineVersion = shortcut.container.getWineVersion();
-        WineInfo wineInfo = WineInfo.fromIdentifier(context, wineVersion);
+        WineInfo wineInfo = WineInfo.fromIdentifier(context, contentsManager, wineVersion);
         if (wineInfo.isArm64EC()) {
             fexcoreFL.setVisibility(View.VISIBLE);
             sEmulator.setEnabled(true);

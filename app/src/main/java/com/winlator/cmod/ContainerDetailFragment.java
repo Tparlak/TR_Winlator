@@ -662,7 +662,7 @@ public class ContainerDetailFragment extends Fragment {
                     imageFs = ImageFs.find(imageFsRoot);
 
 
-                    manager.createContainerAsync(data, (container) -> {
+                    manager.createContainerAsync(data, contentsManager, (container) -> {
                         if (container != null) {
                             this.container = container;
                             saveWineRegistryKeys(view);
@@ -1094,7 +1094,7 @@ public class ContainerDetailFragment extends Fragment {
                 Spinner sEmulator64 = view.findViewById(R.id.SEmulator64);
                 sEmulator64.setEnabled(false);
                 String wineVersion = sWineVersion.getSelectedItem().toString();
-                WineInfo wineInfo = WineInfo.fromIdentifier(context, wineVersion);
+                WineInfo wineInfo = WineInfo.fromIdentifier(context, contentsManager, wineVersion);
                 if (wineInfo.isArm64EC()) {
                     fexcoreFL.setVisibility(View.VISIBLE);
                     sEmulator.setEnabled(true);
@@ -1117,7 +1117,7 @@ public class ContainerDetailFragment extends Fragment {
                 Spinner sEmulator64 = view.findViewById(R.id.SEmulator64);
                 sEmulator64.setEnabled(false);
                 String wineVersion = sWineVersion.getSelectedItem().toString();
-                WineInfo wineInfo = WineInfo.fromIdentifier(context, wineVersion);
+                WineInfo wineInfo = WineInfo.fromIdentifier(context, contentsManager, wineVersion);
                 if (wineInfo.isArm64EC()) {
                     fexcoreFL.setVisibility(View.VISIBLE);
                     sEmulator.setEnabled(true);
