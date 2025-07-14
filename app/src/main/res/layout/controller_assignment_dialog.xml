@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+
+
+    <LinearLayout
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/TVRestartRequired"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/restart_required_for_changes"
+            android:textColor="@color/colorAccent"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/LLPlayer1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:minHeight="48dp">
+
+            <CheckBox
+                android:id="@+id/CBPlayer1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:text="@string/player_1"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/TVPlayer1DeviceName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/not_assigned"
+                android:textStyle="bold"
+                android:gravity="end"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/BTNAssignP1"
+                style="@style/ButtonNeutral"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="@string/assign" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/LLPlayer2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:minHeight="48dp">
+
+            <CheckBox
+                android:id="@+id/CBPlayer2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:text="@string/player_2"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/TVPlayer2DeviceName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/not_assigned"
+                android:textStyle="bold"
+                android:gravity="end"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/BTNAssignP2"
+                style="@style/ButtonNeutral"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="@string/assign" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/LLPlayer3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:minHeight="48dp">
+
+            <CheckBox
+                android:id="@+id/CBPlayer3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:text="@string/player_3"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/TVPlayer3DeviceName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/not_assigned"
+                android:textStyle="bold"
+                android:gravity="end"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/BTNAssignP3"
+                style="@style/ButtonNeutral"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="@string/assign" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/LLPlayer4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:minHeight="48dp">
+
+            <CheckBox
+                android:id="@+id/CBPlayer4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:text="@string/player_4"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/TVPlayer4DeviceName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/not_assigned"
+                android:textStyle="bold"
+                android:gravity="end"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/BTNAssignP4"
+                style="@style/ButtonNeutral"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="@string/assign" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

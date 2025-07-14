@@ -2,10 +2,12 @@ package com.winlator.cmod;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -42,11 +44,18 @@ import com.winlator.cmod.contentdialog.SaveSettingsDialog;
 import com.winlator.cmod.core.Callback;
 import com.winlator.cmod.core.PreloaderDialog;
 import com.winlator.cmod.container.ContainerManager;
+import com.winlator.cmod.inputcontrols.ControllerManager;
 import com.winlator.cmod.saves.Save;
 import com.winlator.cmod.saves.SaveManager;
 import com.winlator.cmod.xenvironment.ImageFsInstaller;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static final @IntRange(from = 1, to = 19) byte CONTAINER_PATTERN_COMPRESSION_LEVEL = 9;
@@ -111,11 +120,56 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        }
 //    }
 
+    private static final String ASSET_SUBDIR   = "x86_64-libs";          // inside assets
+    private static final String GUEST_LIB_DIR  = "imagefs/usr/lib/x86_64-libs";      // inside filesDir
 
+    /** Copy everything under assets/x86_64-libs/ to files/imagefs/usr/lib/ (once) */
+    private void ensureGuestLibsPresent(Context ctx) throws IOException {
+        File dstRoot = new File(ctx.getFilesDir(), GUEST_LIB_DIR);
+        if (!dstRoot.exists() && !dstRoot.mkdirs())
+            throw new IOException("Cannot create " + dstRoot);
+
+        AssetManager am = ctx.getAssets();
+        for (String name : Objects.requireNonNull(am.list(ASSET_SUBDIR))) {
+            File dst = new File(dstRoot, name);
+
+            // If the file is absent OR its size differs -> (re)copy it
+            boolean needCopy = !dst.exists();
+            if (!needCopy) {
+                long assetSize = am.openFd(ASSET_SUBDIR + "/" + name).getLength();
+                needCopy = (dst.length() != assetSize);
+            }
+
+            if (needCopy) {
+                try (InputStream in  = am.open(ASSET_SUBDIR + "/" + name);
+                     OutputStream out = new FileOutputStream(dst)) {
+
+                    byte[] buf = new byte[8192];
+                    for (int r; (r = in.read(buf)) != -1;) out.write(buf, 0, r);
+                }
+                if (name.endsWith(".so")) {
+                    dst.setReadable(true, false);
+                    dst.setExecutable(true, false);
+                }
+                Log.i("GuestLibCopy", "Deployed " + name);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Initialize the controller management system
+        ControllerManager.getInstance().init(getApplicationContext());
+
+        // evshim: add x86_64 guest libs
+        try {
+            ensureGuestLibsPresent(this);
+        } catch (IOException e) {
+            Log.e("GuestLibCopy", "Failed to deploy guest libs", e);
+        }
+
 
 
 //        cleanupErroneousContainer();

@@ -54,6 +54,7 @@ import com.winlator.cmod.container.Container;
 import com.winlator.cmod.container.ContainerManager;
 import com.winlator.cmod.container.Shortcut;
 import com.winlator.cmod.contentdialog.ContentDialog;
+import com.winlator.cmod.contentdialog.ControllerAssignmentDialog;
 import com.winlator.cmod.contentdialog.DXVKConfigDialog;
 import com.winlator.cmod.contentdialog.DebugDialog;
 import com.winlator.cmod.contentdialog.GraphicsDriverConfigDialog;
@@ -82,6 +83,7 @@ import com.winlator.cmod.core.WineStartMenuCreator;
 import com.winlator.cmod.core.WineThemeManager;
 import com.winlator.cmod.core.WineUtils;
 import com.winlator.cmod.fexcore.FEXCoreManager;
+import com.winlator.cmod.inputcontrols.ControllerManager;
 import com.winlator.cmod.inputcontrols.ControlsProfile;
 import com.winlator.cmod.inputcontrols.ExternalController;
 import com.winlator.cmod.inputcontrols.InputControlsManager;
@@ -307,7 +309,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
         // Initialize the WinHandler after context is set up
         winHandler = new WinHandler(this);
-        winHandler.initializeController();
+//        winHandler.initializeController();
         controller = winHandler.getCurrentController();
 
         if (isOpenWithAndroidBrowser || isShareAndroidClipboard)
@@ -990,6 +992,11 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 break;
             case R.id.main_menu_input_controls:
                 showInputControlsDialog();
+                drawerLayout.closeDrawers();
+                break;
+            case R.id.main_menu_controller_assignment:
+                ControllerAssignmentDialog.show(this);
+                winHandler.clearIgnoredDevices();
                 drawerLayout.closeDrawers();
                 break;
             case R.id.main_menu_toggle_fullscreen:
@@ -2062,6 +2069,19 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         touchpadView.setPointerButtonRightEnabled(false);
 
         inputControlsView.invalidate();
+
+        // If the selected profile is a virtual gamepad, we must enable the P1 slot.
+        if (profile.isVirtualGamepad()) {
+            ControllerManager controllerManager = ControllerManager.getInstance();
+            // Ensure Player 1 slot is enabled so a vjoy device is created for it.
+            controllerManager.setSlotEnabled(0, true);
+            // Clear any physical device from P1 to prevent conflicts.
+            controllerManager.unassignSlot(0);
+            // Tell WinHandler to update its internal state.
+            if (winHandler != null) {
+                winHandler.refreshControllerMappings();
+            }
+        }
     }
 
     private void hideInputControls() {
@@ -2072,6 +2092,17 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         touchpadView.setSensitivity(globalCursorSpeed);
         touchpadView.setPointerButtonLeftEnabled(true);
         touchpadView.setPointerButtonRightEnabled(true);
+
+        ControlsProfile hiddenProfile = inputControlsView.getProfile();
+        // If the profile we are hiding was a virtual gamepad...
+        if (hiddenProfile != null && hiddenProfile.isVirtualGamepad()) {
+            ControllerManager controllerManager = ControllerManager.getInstance();
+            // ...and if no physical controller is assigned to P1...
+            if (controllerManager.getAssignedDeviceForSlot(0) == null) {
+                // ...then disable the slot so we don't have an orphaned vjoy device.
+                controllerManager.setSlotEnabled(0, false);
+            }
+        }
 
         inputControlsView.invalidate();
     }

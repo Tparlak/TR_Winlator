@@ -15,6 +15,10 @@
             android:id="@+id/main_menu_input_controls"
             android:title="@string/input_controls" />
         <item
+            android:id="@+id/main_menu_controller_assignment"
+            android:icon="@drawable/icon_gamepad"
+            android:title="@string/controller_assignment" />
+        <item
             android:icon="@drawable/icon_screen_effect"
             android:id="@+id/main_menu_screen_effects"
             android:title="@string/screen_effect" />
