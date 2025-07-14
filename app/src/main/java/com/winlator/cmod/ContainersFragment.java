@@ -119,17 +119,17 @@ public class ContainersFragment extends Fragment {
                         .commit();
                 return true;
 
-            case R.id.containers_menu_import:
-                showImportInfoDialog();
-                return true;
+//            case R.id.containers_menu_import:
+//                showImportInfoDialog();
+//                return true;
 
             case R.id.action_big_picture_mode:
                 toggleBigPictureMode();
                 return true;
 
-            case R.id.action_terminal:  // New case for TerminalActivity
-                openTerminal();
-                return true;
+//            case R.id.action_terminal:  // New case for TerminalActivity
+//                openTerminal();
+//                return true;
 
             default:
                 return super.onOptionsItemSelected(menuItem);

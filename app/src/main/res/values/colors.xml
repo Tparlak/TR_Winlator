@@ -2,15 +2,15 @@
 <resources>
     <!-- Light Theme Colors -->
     <color name="window_background_color">#fafafa</color>
-    <color name="colorPrimary">#607d8b</color>
-    <color name="colorPrimaryDark">#455a64</color>
+    <color name="colorPrimary">#2F0B81</color>
+    <color name="colorPrimaryDark">#350D66</color>
     <color name="colorAccent">#0288d1</color>
     <color name="black">#000000</color>
 
     <!-- Dark Theme Colors -->
     <color name="window_background_color_dark">#121212</color>
-    <color name="colorPrimaryDarkMode">#37474f</color>
-    <color name="colorPrimaryDarkModeDark">#263238</color>
+    <color name="colorPrimaryDarkMode">#2F0B81</color>
+    <color name="colorPrimaryDarkModeDark">#43197C</color>
     <color name="colorAccentDark">#80d8ff</color>
     <color name="white">#ffffff</color>
 
@@ -95,7 +95,7 @@
     <color name="material_blue_grey_900">#ff263238</color>
     <color name="material_blue_grey_950">#ff21272b</color>
     <color name="material_deep_teal_200">#ff80cbc4</color>
-    <color name="material_deep_teal_500">#ff008577</color>
+    <color name="material_deep_teal_500">#673AB7</color>
     <color name="material_grey_100">#fff5f5f5</color>
     <color name="material_grey_300">#ffe0e0e0</color>
     <color name="material_grey_50">#fffafafa</color>

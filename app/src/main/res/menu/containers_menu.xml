@@ -5,11 +5,11 @@
 
 
 
-    <item
-        android:id="@+id/action_terminal"
-        android:title="Open Terminal"
-        android:icon="@drawable/icon_env_var"
-        app:showAsAction="ifRoom" />
+<!--    <item-->
+<!--        android:id="@+id/action_terminal"-->
+<!--        android:title="Open Terminal"-->
+<!--        android:icon="@drawable/icon_env_var"-->
+<!--        app:showAsAction="ifRoom" />-->
 
 
 
@@ -20,12 +20,12 @@
         android:color="#FFFFFF"
         app:showAsAction="ifRoom" />
 
-    <!-- New Import Container button -->
-    <item
-        android:id="@+id/containers_menu_import"
-        android:title="Import Container"
-        android:icon="@drawable/icon_action_bar_import"
-    app:showAsAction="ifRoom" />
+
+<!--    <item-->
+<!--        android:id="@+id/containers_menu_import"-->
+<!--        android:title="Import Container"-->
+<!--        android:icon="@drawable/icon_action_bar_import"-->
+<!--    app:showAsAction="ifRoom" />-->
 
     <item
         android:icon="@drawable/icon_action_bar_add"

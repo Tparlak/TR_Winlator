@@ -39,6 +39,7 @@ import androidx.preference.PreferenceManager;
 import com.google.android.material.navigation.NavigationView;
 import com.winlator.cmod.R;
 import com.winlator.cmod.contentdialog.ContentDialog;
+import com.winlator.cmod.contentdialog.ControllerAssignmentDialog;
 import com.winlator.cmod.contentdialog.SaveEditDialog;
 import com.winlator.cmod.contentdialog.SaveSettingsDialog;
 import com.winlator.cmod.core.Callback;
@@ -415,6 +416,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.main_menu_input_controls:
                 show(new InputControlsFragment(selectedProfileId), false);  // Forward animation
                 break;
+            case R.id.main_menu_controller_assignment:
+                ControllerAssignmentDialog.show(this);
+                drawerLayout.closeDrawers();
+                break;
             case R.id.main_menu_box_rc:
                 show(new Box86_64RCFragment(), false);  // Forward animation
                 break;
@@ -484,9 +489,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             ((TextView) dialog.findViewById(R.id.TVAppVersion)).setText(getString(R.string.version) + " " + pInfo.versionName);
 
             String creditsAndThirdPartyAppsHTML = String.join("<br />",
-                    "Winlator Cmod by coffincolors (<a href=\"https://github.com/coffincolors/winlator\">Fork</a>)",
-                    "Big Picture Mode Music by",
-                    "Dale Melvin Blevens III (Fumer)",
+                    "Winlator was created by Brunodev85 (<a href=\"https://github.com/brunodev85\">Git</a>)",
+                    "Winlator Cmod by <a href=\"https://github.com/coffincolors/winlator\">coffincolors</a>, <a href=\"https://github.com/coffincolors/winlator\">Pipetto-crypto</a>",
+                    "Winlator Glibc by longjunyu2 (<a href=\"https://github.com/longjunyu2/winlator/tree/use-glibc-instead-of-proot\">Fork</a>)",
+                    "Winlator OpenXR by lvanosek (<a href=\"https://github.com/Ivanosek\">Fork</a>)",
+                    "Big Picture Mode Music by Fumer",
                     "---",
                     "Ubuntu RootFs (<a href=\"https://releases.ubuntu.com/focal\">Focal Fossa</a>)",
                     "Wine (<a href=\"https://www.winehq.org\">winehq.org</a>)",
@@ -503,11 +510,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tvCreditsAndThirdPartyApps.setText(Html.fromHtml(creditsAndThirdPartyAppsHTML, Html.FROM_HTML_MODE_LEGACY));
             tvCreditsAndThirdPartyApps.setMovementMethod(LinkMovementMethod.getInstance());
 
-            String glibcExpVersionForkHTML = String.join("<br />",
-                    "longjunyu2's <a href=\"https://github.com/longjunyu2/winlator/tree/use-glibc-instead-of-proot\">(Fork)</a>");
-            TextView tvGlibcExpVersionFork = dialog.findViewById(R.id.TVGlibcExpVersionFork);
-            tvGlibcExpVersionFork.setText(Html.fromHtml(glibcExpVersionForkHTML, Html.FROM_HTML_MODE_LEGACY));
-            tvGlibcExpVersionFork.setMovementMethod(LinkMovementMethod.getInstance());
+//            String glibcExpVersionForkHTML = String.join("<br />",
+//                    "longjunyu2's <a href=\"https://github.com/longjunyu2/winlator/tree/use-glibc-instead-of-proot\">(Fork)</a>");
+//            TextView tvGlibcExpVersionFork = dialog.findViewById(R.id.TVGlibcExpVersionFork);
+//            tvGlibcExpVersionFork.setText(Html.fromHtml(glibcExpVersionForkHTML, Html.FROM_HTML_MODE_LEGACY));
+//            tvGlibcExpVersionFork.setMovementMethod(LinkMovementMethod.getInstance());
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
