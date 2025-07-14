@@ -27,12 +27,19 @@ import com.winlator.cmod.core.GPUInformation;
 import com.winlator.cmod.core.ProcessHelper;
 import com.winlator.cmod.core.TarCompressorUtils;
 import com.winlator.cmod.core.WineInfo;
+import com.winlator.cmod.inputcontrols.ControllerManager;
+import com.winlator.cmod.sysvshm.SysVSHMConnectionHandler;
+import com.winlator.cmod.sysvshm.SysVSHMRequestHandler;
+import com.winlator.cmod.sysvshm.SysVSharedMemory;
 import com.winlator.cmod.xconnector.UnixSocketConfig;
+import com.winlator.cmod.xconnector.XConnectorEpoll;
 import com.winlator.cmod.xenvironment.ImageFs;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +59,9 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
     private Container container;
     private final Shortcut shortcut;
 
+    private static SysVSharedMemory shmMgr;
+    private static XConnectorEpoll shmServer;
+    
     public void setWineInfo(WineInfo wineInfo) {
         this.wineInfo = wineInfo;
     }
@@ -61,6 +71,55 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
     public Container getContainer() { return this.container; }
     public void setContainer(Container container) { this.container = container; }
+
+
+    private void ensureSysvServerRunning() {
+
+        if (shmServer != null) return; // already running in this process
+
+
+// Build a UnixSocketConfig object pointing at …/usr/tmp/.sysvshm/SM0
+
+        File rootDir = environment.getImageFs().getRootDir();
+
+        UnixSocketConfig sockConf = UnixSocketConfig.createSocket(
+
+                rootDir.getPath(),
+
+                UnixSocketConfig.SYSVSHM_SERVER_PATH); // relative path constant
+
+
+        shmMgr = new SysVSharedMemory();
+
+        shmServer = new XConnectorEpoll(
+
+                sockConf, // <-- correct type
+
+                new SysVSHMConnectionHandler(shmMgr),
+
+                new SysVSHMRequestHandler());
+
+
+        shmServer.setCanReceiveAncillaryMessages(true); // <-- allow FD passing
+
+
+        shmServer.start(); // non-blocking; runs its own thread
+
+        Log.d("SysVSHM", "server started on " + sockConf.path);
+
+
+// right after shmServer.start();
+
+        int PAD_SIZE = 4096; // sizeof(struct shm_pad)
+
+        int id = shmMgr.get(PAD_SIZE);
+
+        Log.d("SysVSHM", "pre-created pad segment id=" + id);
+
+
+    }
+
+
 
     private void extractBox86_64Files() {
         ImageFs imageFs = environment.getImageFs();
@@ -146,39 +205,39 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
                 extractEmulatorsDlls();
             else
                 extractBox86_64Files();
-            checkDependencies();
+//            checkDependencies();
             pid = execGuestProgram();
         }
     }
 
 
-    private String checkDependencies() {
-        String curlPath = environment.getImageFs().getRootDir().getPath() + "/usr/lib/libXau.so";
-        String lddCommand = "ldd " + curlPath;
-
-        StringBuilder output = new StringBuilder("Checking Curl dependencies...\n");
-
-        try {
-            java.lang.Process process = Runtime.getRuntime().exec(lddCommand);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-            while ((line = errorReader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-
-            process.waitFor();
-        } catch (Exception e) {
-            output.append("Error running ldd: ").append(e.getMessage());
-        }
-
-        Log.d("CurlDeps", output.toString()); // Log the full dependency output
-        return output.toString();
-    }
+//    private String checkDependencies() {
+//        String curlPath = environment.getImageFs().getRootDir().getPath() + "/usr/lib/libXau.so";
+//        String lddCommand = "ldd " + curlPath;
+//
+//        StringBuilder output = new StringBuilder("Checking Curl dependencies...\n");
+//
+//        try {
+//            java.lang.Process process = Runtime.getRuntime().exec(lddCommand);
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+//
+//            String line;
+//            while ((line = reader.readLine()) != null) {
+//                output.append(line).append("\n");
+//            }
+//            while ((line = errorReader.readLine()) != null) {
+//                output.append(line).append("\n");
+//            }
+//
+//            process.waitFor();
+//        } catch (Exception e) {
+//            output.append("Error running ldd: ").append(e.getMessage());
+//        }
+//
+//        Log.d("CurlDeps", output.toString()); // Log the full dependency output
+//        return output.toString();
+//    }
 
 
     @Override
@@ -240,6 +299,62 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
     }
 
     private int execGuestProgram() {
+
+        // final int MAX_PLAYERS = 1; // old static method
+
+        // Get the number of enabled players directly from ControllerManager.
+        final int enabledPlayerCount = ControllerManager.getInstance().getEnabledPlayerCount();
+        for (int i = 0; i < enabledPlayerCount; i++) {
+            String memPath;
+            if (i == 0) {
+                // Player 1 uses the original, non-numbered path that is known to work.
+                memPath = "/data/data/com.winlator.cmod/files/imagefs/tmp/gamepad.mem";
+            } else {
+                // Players 2, 3, 4 use a 1-based index.
+                memPath = "/data/data/com.winlator.cmod/files/imagefs/tmp/gamepad" + i + ".mem";
+            }
+
+            File memFile = new File(memPath);
+            memFile.getParentFile().mkdirs();
+            try (RandomAccessFile raf = new RandomAccessFile(memFile, "rw")) {
+                raf.setLength(64);
+            } catch (IOException e) {
+                Log.e("EVSHIM_HOST", "Failed to create mem file for player index "+i, e);
+            }
+        }
+
+        final String shmIdEnvValue;
+
+
+        SysVSharedMemory shmMgr = SysVSharedMemory.getInstance();
+
+        if (shmMgr != null) {
+
+            int padShmId = shmMgr.get(4096);
+
+            if (padShmId != -1) {
+
+                Log.i("EVSHIM_HOST", "Pre-created gamepad SHM segment with ID: " + padShmId);
+
+                shmIdEnvValue = String.valueOf(padShmId);
+
+            } else {
+
+                Log.e("EVSHIM_HOST", "shmMgr.get() failed!");
+
+                shmIdEnvValue = null;
+
+            }
+
+        } else {
+
+            Log.e("EVSHIM_HOST", "SysVSharedMemory.getInstance() is null!");
+
+            shmIdEnvValue = null;
+
+        }
+
+
         Context context = environment.getContext();
         ImageFs imageFs = environment.getImageFs();
         File rootDir = imageFs.getRootDir();
@@ -248,6 +363,20 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         boolean enableBox86_64Logs = preferences.getBoolean("enable_box86_64_logs", false);
 
         EnvVars envVars = new EnvVars();
+
+        // --- Set the number of players for evshim ---
+        //envVars.put("EVSHIM_MAX_PLAYERS", String.valueOf(MAX_PLAYERS));
+
+        // Use the ControllerManager's dynamic count for the environment variable
+        envVars.put("EVSHIM_MAX_PLAYERS", String.valueOf(enabledPlayerCount));
+
+
+        if (shmIdEnvValue != null) {
+
+            envVars.put("EVSHIM_SHM_ID", shmIdEnvValue);
+
+        }
+
 
         addBox64EnvVars(envVars, enableBox86_64Logs);
 
@@ -301,11 +430,25 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         String ld_preload = "";
         
         // Check for specific shared memory libraries
-        if ((new File(imageFs.getLibDir(), "libandroid-sysvshm.so")).exists()){
-            ld_preload = imageFs.getLibDir() + "/libandroid-sysvshm.so";
-        }
+//        if ((new File(imageFs.getLibDir(), "libandroid-sysvshm.so")).exists()){
+//            ld_preload = imageFs.getLibDir() + "/libandroid-sysvshm.so";
+//        }
+
+        String nativeDir = context.getApplicationInfo().nativeLibraryDir; // e.g. /data/app/…/lib/arm64
+
+        String evshimPath = nativeDir + "/libevshim.so";
+
+        String sysvPath = imageFs.getLibDir() + "/libandroid-sysvshm.so"; // unchanged
+
+
+        if (new File(sysvPath).exists()) ld_preload += sysvPath;
+
+
+        ld_preload += ":" + evshimPath;
 
         envVars.put("LD_PRELOAD", ld_preload);
+
+        envVars.put("EVSHIM_SHM_NAME", "controller-shm0");
         
         // Merge any additional environment variables from external sources
         if (this.envVars != null) {

@@ -68,6 +68,15 @@
         android:layout_weight="1"
         android:visibility="gone" />
 
+    <CheckBox
+        android:id="@+id/CBExtraOption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:text="Extra Option"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/LLBottomBar"
         android:layout_width="match_parent"
