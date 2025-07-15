@@ -657,15 +657,18 @@ public class WinHandler {
                 }
             }
             catch (IOException e) {
-                throw new RuntimeException(e);
+                // If the loop was told to stop, this exception is expected.
+                if (!running) {
+                    Log.d("WinHandler", "Socket closed for shutdown. Listener thread exiting.");
+                }
+                // Otherwise, it was an unexpected error.
+                else {
+                    Log.e("WinHandler", "Unexpected socket error", e);
+                }
             }
         });
 
-        // ---- START THE RUMBLE POLLER ----
         startRumblePoller();
-
-        running = true;
-        startSendThread();
     }
 
 // In WinHandler.java

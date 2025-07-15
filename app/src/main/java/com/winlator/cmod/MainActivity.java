@@ -121,40 +121,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        }
 //    }
 
-    private static final String ASSET_SUBDIR   = "x86_64-libs";          // inside assets
-    private static final String GUEST_LIB_DIR  = "imagefs/usr/lib/x86_64-libs";      // inside filesDir
+    private static final String GUEST_LIB_NAME = "libevshim_guest.so";
+    private static final String ASSET_PATH = "x86_64-libs/" + GUEST_LIB_NAME;
+    private static final String GUEST_LIB_DIR  = "imagefs/usr/lib/x86_64-libs";
 
-    /** Copy everything under assets/x86_64-libs/ to files/imagefs/usr/lib/ (once) */
+    /**
+     * Ensures a fresh copy of the guest .so file is present by overwriting any existing version.
+     */
     private void ensureGuestLibsPresent(Context ctx) throws IOException {
-        File dstRoot = new File(ctx.getFilesDir(), GUEST_LIB_DIR);
-        if (!dstRoot.exists() && !dstRoot.mkdirs())
-            throw new IOException("Cannot create " + dstRoot);
+        File dstDir = new File(ctx.getFilesDir(), GUEST_LIB_DIR);
+        // Create the directory if it doesn't already exist.
+        if (!dstDir.exists() && !dstDir.mkdirs()) {
+            throw new IOException("Cannot create destination directory: " + dstDir);
+        }
 
-        AssetManager am = ctx.getAssets();
-        for (String name : Objects.requireNonNull(am.list(ASSET_SUBDIR))) {
-            File dst = new File(dstRoot, name);
+        File dstFile = new File(dstDir, GUEST_LIB_NAME);
 
-            // If the file is absent OR its size differs -> (re)copy it
-            boolean needCopy = !dst.exists();
-            if (!needCopy) {
-                long assetSize = am.openFd(ASSET_SUBDIR + "/" + name).getLength();
-                needCopy = (dst.length() != assetSize);
-            }
+        // Delete the old file if it exists to prepare for a fresh copy.
+        if (dstFile.exists()) {
+            dstFile.delete();
+        }
 
-            if (needCopy) {
-                try (InputStream in  = am.open(ASSET_SUBDIR + "/" + name);
-                     OutputStream out = new FileOutputStream(dst)) {
+        // Always copy the file from assets.
+        Log.d("GuestLibCopy", "Deploying " + GUEST_LIB_NAME + "...");
+        try (InputStream in  = ctx.getAssets().open(ASSET_PATH);
+             OutputStream out = new FileOutputStream(dstFile)) {
 
-                    byte[] buf = new byte[8192];
-                    for (int r; (r = in.read(buf)) != -1;) out.write(buf, 0, r);
-                }
-                if (name.endsWith(".so")) {
-                    dst.setReadable(true, false);
-                    dst.setExecutable(true, false);
-                }
-                Log.i("GuestLibCopy", "Deployed " + name);
+            byte[] buf = new byte[8192];
+            for (int r; (r = in.read(buf)) != -1;) {
+                out.write(buf, 0, r);
             }
         }
+
+        // Set the necessary permissions for the .so file.
+        dstFile.setReadable(true, false);
+        dstFile.setExecutable(true, false);
+        Log.i("GuestLibCopy", "Successfully deployed " + GUEST_LIB_NAME);
     }
 
     @Override

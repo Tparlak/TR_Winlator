@@ -943,11 +943,18 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         AppUtils.restartApplication(this);
     }
 
+
     @Override
     protected void onDestroy() {
         savePlaytimeData(); // Save on destroy
         handler.removeCallbacks(savePlaytimeRunnable);
-        if (restartTriggerObserver != null) restartTriggerObserver.stopWatching();
+        winHandler.stop();
+        if (midiHandler != null) midiHandler.stop();
+        if (sensorManager != null) sensorManager.unregisterListener(gyroListener);
+        if (environment != null) environment.stopEnvironmentComponents();
+        if (preloaderDialog != null && preloaderDialog.isShowing()) preloaderDialog.close();
+        ProcessHelper.terminateAllWineProcesses();
+
         super.onDestroy();
     }
 
@@ -1151,7 +1158,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                 drawerLayout.closeDrawers();
                 return true;
             case R.id.main_menu_exit:
-                exit();
+                finish();
                 break;
         }
         return true;
@@ -1258,21 +1265,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     }
 
     private void setupXEnvironment() throws PackageManager.NameNotFoundException {
-        // Optional: Example logging or debugging code
-        // try {
-        //     // Execute busybox whoami to log the UID
-        //     Process whoamiProcess = new ProcessBuilder("/data/data/com.winlator/files/imagefs/usr/bin/busybox", "whoami").start();
-        //     BufferedReader reader = new BufferedReader(new InputStreamReader(whoamiProcess.getInputStream()));
-        //     String uid = reader.readLine();
-        //     whoamiProcess.waitFor();
-        //
-        //     // Log the UID to understand what user is being used
-        //     Log.d("Winetricks", "Current UID executing Wine: " + (uid != null ? uid : "unknown"));
-        // } catch (Exception e) {
-        //     Log.e("Winetricks", "Error executing busybox whoami: " + e.getMessage(), e);
-        // }
-
-        // ... (Other optional debugging code omitted) ...
 
         // Set environment variables
         envVars.put("LC_ALL", lc_all);
@@ -1407,7 +1399,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
         // Pass final envVars to the launcher
         guestProgramLauncherComponent.setEnvVars(envVars);
-        guestProgramLauncherComponent.setTerminationCallback((status) -> exit());
+        guestProgramLauncherComponent.setTerminationCallback((status) -> finish());
 
         // Add the launcher to our environment
         environment.addComponent(guestProgramLauncherComponent);

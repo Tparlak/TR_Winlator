@@ -325,33 +325,20 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
         final String shmIdEnvValue;
 
-
         SysVSharedMemory shmMgr = SysVSharedMemory.getInstance();
 
         if (shmMgr != null) {
-
             int padShmId = shmMgr.get(4096);
-
             if (padShmId != -1) {
-
                 Log.i("EVSHIM_HOST", "Pre-created gamepad SHM segment with ID: " + padShmId);
-
                 shmIdEnvValue = String.valueOf(padShmId);
-
             } else {
-
                 Log.e("EVSHIM_HOST", "shmMgr.get() failed!");
-
                 shmIdEnvValue = null;
-
             }
-
         } else {
-
             Log.e("EVSHIM_HOST", "SysVSharedMemory.getInstance() is null!");
-
             shmIdEnvValue = null;
-
         }
 
 
