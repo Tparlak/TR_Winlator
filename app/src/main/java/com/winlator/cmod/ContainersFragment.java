@@ -100,10 +100,15 @@ public class ContainersFragment extends Fragment {
         menu.clear();
         menuInflater.inflate(R.menu.containers_menu, menu);
         MenuItem bigPictureItem = menu.findItem(R.id.action_big_picture_mode);
+        MenuItem copyDevLibs = menu.findItem(R.id.action_copy_dev_libs);
         Drawable icon = bigPictureItem.getIcon();
-        if (icon != null) {
+        Drawable icon_dev = copyDevLibs.getIcon();
+
+        if (icon != null && icon_dev != null) {
             icon.mutate(); // Ensure we don't modify other instances of this drawable
+            //icon_dev.mutate();
             icon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
+            //icon_dev.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
         }
     }
 
@@ -132,10 +137,88 @@ public class ContainersFragment extends Fragment {
 //                openTerminal();
 //                return true;
 
+            case R.id.action_copy_dev_libs:
+                copyDevLibs();
+                return true;
+
             default:
                 return super.onOptionsItemSelected(menuItem);
         }
     }
+
+    private void copyDevLibs() {
+        // Use requireActivity() or getActivity() to get the context
+        android.content.res.AssetManager assetManager = requireActivity().getAssets();
+        String sourceDir = "devLibs";
+        String destDir = "/data/data/com.winlator.cmod/files/imagefs/opt/proton-9.0-arm64ec/lib/wine/aarch64-unix/";
+
+        try {
+            // Create the destination directory if it doesn't exist
+            java.io.File destDirFile = new java.io.File(destDir);
+            if (!destDirFile.exists()) {
+                if (!destDirFile.mkdirs()) {
+                    // If directory creation fails, show an error and exit
+                    android.widget.Toast.makeText(requireActivity(), "Failed to create destination directory.", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+
+            // List all files in the assets/devLibs folder
+            String[] files = assetManager.list(sourceDir);
+            if (files == null || files.length == 0) {
+                android.widget.Toast.makeText(requireActivity(), "No dev libs found in assets.", android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Loop through each file and copy it
+            for (String filename : files) {
+                java.io.InputStream in = null;
+                java.io.OutputStream out = null;
+                try {
+                    in = assetManager.open(sourceDir + "/" + filename);
+                    java.io.File outFile = new java.io.File(destDir, filename);
+                    out = new java.io.FileOutputStream(outFile);
+
+                    // Copy the file in a buffered way
+                    byte[] buffer = new byte[1024];
+                    int read;
+                    while ((read = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, read);
+                    }
+                } catch (java.io.IOException e) {
+                    // Log the error for debugging
+                    android.util.Log.e("CopyDevLibs", "Failed to copy asset file: " + filename, e);
+                    throw new java.io.IOException("Failed to copy " + filename, e); // Rethrow to be caught by the outer catch block
+                } finally {
+                    // Ensure streams are closed
+                    if (in != null) {
+                        try {
+                            in.close();
+                        } catch (java.io.IOException e) {
+                            // ignore
+                        }
+                    }
+                    if (out != null) {
+                        try {
+                            out.flush();
+                            out.close();
+                        } catch (java.io.IOException e) {
+                            // ignore
+                        }
+                    }
+                }
+            }
+
+            // If the loop completes without throwing an exception, it was successful
+            android.widget.Toast.makeText(requireActivity(), "Dev libs copied successfully!", android.widget.Toast.LENGTH_SHORT).show();
+
+        } catch (java.io.IOException e) {
+            // If any file fails, show a general error message
+            android.util.Log.e("CopyDevLibs", "An error occurred during asset copying.", e);
+            android.widget.Toast.makeText(requireActivity(), "Error copying dev libs.", android.widget.Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     private void openTerminal() {
         Intent intent = new Intent(getContext(), TerminalActivity.class);
