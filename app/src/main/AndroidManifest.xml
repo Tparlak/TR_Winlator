@@ -116,14 +116,6 @@
             android:screenOrientation="sensor"
             android:exported="false" />
 
-        <receiver
-            android:name=".ShortcutBroadcastReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.winlator.cmod.SHORTCUT_ADDED" />
-            </intent-filter>
-        </receiver>
-
         <!-- FileProvider for sharing files -->
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -4,9 +4,6 @@ import static com.winlator.cmod.core.AppUtils.showToast;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -16,7 +13,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.Handler;
@@ -47,7 +43,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.navigation.NavigationView;
-import com.winlator.cmod.R;
 import com.winlator.cmod.box86_64.rc.RCFile;
 import com.winlator.cmod.box86_64.rc.RCManager;
 import com.winlator.cmod.container.Container;
@@ -68,7 +63,6 @@ import com.winlator.cmod.core.DefaultVersion;
 import com.winlator.cmod.core.EnvVars;
 import com.winlator.cmod.core.EnvironmentManager;
 import com.winlator.cmod.core.FileUtils;
-import com.winlator.cmod.core.GPUInformation;
 import com.winlator.cmod.core.KeyValueSet;
 import com.winlator.cmod.core.OnExtractFileListener;
 import com.winlator.cmod.core.PreloaderDialog;
@@ -130,8 +124,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -140,10 +132,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -228,7 +216,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     private Win32AppWorkarounds win32AppWorkarounds;
     private EnvVars overrideEnvVars;
 
-    private WinetricksFloatingView winetricksFloatingView;
+//    private WinetricksFloatingView winetricksFloatingView;
 
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
@@ -464,40 +452,40 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             }
 
             // Initialize Win32AppWorkarounds
-            win32AppWorkarounds = new Win32AppWorkarounds(this);
-
-            taskAffinityMask = (short) ProcessHelper.getAffinityMask(container.getCPUList(true));
-            taskAffinityMaskWoW64 = (short) ProcessHelper.getAffinityMask(container.getCPUListWoW64(true));
-
-            if (shortcut != null) {
-                taskAffinityMask = (short) ProcessHelper.getAffinityMask(shortcut.getExtra("cpuList", container.getCPUList(true)));
-                taskAffinityMaskWoW64 = (short) ProcessHelper.getAffinityMask(shortcut.getExtra("cpuListWoW64", container.getCPUListWoW64(true)));
-            }
-
-            win32AppWorkarounds.setTaskAffinityMask(taskAffinityMask);
-            win32AppWorkarounds.setTaskAffinityMaskWoW64(taskAffinityMaskWoW64);
-
-            // Determine the class name for the startup workarounds
-            String wmClass = shortcut != null ? shortcut.getExtra("wmClass", "") : "";
-            Log.d("XServerDisplayActivity", "Startup wmClass: " + wmClass);
-
-            if (!wmClass.isEmpty()) {
-                // Apply startup workarounds based on wmClass
-                win32AppWorkarounds.applyStartupWorkarounds(wmClass);
-            } else {
-                // Fallback: Use the executable name for workarounds
-                String execPath = getIntent().getStringExtra("exec_path");
-                Log.d("XServerDisplayActivity", "Startup execPath: " + execPath);
-
-                if (execPath != null && !execPath.isEmpty()) {
-                    String execName = FileUtils.getName(execPath);
-                    Log.d("XServerDisplayActivity", "Startup execName: " + execName);
-
-                    win32AppWorkarounds.applyStartupWorkarounds(execName);
-                } else {
-                    Log.w("XServerDisplayActivity", "No wmClass or execPath provided for startup workarounds.");
-                }
-            }
+//            win32AppWorkarounds = new Win32AppWorkarounds(this);
+//
+//            taskAffinityMask = (short) ProcessHelper.getAffinityMask(container.getCPUList(true));
+//            taskAffinityMaskWoW64 = (short) ProcessHelper.getAffinityMask(container.getCPUListWoW64(true));
+//
+//            if (shortcut != null) {
+//                taskAffinityMask = (short) ProcessHelper.getAffinityMask(shortcut.getExtra("cpuList", container.getCPUList(true)));
+//                taskAffinityMaskWoW64 = (short) ProcessHelper.getAffinityMask(shortcut.getExtra("cpuListWoW64", container.getCPUListWoW64(true)));
+//            }
+//
+//            win32AppWorkarounds.setTaskAffinityMask(taskAffinityMask);
+//            win32AppWorkarounds.setTaskAffinityMaskWoW64(taskAffinityMaskWoW64);
+//
+//            // Determine the class name for the startup workarounds
+//            String wmClass = shortcut != null ? shortcut.getExtra("wmClass", "") : "";
+//            Log.d("XServerDisplayActivity", "Startup wmClass: " + wmClass);
+//
+//            if (!wmClass.isEmpty()) {
+//                // Apply startup workarounds based on wmClass
+//                win32AppWorkarounds.applyStartupWorkarounds(wmClass);
+//            } else {
+//                // Fallback: Use the executable name for workarounds
+//                String execPath = getIntent().getStringExtra("exec_path");
+//                Log.d("XServerDisplayActivity", "Startup execPath: " + execPath);
+//
+//                if (execPath != null && !execPath.isEmpty()) {
+//                    String execName = FileUtils.getName(execPath);
+//                    Log.d("XServerDisplayActivity", "Startup execName: " + execName);
+//
+//                    win32AppWorkarounds.applyStartupWorkarounds(execName);
+//                } else {
+//                    Log.w("XServerDisplayActivity", "No wmClass or execPath provided for startup workarounds.");
+//                }
+//            }
 
             firstTimeBoot = container.getExtra("appVersion").isEmpty();
 
@@ -697,9 +685,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                             envVars.put("WINE_TO_ANDROID_CLIPBOARD", "1");
                         }
                     }
-//                    runWinetricksAfterSetup();
-                    // Run winetricks before setting up the X environment
-//                    runWinetricks("--force vcrun2010");  // Replace with the desired winetricks arguments
 
                 }
                 try {
@@ -708,9 +693,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                     throw new RuntimeException(e);
                 }
 
-//                runWinetricksAfterSetup();
-                // Run winetricks after setting up the X environment
-//                runWinetricks("--force vcrun2010");  // Replace with the desired winetricks arguments
             });
         };
 
@@ -922,40 +904,35 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         editor.apply();
     }
 
-    private void exit() {
-        if (midiHandler != null) midiHandler.stop();
-        // Unregister sensor listener to avoid memory leaks
-        if (sensorManager != null) sensorManager.unregisterListener(gyroListener);
-        if (environment != null) environment.stopEnvironmentComponents();
-        if (preloaderDialog != null && preloaderDialog.isShowing()) preloaderDialog.close();
-        if (winHandler != null) winHandler.stop();
-        if (wineRequestHandler != null) wineRequestHandler.stop();
-        /* Gracefully terminate all running wine processes */
-        ProcessHelper.terminateAllWineProcesses();
-        /* Wait until all processes have gracefully terminated, forcefully killing them only after a certain amount of time */
-        long start = System.currentTimeMillis();
-        while (!ProcessHelper.listRunningWineProcesses().isEmpty()) {
-            long elapsed = System.currentTimeMillis() - start;
-            if (elapsed >= 1500) {
-                break;
-            }
-        }
-        AppUtils.restartApplication(this);
-    }
-
-
     @Override
     protected void onDestroy() {
-        savePlaytimeData(); // Save on destroy
-        handler.removeCallbacks(savePlaytimeRunnable);
-        winHandler.stop();
-        if (midiHandler != null) midiHandler.stop();
-        if (sensorManager != null) sensorManager.unregisterListener(gyroListener);
-        if (environment != null) environment.stopEnvironmentComponents();
-        if (preloaderDialog != null && preloaderDialog.isShowing()) preloaderDialog.close();
-        ProcessHelper.terminateAllWineProcesses();
-
         super.onDestroy();
+    }
+
+    public void exitApp() {
+        preloaderDialog.show(R.string.closing_app); // Assuming you add "closing_app" to strings.xml
+
+        // Run cleanup on a background thread
+        Executors.newSingleThreadExecutor().execute(() -> {
+
+            // --- All long-running cleanup tasks go here ---
+            savePlaytimeData();
+            handler.removeCallbacks(savePlaytimeRunnable);
+
+            if (midiHandler != null) midiHandler.stop();
+            if (sensorManager != null) sensorManager.unregisterListener(gyroListener);
+            if (environment != null) environment.stopEnvironmentComponents();
+            if (midiHandler != null) midiHandler.stop();
+            if (winHandler != null) winHandler.stop();
+            if (wineRequestHandler != null) wineRequestHandler.stop();
+            ProcessHelper.terminateAllWineProcesses();
+
+            // Finish the activity on the main UI thread
+            runOnUiThread(() -> {
+                preloaderDialog.close();
+                finishAndRemoveTask(); // Or just finish()
+            });
+        });
     }
 
     @Override
@@ -1085,80 +1062,80 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             case R.id.main_menu_terminal:  // New case for TerminalActivity
                 openTerminal();
                 return true;
-            case R.id.main_menu_winetricks:
-                if (winetricksFloatingView == null) {
-                    FrameLayout frameLayout = findViewById(R.id.FLXServerDisplay);
-                    winetricksFloatingView = new WinetricksFloatingView(this);
-                    winetricksFloatingView.setWinetricksListener(new WinetricksFloatingView.WinetricksListener() {
-                        @Override
-                        public void onWinetricksStableClick(String verb, TextView outputView) {
-                            if (!verb.isEmpty()) {
-                                runWinetricksWithVerb(container, contentsManager, verb, outputView); // Use container here
-                            } else {
-                                Toast.makeText(XServerDisplayActivity.this, "Please enter a Winetricks verb", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        @Override
-                        public void onWinetricksLatestClick(String verb, TextView outputView) {
-                            if (!verb.isEmpty()) {
-                                runWinetricksLatestWithVerb(container, contentsManager, verb, outputView); // Use container here
-                            } else {
-                                Toast.makeText(XServerDisplayActivity.this, "Please enter a Winetricks verb", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        @Override
-                        public void onOpenWinetricksFolder(TextView outputView) {
-                            runWinetricksFolder(container, contentsManager, outputView); // Use container here
-                        }
-
-                        @Override
-                        public void onToggleTransparency(View floatingView) {
-                            if (floatingView.getAlpha() < 1.0f) {
-                                floatingView.setAlpha(1.0f);
-                            } else {
-                                floatingView.setAlpha(0.5f);
-                            }
-                        }
-
-                        @Override
-                        public void onRestartWineserverClick(TextView outputView) {
-                            // NEW
-                            try {
-                                environment.setWinetricksRunning(true);
-                                // Determine whether to use Glibc or Bionic launcher based on preference
-                                if (bionicLauncher != null) {
-                                    bionicLauncher.restartWineServer();
-                                } else {
-                                    runOnUiThread(() -> {
-                                        outputView.append("No valid launcher found; cannot restart Wineserver.\n");
-                                    });
-                                    return; // Exit the method early if no valid launcher is found
-                                }
-
-                                // If the environment needs frequent re-initialization
-                                setupXEnvironment();
-
-                                // Confirm to the user in logs
-                                runOnUiThread(() -> {
-                                    outputView.append("Wineserver restarted.\n");
-                                });
-
-                            } catch (Exception e) {
-                            }
-                            environment.setWinetricksRunning(false);
-                        }
-
-                    });
-                    frameLayout.addView(winetricksFloatingView);
-                } else {
-                    winetricksFloatingView.setVisibility(View.VISIBLE);
-                }
-                drawerLayout.closeDrawers();
-                return true;
+//            case R.id.main_menu_winetricks:
+//                if (winetricksFloatingView == null) {
+//                    FrameLayout frameLayout = findViewById(R.id.FLXServerDisplay);
+//                    winetricksFloatingView = new WinetricksFloatingView(this);
+//                    winetricksFloatingView.setWinetricksListener(new WinetricksFloatingView.WinetricksListener() {
+//                        @Override
+//                        public void onWinetricksStableClick(String verb, TextView outputView) {
+//                            if (!verb.isEmpty()) {
+//                                runWinetricksWithVerb(container, contentsManager, verb, outputView); // Use container here
+//                            } else {
+//                                Toast.makeText(XServerDisplayActivity.this, "Please enter a Winetricks verb", Toast.LENGTH_SHORT).show();
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onWinetricksLatestClick(String verb, TextView outputView) {
+//                            if (!verb.isEmpty()) {
+//                                runWinetricksLatestWithVerb(container, contentsManager, verb, outputView); // Use container here
+//                            } else {
+//                                Toast.makeText(XServerDisplayActivity.this, "Please enter a Winetricks verb", Toast.LENGTH_SHORT).show();
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onOpenWinetricksFolder(TextView outputView) {
+//                            runWinetricksFolder(container, contentsManager, outputView); // Use container here
+//                        }
+//
+//                        @Override
+//                        public void onToggleTransparency(View floatingView) {
+//                            if (floatingView.getAlpha() < 1.0f) {
+//                                floatingView.setAlpha(1.0f);
+//                            } else {
+//                                floatingView.setAlpha(0.5f);
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onRestartWineserverClick(TextView outputView) {
+//                            // NEW
+//                            try {
+//                                environment.setWinetricksRunning(true);
+//                                // Determine whether to use Glibc or Bionic launcher based on preference
+//                                if (bionicLauncher != null) {
+//                                    bionicLauncher.restartWineServer();
+//                                } else {
+//                                    runOnUiThread(() -> {
+//                                        outputView.append("No valid launcher found; cannot restart Wineserver.\n");
+//                                    });
+//                                    return; // Exit the method early if no valid launcher is found
+//                                }
+//
+//                                // If the environment needs frequent re-initialization
+//                                setupXEnvironment();
+//
+//                                // Confirm to the user in logs
+//                                runOnUiThread(() -> {
+//                                    outputView.append("Wineserver restarted.\n");
+//                                });
+//
+//                            } catch (Exception e) {
+//                            }
+//                            environment.setWinetricksRunning(false);
+//                        }
+//
+//                    });
+//                    frameLayout.addView(winetricksFloatingView);
+//                } else {
+//                    winetricksFloatingView.setVisibility(View.VISIBLE);
+//                }
+//                drawerLayout.closeDrawers();
+//                return true;
             case R.id.main_menu_exit:
-                finish();
+                exitApp();
                 break;
         }
         return true;
@@ -1271,7 +1248,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         envVars.put("MESA_DEBUG", "silent");
         envVars.put("MESA_NO_ERROR", "1");
         envVars.put("WINEPREFIX", imageFs.wineprefix);
-        Log.d("Winetricks", "WINEPREFIX: " + imageFs.wineprefix);
+//        Log.d("Winetricks", "WINEPREFIX: " + imageFs.wineprefix);
 
         boolean enableWineDebug = preferences.getBoolean("enable_wine_debug", false);
         String wineDebugChannels = preferences.getString("wine_debug_channels", SettingsFragment.DEFAULT_WINE_DEBUG_CHANNELS);
@@ -1308,7 +1285,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             String guestExecutable = "wine explorer /desktop=shell," + xServer.screenInfo + " " + getWineStartCommand();
             // (Alternatively: "wine wineboot -u" or anything else you want)
 
-            Log.d("Winetricks", "Guest executable: " + guestExecutable);
+//            Log.d("Winetricks", "Guest executable: " + guestExecutable);
 
             // Set up the guest program parameters
             guestProgramLauncherComponent.setWoW64Mode(wow64Mode);
@@ -1482,144 +1459,144 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     private static final int MAX_LOG_LINES = 1000;
     private static final int BATCH_SIZE = 10;
 
-    private void runWinetricksWithVerb(Container container,
-                                       ContentsManager contentsManager,
-                                       String verb,
-                                       TextView outputView) {
-
-        // 1. Tell the environment that Winetricks is about to run
-        environment.setWinetricksRunning(true);
-
-        // Example: create wrappers, etc.
-        createWineWrappers(container, contentsManager);
-
-        Map<String, String> envVars = EnvironmentManager.getEnvVars();
-        String usrLocalBin = imageFs.getRootDir().getPath() + "/usr/local/bin";
-        String wineBinPath = imageFs.getWinePath() + "/bin";
-        String defaultPath = usrLocalBin + ":" + wineBinPath + ":" + imageFs.getRootDir().getPath() + "/usr/bin";
-        envVars.put("PATH", defaultPath);
-
-        File winetricksFile = new File(imageFs.getRootDir(), "/usr/bin/winetricks");
-        if (!winetricksFile.exists()) {
-            Log.e("Winetricks", "winetricks script not found at " + winetricksFile.getAbsolutePath());
-            // IMPORTANT: re-enable the callback if we fail early
-            environment.setWinetricksRunning(false);
-            return;
-        }
-        winetricksFile.setExecutable(true);
-
-        String[] command = {
-                winetricksFile.getAbsolutePath(),
-                "--force",
-                verb
-        };
-
-        Executor executor = Executors.newSingleThreadExecutor();
-
-        final Process[] process = {null};
-
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ProcessBuilder processBuilder = new ProcessBuilder(command);
-                    processBuilder.directory(new File(imageFs.home_path));
-                    Map<String, String> environmentVars = processBuilder.environment();
-                    for (Map.Entry<String, String> entry : envVars.entrySet()) {
-                        environmentVars.put(entry.getKey(), entry.getValue());
-                    }
-                    processBuilder.redirectErrorStream(true);
-                    process[0] = processBuilder.start();
-                    runOnUiThread(() -> outputView.setText(""));
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(process[0].getInputStream()));
-                    String outputLine = null;
-                    while (((outputLine = reader.readLine()) != null)) {
-                        if (outputLine != null) {
-                            String finalOutputLine = outputLine;
-                            runOnUiThread(() -> outputView.append(finalOutputLine + "\n"));
-                        }
-                    }
-                    int exitCode = process[0].waitFor();
-                    runOnUiThread(() -> outputView.append("Winetricks exited with code " + exitCode + "\n"));
-
-                } catch (Exception e) {
-                    String msg = "Error executing winetricks: " + e.getMessage();
-                    runOnUiThread(() -> outputView.setText(msg));
-                } finally {
-                    // 2. Once Winetricks finishes or fails, kill eventual stale processes
-                    environment.setWinetricksRunning(false);
-                }
-            }
-        });
-    }
-
-    private void runWinetricksLatestWithVerb(Container container,
-                                             ContentsManager contentsManager,
-                                             String verb,
-                                             TextView outputView) {
-
-        // 1. Mark Winetricks as running
-        environment.setWinetricksRunning(true);
-
-        // 2. Create wrappers, etc. (same as normal)
-        createWineWrappers(container, contentsManager);
-
-        Map<String, String> envVars = EnvironmentManager.getEnvVars();
-        String usrLocalBin = imageFs.getRootDir().getPath() + "/usr/local/bin";
-        String wineBinPath = imageFs.getWinePath() + "/bin";
-        String defaultPath = usrLocalBin + ":" + wineBinPath + ":" + imageFs.getRootDir().getPath() + "/usr/bin";
-        envVars.put("PATH", defaultPath);
-
-        // 3. **Use winetricks.latest** instead of winetricks
-        File winetricksFile = new File(imageFs.getRootDir(), "/usr/bin/winetricks.latest");
-        if (!winetricksFile.exists()) {
-            Log.e("WinetricksLatest", "winetricks.latest script not found at " + winetricksFile.getAbsolutePath());
-            // Re-enable callback if we fail early
-            environment.setWinetricksRunning(false);
-            return;
-        }
-        winetricksFile.setExecutable(true);
-
-        // 4. Build the command array for the script + verb
-        String[] command = {
-                winetricksFile.getAbsolutePath(),
-                "--force",
-                verb
-        };
-
-        new Thread(() -> {
-            Process process = null;
-            try {
-                ProcessBuilder processBuilder = new ProcessBuilder(command);
-                processBuilder.directory(new File(imageFs.home_path));
-
-                Map<String, String> environmentVars = processBuilder.environment();
-                for (Map.Entry<String, String> entry : envVars.entrySet()) {
-                    environmentVars.put(entry.getKey(), entry.getValue());
-                }
-
-                process = processBuilder.start();
-                process.getOutputStream().close();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-
-                appendBufferedLog(reader, outputView, false);
-                appendBufferedLog(errorReader, outputView, true);
-
-                int exitCode = process.waitFor();
-                final int finalExitCode = exitCode;
-                runOnUiThread(() -> outputView.append("Winetricks Latest exited with code " + finalExitCode + "\n"));
-
-            } catch (Exception e) {
-                String msg = "Error executing winetricks.latest: " + e.getMessage();
-                runOnUiThread(() -> outputView.setText(msg));
-            } finally {
-                // Re-enable normal callback
-                environment.setWinetricksRunning(false);
-            }
-        }).start();
-    }
+//    private void runWinetricksWithVerb(Container container,
+//                                       ContentsManager contentsManager,
+//                                       String verb,
+//                                       TextView outputView) {
+//
+//        // 1. Tell the environment that Winetricks is about to run
+//        environment.setWinetricksRunning(true);
+//
+//        // Example: create wrappers, etc.
+//        createWineWrappers(container, contentsManager);
+//
+//        Map<String, String> envVars = EnvironmentManager.getEnvVars();
+//        String usrLocalBin = imageFs.getRootDir().getPath() + "/usr/local/bin";
+//        String wineBinPath = imageFs.getWinePath() + "/bin";
+//        String defaultPath = usrLocalBin + ":" + wineBinPath + ":" + imageFs.getRootDir().getPath() + "/usr/bin";
+//        envVars.put("PATH", defaultPath);
+//
+//        File winetricksFile = new File(imageFs.getRootDir(), "/usr/bin/winetricks");
+//        if (!winetricksFile.exists()) {
+//            Log.e("Winetricks", "winetricks script not found at " + winetricksFile.getAbsolutePath());
+//            // IMPORTANT: re-enable the callback if we fail early
+//            environment.setWinetricksRunning(false);
+//            return;
+//        }
+//        winetricksFile.setExecutable(true);
+//
+//        String[] command = {
+//                winetricksFile.getAbsolutePath(),
+//                "--force",
+//                verb
+//        };
+//
+//        Executor executor = Executors.newSingleThreadExecutor();
+//
+//        final Process[] process = {null};
+//
+//        executor.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    ProcessBuilder processBuilder = new ProcessBuilder(command);
+//                    processBuilder.directory(new File(imageFs.home_path));
+//                    Map<String, String> environmentVars = processBuilder.environment();
+//                    for (Map.Entry<String, String> entry : envVars.entrySet()) {
+//                        environmentVars.put(entry.getKey(), entry.getValue());
+//                    }
+//                    processBuilder.redirectErrorStream(true);
+//                    process[0] = processBuilder.start();
+//                    runOnUiThread(() -> outputView.setText(""));
+//                    BufferedReader reader = new BufferedReader(new InputStreamReader(process[0].getInputStream()));
+//                    String outputLine = null;
+//                    while (((outputLine = reader.readLine()) != null)) {
+//                        if (outputLine != null) {
+//                            String finalOutputLine = outputLine;
+//                            runOnUiThread(() -> outputView.append(finalOutputLine + "\n"));
+//                        }
+//                    }
+//                    int exitCode = process[0].waitFor();
+//                    runOnUiThread(() -> outputView.append("Winetricks exited with code " + exitCode + "\n"));
+//
+//                } catch (Exception e) {
+//                    String msg = "Error executing winetricks: " + e.getMessage();
+//                    runOnUiThread(() -> outputView.setText(msg));
+//                } finally {
+//                    // 2. Once Winetricks finishes or fails, kill eventual stale processes
+//                    environment.setWinetricksRunning(false);
+//                }
+//            }
+//        });
+//    }
+//
+//    private void runWinetricksLatestWithVerb(Container container,
+//                                             ContentsManager contentsManager,
+//                                             String verb,
+//                                             TextView outputView) {
+//
+//        // 1. Mark Winetricks as running
+//        environment.setWinetricksRunning(true);
+//
+//        // 2. Create wrappers, etc. (same as normal)
+//        createWineWrappers(container, contentsManager);
+//
+//        Map<String, String> envVars = EnvironmentManager.getEnvVars();
+//        String usrLocalBin = imageFs.getRootDir().getPath() + "/usr/local/bin";
+//        String wineBinPath = imageFs.getWinePath() + "/bin";
+//        String defaultPath = usrLocalBin + ":" + wineBinPath + ":" + imageFs.getRootDir().getPath() + "/usr/bin";
+//        envVars.put("PATH", defaultPath);
+//
+//        // 3. **Use winetricks.latest** instead of winetricks
+//        File winetricksFile = new File(imageFs.getRootDir(), "/usr/bin/winetricks.latest");
+//        if (!winetricksFile.exists()) {
+//            Log.e("WinetricksLatest", "winetricks.latest script not found at " + winetricksFile.getAbsolutePath());
+//            // Re-enable callback if we fail early
+//            environment.setWinetricksRunning(false);
+//            return;
+//        }
+//        winetricksFile.setExecutable(true);
+//
+//        // 4. Build the command array for the script + verb
+//        String[] command = {
+//                winetricksFile.getAbsolutePath(),
+//                "--force",
+//                verb
+//        };
+//
+//        new Thread(() -> {
+//            Process process = null;
+//            try {
+//                ProcessBuilder processBuilder = new ProcessBuilder(command);
+//                processBuilder.directory(new File(imageFs.home_path));
+//
+//                Map<String, String> environmentVars = processBuilder.environment();
+//                for (Map.Entry<String, String> entry : envVars.entrySet()) {
+//                    environmentVars.put(entry.getKey(), entry.getValue());
+//                }
+//
+//                process = processBuilder.start();
+//                process.getOutputStream().close();
+//
+//                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//                BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+//
+//                appendBufferedLog(reader, outputView, false);
+//                appendBufferedLog(errorReader, outputView, true);
+//
+//                int exitCode = process.waitFor();
+//                final int finalExitCode = exitCode;
+//                runOnUiThread(() -> outputView.append("Winetricks Latest exited with code " + finalExitCode + "\n"));
+//
+//            } catch (Exception e) {
+//                String msg = "Error executing winetricks.latest: " + e.getMessage();
+//                runOnUiThread(() -> outputView.setText(msg));
+//            } finally {
+//                // Re-enable normal callback
+//                environment.setWinetricksRunning(false);
+//            }
+//        }).start();
+//    }
 
     private void appendBufferedLog(BufferedReader reader, TextView outputView, boolean isError) throws IOException {
         ArrayDeque<String> logBuffer = new ArrayDeque<>(MAX_LOG_LINES);
@@ -1653,111 +1630,111 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         }
     }
 
-    private void runWinetricksFolder(Container container, ContentsManager contentsManager, TextView outputView) {
-        // The path to where you'd like to store your dynamic script
-        String scriptPath = imageFs.getRootDir() + "/usr/bin/winetricksfolder";
-
-        // 1. Generate (or overwrite) the script
-        createWinetricksFolderScript(container, contentsManager, scriptPath);
-
-        // 2. Verify it got created
-        File winetricksFolderFile = new File(scriptPath);
-        if (!winetricksFolderFile.exists()) {
-            Log.e("WinetricksFolder", "winetricksfolder script not found after creation.");
-            outputView.setText("Error: winetricksfolder script not found.");
-            return;
-        }
-        winetricksFolderFile.setExecutable(true);
-
-        // 3. Execute the newly created script
-        String[] command = { winetricksFolderFile.getAbsolutePath() };
-
-        new Thread(() -> {
-            try {
-                ProcessBuilder processBuilder = new ProcessBuilder(command);
-                Map<String, String> environment = processBuilder.environment();
-
-                // Optionally set additional environment variables if needed
-                // environment.put("HOME", imageFs.home_path);
-                // environment.put("DISPLAY", ":0");
-                // etc.
-
-                // Start process
-                Process process = processBuilder.start();
-                process.getOutputStream().close();
-
-                // Capture output
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                StringBuilder output = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    output.append(line).append("\n");
-                }
-                while ((line = errorReader.readLine()) != null) {
-                    output.append("Error: ").append(line).append("\n");
-                }
-
-                int exitCode = process.waitFor();
-                output.append("winetricksfolder script exited with code ").append(exitCode).append("\n");
-
-                runOnUiThread(() -> outputView.setText(output.toString()));
-
-            } catch (Exception e) {
-                runOnUiThread(() -> outputView.setText("Error executing winetricksfolder: " + e.getMessage()));
-            }
-        }).start();
-    }
-
-
-    private void createWinetricksFolderScript(
-            Container container,
-            ContentsManager contentsManager,
-            String scriptPath
-    ) {
-        // 1. Figure out which Wine bin path to use based on the container/profile
-        ContentProfile profile = contentsManager.getProfileByEntryName(container.getWineVersion());
-        String wineBinPath;
-        if (profile != null && profile.type == ContentProfile.ContentType.CONTENT_TYPE_WINE) {
-            File profileInstallDir = contentsManager.getInstallDir(this, profile);
-            wineBinPath = profileInstallDir.getPath() + "/" + profile.wineBinPath;
-        } else {
-            wineBinPath = imageFs.getWinePath() + "/bin";
-        }
-
-        // 2. Construct environment-variable exports similarly to createWineWrappers()
-        //    (fetch the env vars from EnvironmentManager)
-        Map<String, String> envVars = EnvironmentManager.getEnvVars();
-        StringBuilder dynamicEnvExports = new StringBuilder("#!" + imageFs.getRootDir().getPath() + "/usr/bin/dash\n");
-
-        for (Map.Entry<String, String> entry : envVars.entrySet()) {
-            // Properly escape quotes
-            String escapedValue = entry.getValue().replace("\"", "\\\"");
-            dynamicEnvExports
-                    .append("export ")
-                    .append(entry.getKey())
-                    .append("=\"")
-                    .append(escapedValue)
-                    .append("\"\n");
-        }
-
-        // 3. Add your final “exec” line
-        //    For example, run wine explorer.exe /desktop=shell wfm ...
-        //    Also note if you need box64 or not—depends on your environment.
-        String box64Path = imageFs.getRootDir().getPath() + "/usr/local/bin/box64";
-
-        dynamicEnvExports.append("exec \"")
-                .append(box64Path).append("\" \"")
-                .append(wineBinPath).append("/wine\" ")
-                .append("explorer.exe /desktop=shell wfm ")
-                .append("\"" + imageFs.getRootDir().getPath() +  "/home/xuser/.cache/winetricks\"")
-                .append("\n");
-
-        // 4. Write the script to disk
-        File scriptFile = new File(scriptPath);
-        FileUtils.writeString(scriptFile, dynamicEnvExports.toString());
-        scriptFile.setExecutable(true);
-    }
+//    private void runWinetricksFolder(Container container, ContentsManager contentsManager, TextView outputView) {
+//        // The path to where you'd like to store your dynamic script
+//        String scriptPath = imageFs.getRootDir() + "/usr/bin/winetricksfolder";
+//
+//        // 1. Generate (or overwrite) the script
+//        createWinetricksFolderScript(container, contentsManager, scriptPath);
+//
+//        // 2. Verify it got created
+//        File winetricksFolderFile = new File(scriptPath);
+//        if (!winetricksFolderFile.exists()) {
+//            Log.e("WinetricksFolder", "winetricksfolder script not found after creation.");
+//            outputView.setText("Error: winetricksfolder script not found.");
+//            return;
+//        }
+//        winetricksFolderFile.setExecutable(true);
+//
+//        // 3. Execute the newly created script
+//        String[] command = { winetricksFolderFile.getAbsolutePath() };
+//
+//        new Thread(() -> {
+//            try {
+//                ProcessBuilder processBuilder = new ProcessBuilder(command);
+//                Map<String, String> environment = processBuilder.environment();
+//
+//                // Optionally set additional environment variables if needed
+//                // environment.put("HOME", imageFs.home_path);
+//                // environment.put("DISPLAY", ":0");
+//                // etc.
+//
+//                // Start process
+//                Process process = processBuilder.start();
+//                process.getOutputStream().close();
+//
+//                // Capture output
+//                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//                BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+//                StringBuilder output = new StringBuilder();
+//                String line;
+//                while ((line = reader.readLine()) != null) {
+//                    output.append(line).append("\n");
+//                }
+//                while ((line = errorReader.readLine()) != null) {
+//                    output.append("Error: ").append(line).append("\n");
+//                }
+//
+//                int exitCode = process.waitFor();
+//                output.append("winetricksfolder script exited with code ").append(exitCode).append("\n");
+//
+//                runOnUiThread(() -> outputView.setText(output.toString()));
+//
+//            } catch (Exception e) {
+//                runOnUiThread(() -> outputView.setText("Error executing winetricksfolder: " + e.getMessage()));
+//            }
+//        }).start();
+//    }
+//
+//
+//    private void createWinetricksFolderScript(
+//            Container container,
+//            ContentsManager contentsManager,
+//            String scriptPath
+//    ) {
+//        // 1. Figure out which Wine bin path to use based on the container/profile
+//        ContentProfile profile = contentsManager.getProfileByEntryName(container.getWineVersion());
+//        String wineBinPath;
+//        if (profile != null && profile.type == ContentProfile.ContentType.CONTENT_TYPE_WINE) {
+//            File profileInstallDir = contentsManager.getInstallDir(this, profile);
+//            wineBinPath = profileInstallDir.getPath() + "/" + profile.wineBinPath;
+//        } else {
+//            wineBinPath = imageFs.getWinePath() + "/bin";
+//        }
+//
+//        // 2. Construct environment-variable exports similarly to createWineWrappers()
+//        //    (fetch the env vars from EnvironmentManager)
+//        Map<String, String> envVars = EnvironmentManager.getEnvVars();
+//        StringBuilder dynamicEnvExports = new StringBuilder("#!" + imageFs.getRootDir().getPath() + "/usr/bin/dash\n");
+//
+//        for (Map.Entry<String, String> entry : envVars.entrySet()) {
+//            // Properly escape quotes
+//            String escapedValue = entry.getValue().replace("\"", "\\\"");
+//            dynamicEnvExports
+//                    .append("export ")
+//                    .append(entry.getKey())
+//                    .append("=\"")
+//                    .append(escapedValue)
+//                    .append("\"\n");
+//        }
+//
+//        // 3. Add your final “exec” line
+//        //    For example, run wine explorer.exe /desktop=shell wfm ...
+//        //    Also note if you need box64 or not—depends on your environment.
+//        String box64Path = imageFs.getRootDir().getPath() + "/usr/local/bin/box64";
+//
+//        dynamicEnvExports.append("exec \"")
+//                .append(box64Path).append("\" \"")
+//                .append(wineBinPath).append("/wine\" ")
+//                .append("explorer.exe /desktop=shell wfm ")
+//                .append("\"" + imageFs.getRootDir().getPath() +  "/home/xuser/.cache/winetricks\"")
+//                .append("\n");
+//
+//        // 4. Write the script to disk
+//        File scriptFile = new File(scriptPath);
+//        FileUtils.writeString(scriptFile, dynamicEnvExports.toString());
+//        scriptFile.setExecutable(true);
+//    }
 
 
     private void setupUI() {
@@ -2253,12 +2230,12 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             }
         }
 
-        // **NEW: Check if the floating view is visible and forward the key event to it**
-        if (winetricksFloatingView != null && winetricksFloatingView.getVisibility() == View.VISIBLE) {
-            if (winetricksFloatingView.dispatchKeyEvent(event)) {
-                return true; // Indicate the floating view handled the event
-            }
-        }
+        // Check if the floating view is visible and forward the key event to it**
+//        if (winetricksFloatingView != null && winetricksFloatingView.getVisibility() == View.VISIBLE) {
+//            if (winetricksFloatingView.dispatchKeyEvent(event)) {
+//                return true; // Indicate the floating view handled the event
+//            }
+//        }
 
         // Fallback to existing input handling
         return (!inputControlsView.onKeyEvent(event) && !winHandler.onKeyEvent(event) && xServer.keyboard.onKeyEvent(event)) ||
@@ -2526,7 +2503,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         }
         // Construct the final command
         String command = "winhandler.exe " + args;
-        Log.d("Winetricks", "Wine Start Command: " + command);
 
         return command;
     }

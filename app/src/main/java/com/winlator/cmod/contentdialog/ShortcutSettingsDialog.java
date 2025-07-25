@@ -97,7 +97,7 @@ public class ShortcutSettingsDialog extends ContentDialog {
 
         // Get the shared preferences and check the legacy mode status
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean isLegacyModeEnabled = preferences.getBoolean("legacy_mode_enabled", false);
+//        boolean isLegacyModeEnabled = preferences.getBoolean("legacy_mode_enabled", false);
 
         final EditText etName = findViewById(R.id.ETName);
         etName.setText(shortcut.name);
@@ -205,60 +205,60 @@ public class ShortcutSettingsDialog extends ContentDialog {
         });
 
         // Initialize the TextView for the legacy mode message
-        TextView tvLegacyInputMessage = findViewById(R.id.TVLegacyInputMessage);
+//        TextView tvLegacyInputMessage = findViewById(R.id.TVLegacyInputMessage);
 
         final CheckBox cbFullscreenStretched =  findViewById(R.id.CBFullscreenStretched);
         boolean fullscreenStretched = shortcut.getExtra("fullscreenStretched", "0").equals("1");
         cbFullscreenStretched.setChecked(fullscreenStretched);
 
 
-        final Runnable showInputWarning = () -> ContentDialog.alert(context, R.string.enable_xinput_and_dinput_same_time, null);
-        final CheckBox cbEnableXInput = findViewById(R.id.CBEnableXInput);
-        final CheckBox cbEnableDInput = findViewById(R.id.CBEnableDInput);
-        final View llDInputType = findViewById(R.id.LLDinputMapperType);
-        final View btHelpXInput = findViewById(R.id.BTXInputHelp);
-        final View btHelpDInput = findViewById(R.id.BTDInputHelp);
-        Spinner SDInputType = findViewById(R.id.SDInputType);
-        int inputType = Integer.parseInt(shortcut.getExtra("inputType", String.valueOf(shortcut.container.getInputType())));
+//        final Runnable showInputWarning = () -> ContentDialog.alert(context, R.string.enable_xinput_and_dinput_same_time, null);
+//        final CheckBox cbEnableXInput = findViewById(R.id.CBEnableXInput);
+//        final CheckBox cbEnableDInput = findViewById(R.id.CBEnableDInput);
+//        final View llDInputType = findViewById(R.id.LLDinputMapperType);
+//        final View btHelpXInput = findViewById(R.id.BTXInputHelp);
+//        final View btHelpDInput = findViewById(R.id.BTDInputHelp);
+//        Spinner SDInputType = findViewById(R.id.SDInputType);
+//        int inputType = Integer.parseInt(shortcut.getExtra("inputType", String.valueOf(shortcut.container.getInputType())));
 
-        if (isLegacyModeEnabled) {
-            // Display legacy mode message and hide input controls
-            tvLegacyInputMessage.setText("You are in 7.1.2 legacy input mode. Advanced input settings are not available.");
-            tvLegacyInputMessage.setVisibility(View.VISIBLE);
-            // In legacy mode, hide all input-related UI elements
-            cbEnableXInput.setVisibility(View.GONE);
-            cbEnableDInput.setVisibility(View.GONE);
-            llDInputType.setVisibility(View.GONE);
-            btHelpXInput.setVisibility(View.GONE);
-            btHelpDInput.setVisibility(View.GONE);
-            SDInputType.setVisibility(View.GONE);
-        } else {
-            cbEnableXInput.setChecked((inputType & WinHandler.FLAG_INPUT_TYPE_XINPUT) == WinHandler.FLAG_INPUT_TYPE_XINPUT);
-            cbEnableDInput.setChecked((inputType & WinHandler.FLAG_INPUT_TYPE_DINPUT) == WinHandler.FLAG_INPUT_TYPE_DINPUT);
-            cbEnableDInput.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                llDInputType.setVisibility(isChecked?View.VISIBLE:View.GONE);
-                if (isChecked && cbEnableXInput.isChecked())
-                    showInputWarning.run();
-            });
-            cbEnableXInput.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked && cbEnableDInput.isChecked())
-                    showInputWarning.run();
-            });
-            btHelpXInput.setOnClickListener(v -> AppUtils.showHelpBox(context, v, R.string.help_xinput));
-            btHelpDInput.setOnClickListener(v -> AppUtils.showHelpBox(context, v, R.string.help_dinput));
-            SDInputType.setSelection(((inputType & WinHandler.FLAG_DINPUT_MAPPER_STANDARD) == WinHandler.FLAG_DINPUT_MAPPER_STANDARD) ? 0 : 1);
-            llDInputType.setVisibility(cbEnableDInput.isChecked()?View.VISIBLE:View.GONE);
-
-            // Always show input-related UI elements when not in legacy mode
-            cbEnableXInput.setVisibility(View.VISIBLE);
-            cbEnableDInput.setVisibility(View.VISIBLE);
-            llDInputType.setVisibility(View.VISIBLE);
-            btHelpXInput.setVisibility(View.VISIBLE);
-            btHelpDInput.setVisibility(View.VISIBLE);
-            SDInputType.setVisibility(View.VISIBLE);
-
-
-        }
+//        if (isLegacyModeEnabled) {
+//            // Display legacy mode message and hide input controls
+//            tvLegacyInputMessage.setText("You are in 7.1.2 legacy input mode. Advanced input settings are not available.");
+//            tvLegacyInputMessage.setVisibility(View.VISIBLE);
+//            // In legacy mode, hide all input-related UI elements
+//            cbEnableXInput.setVisibility(View.GONE);
+//            cbEnableDInput.setVisibility(View.GONE);
+//            llDInputType.setVisibility(View.GONE);
+//            btHelpXInput.setVisibility(View.GONE);
+//            btHelpDInput.setVisibility(View.GONE);
+//            SDInputType.setVisibility(View.GONE);
+//        } else {
+//            cbEnableXInput.setChecked((inputType & WinHandler.FLAG_INPUT_TYPE_XINPUT) == WinHandler.FLAG_INPUT_TYPE_XINPUT);
+//            cbEnableDInput.setChecked((inputType & WinHandler.FLAG_INPUT_TYPE_DINPUT) == WinHandler.FLAG_INPUT_TYPE_DINPUT);
+//            cbEnableDInput.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//                llDInputType.setVisibility(isChecked?View.VISIBLE:View.GONE);
+//                if (isChecked && cbEnableXInput.isChecked())
+//                    showInputWarning.run();
+//            });
+//            cbEnableXInput.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//                if (isChecked && cbEnableDInput.isChecked())
+//                    showInputWarning.run();
+//            });
+//            btHelpXInput.setOnClickListener(v -> AppUtils.showHelpBox(context, v, R.string.help_xinput));
+//            btHelpDInput.setOnClickListener(v -> AppUtils.showHelpBox(context, v, R.string.help_dinput));
+//            SDInputType.setSelection(((inputType & WinHandler.FLAG_DINPUT_MAPPER_STANDARD) == WinHandler.FLAG_DINPUT_MAPPER_STANDARD) ? 0 : 1);
+//            llDInputType.setVisibility(cbEnableDInput.isChecked()?View.VISIBLE:View.GONE);
+//
+//            // Always show input-related UI elements when not in legacy mode
+//            cbEnableXInput.setVisibility(View.VISIBLE);
+//            cbEnableDInput.setVisibility(View.VISIBLE);
+//            llDInputType.setVisibility(View.VISIBLE);
+//            btHelpXInput.setVisibility(View.VISIBLE);
+//            btHelpDInput.setVisibility(View.VISIBLE);
+//            SDInputType.setVisibility(View.VISIBLE);
+//
+//
+//        }
 
         final CheckBox cbForceFullscreen = findViewById(R.id.CBForceFullscreen);
         cbForceFullscreen.setChecked(shortcut.getExtra("forceFullscreen", "0").equals("1"));
@@ -360,13 +360,13 @@ public class ShortcutSettingsDialog extends ContentDialog {
                 String midiSoundFont = sMIDISoundFont.getSelectedItemPosition() == 0 ? "" : sMIDISoundFont.getSelectedItem().toString();
                 String screenSize = containerDetailFragment.getScreenSize(getContentView());
 
-                int finalInputType = 0;
-                finalInputType |= cbEnableXInput.isChecked() ? WinHandler.FLAG_INPUT_TYPE_XINPUT : 0;
-                finalInputType |= cbEnableDInput.isChecked() ? WinHandler.FLAG_INPUT_TYPE_DINPUT : 0;
-                finalInputType |= SDInputType.getSelectedItemPosition() == 0 ?  WinHandler.FLAG_DINPUT_MAPPER_STANDARD : WinHandler.FLAG_DINPUT_MAPPER_XINPUT;
+//                int finalInputType = 0;
+//                finalInputType |= cbEnableXInput.isChecked() ? WinHandler.FLAG_INPUT_TYPE_XINPUT : 0;
+//                finalInputType |= cbEnableDInput.isChecked() ? WinHandler.FLAG_INPUT_TYPE_DINPUT : 0;
+//                finalInputType |= SDInputType.getSelectedItemPosition() == 0 ?  WinHandler.FLAG_DINPUT_MAPPER_STANDARD : WinHandler.FLAG_DINPUT_MAPPER_XINPUT;
 
 
-                shortcut.putExtra("inputType", String.valueOf(finalInputType));
+//                shortcut.putExtra("inputType", String.valueOf(finalInputType));
 
                 boolean disabledXInput = cbDisabledXInput.isChecked();
                 shortcut.putExtra("disableXinput", disabledXInput ? "1" : null);
@@ -511,7 +511,7 @@ public class ShortcutSettingsDialog extends ContentDialog {
         Spinner sBox64Preset = view.findViewById(R.id.SBox64Preset);
         Spinner sControlsProfile = view.findViewById(R.id.SControlsProfile);
         Spinner sRCFile = view.findViewById(R.id.SRCFile);
-        Spinner sDInputType = view.findViewById(R.id.SDInputType);
+//        Spinner sDInputType = view.findViewById(R.id.SDInputType);
         Spinner sMIDISoundFont = view.findViewById(R.id.SMIDISoundFont);
         Spinner sBox64Version = view.findViewById(R.id.SBox64Version);
         Spinner sFEXCoreVersion = view.findViewById(R.id.SFEXCoreVersion);
@@ -530,7 +530,7 @@ public class ShortcutSettingsDialog extends ContentDialog {
         sBox64Preset.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
         sControlsProfile.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
         sRCFile.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
-        sDInputType.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
+//        sDInputType.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
         sMIDISoundFont.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
         sBox64Version.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
         sFEXCoreTSOPreset.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);

@@ -104,17 +104,17 @@ public class ContainerDetailFragment extends Fragment {
         this.containerId = containerId;
     }
 
-    private static final String[] SDL2_ENV_VARS = {
-            "SDL_JOYSTICK_WGI=0",
-            "SDL_XINPUT_ENABLED=1",
-            "SDL_JOYSTICK_RAWINPUT=0",
-            "SDL_JOYSTICK_HIDAPI=1",
-            "SDL_DIRECTINPUT_ENABLED=0",
-            "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS=1",
-            "SDL_HINT_FORCE_RAISEWINDOW=0",
-            "SDL_ALLOW_TOPMOST=0",
-            "SDL_MOUSE_FOCUS_CLICKTHROUGH=1"
-    };
+//    private static final String[] SDL2_ENV_VARS = {
+//            "SDL_JOYSTICK_WGI=0",
+//            "SDL_XINPUT_ENABLED=1",
+//            "SDL_JOYSTICK_RAWINPUT=0",
+//            "SDL_JOYSTICK_HIDAPI=1",
+//            "SDL_DIRECTINPUT_ENABLED=0",
+//            "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS=1",
+//            "SDL_HINT_FORCE_RAISEWINDOW=0",
+//            "SDL_ALLOW_TOPMOST=0",
+//            "SDL_MOUSE_FOCUS_CLICKTHROUGH=1"
+//    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -204,8 +204,8 @@ public class ContainerDetailFragment extends Fragment {
         // Handled in createWinComponentsTab
 
         // Update Advanced Tab Spinner styles
-        Spinner SDInputType = view.findViewById(R.id.SDInputType);
-        SDInputType.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
+//        Spinner SDInputType = view.findViewById(R.id.SDInputType);
+//        SDInputType.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
 
         Spinner sBox64Preset = view.findViewById(R.id.SBox64Preset);
         sBox64Preset.setPopupBackgroundResource(isDarkMode ? R.drawable.content_dialog_background_dark : R.drawable.content_dialog_background);
@@ -298,8 +298,8 @@ public class ContainerDetailFragment extends Fragment {
         TextView systemLabel = view.findViewById(R.id.TVSystem);
         applyFieldSetLabelStyle(systemLabel, isDarkMode);  // Apply the dark or light mode styles
 
-        TextView gameControllerLabel = view.findViewById(R.id.TVGameController);
-        applyFieldSetLabelStyle(gameControllerLabel, isDarkMode);  // Apply the dark or light mode styles
+//        TextView gameControllerLabel = view.findViewById(R.id.TVGameController);
+//        applyFieldSetLabelStyle(gameControllerLabel, isDarkMode);  // Apply the dark or light mode styles
 
     }
 
@@ -393,63 +393,63 @@ public class ContainerDetailFragment extends Fragment {
         cbFullscreenStretched.setChecked(isEditMode() && container.isFullscreenStretched());
 
         // Existing declarations of UI components and variables
-        final Runnable showInputWarning = () -> ContentDialog.alert(context, R.string.enable_xinput_and_dinput_same_time, null);
-        final CheckBox cbEnableXInput = view.findViewById(R.id.CBEnableXInput);
-        final CheckBox cbEnableDInput = view.findViewById(R.id.CBEnableDInput);
-        final View llDInputType = view.findViewById(R.id.LLDinputMapperType);
-        final View btHelpXInput = view.findViewById(R.id.BTXInputHelp);
-        final View btHelpDInput = view.findViewById(R.id.BTDInputHelp);
-        final Spinner SDInputType = view.findViewById(R.id.SDInputType);
+//        final Runnable showInputWarning = () -> ContentDialog.alert(context, R.string.enable_xinput_and_dinput_same_time, null);
+//        final CheckBox cbEnableXInput = view.findViewById(R.id.CBEnableXInput);
+//        final CheckBox cbEnableDInput = view.findViewById(R.id.CBEnableDInput);
+//        final View llDInputType = view.findViewById(R.id.LLDinputMapperType);
+//        final View btHelpXInput = view.findViewById(R.id.BTXInputHelp);
+//        final View btHelpDInput = view.findViewById(R.id.BTDInputHelp);
+//        final Spinner SDInputType = view.findViewById(R.id.SDInputType);
 
-        // Check if we are in edit mode to set input type accordingly
-        int inputType = isEditMode() ? container.getInputType() : WinHandler.DEFAULT_INPUT_TYPE;
-
-        // Initialize the TextView for the legacy mode message
-        TextView tvLegacyInputMessage = view.findViewById(R.id.TVLegacyInputMessage);
-
-        if (!isLegacyModeEnabled) {
-
-            // Set visibility of legacy mode message
-            tvLegacyInputMessage.setVisibility(View.GONE); // Hide message when not in legacy mode
-
-            // New logic for enabling XInput and DInput
-            cbEnableXInput.setChecked((inputType & WinHandler.FLAG_INPUT_TYPE_XINPUT) == WinHandler.FLAG_INPUT_TYPE_XINPUT);
-            cbEnableDInput.setChecked((inputType & WinHandler.FLAG_INPUT_TYPE_DINPUT) == WinHandler.FLAG_INPUT_TYPE_DINPUT);
-
-            cbEnableDInput.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                llDInputType.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-                if (isChecked && cbEnableXInput.isChecked())
-                    showInputWarning.run();
-            });
-
-            cbEnableXInput.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked && cbEnableDInput.isChecked())
-                    showInputWarning.run();
-            });
-
-            SDInputType.setSelection(((inputType & WinHandler.FLAG_DINPUT_MAPPER_STANDARD) == WinHandler.FLAG_DINPUT_MAPPER_STANDARD) ? 0 : 1);
-            llDInputType.setVisibility(cbEnableDInput.isChecked() ? View.VISIBLE : View.GONE);
-
-            btHelpXInput.setOnClickListener(v -> AppUtils.showHelpBox(context, v, R.string.help_xinput));
-            btHelpDInput.setOnClickListener(v -> AppUtils.showHelpBox(context, v, R.string.help_dinput));
-        } else {
-            // Legacy mode handling: disable or hide input-related UI elements
-            cbEnableXInput.setVisibility(View.GONE);
-            cbEnableDInput.setVisibility(View.GONE);
-            llDInputType.setVisibility(View.GONE);
-            btHelpXInput.setVisibility(View.GONE);
-            btHelpDInput.setVisibility(View.GONE);
-            SDInputType.setVisibility(View.GONE);
-
-            // Show the legacy input mode message
-            tvLegacyInputMessage.setVisibility(View.VISIBLE);
-
-            // Set inputType to default or legacy-compatible setting
-            inputType = WinHandler.DEFAULT_INPUT_TYPE;
-        }
-
-        final CheckBox cbSdl2Toggle = view.findViewById(R.id.CBSdl2Toggle);
-        cbSdl2Toggle.setChecked(isEditMode() && container.getEnvVars().contains("SDL_XINPUT_ENABLED=1"));
+//        // Check if we are in edit mode to set input type accordingly
+//        int inputType = isEditMode() ? container.getInputType() : WinHandler.DEFAULT_INPUT_TYPE;
+//
+//        // Initialize the TextView for the legacy mode message
+//        TextView tvLegacyInputMessage = view.findViewById(R.id.TVLegacyInputMessage);
+//
+//        if (!isLegacyModeEnabled) {
+//
+//            // Set visibility of legacy mode message
+//            tvLegacyInputMessage.setVisibility(View.GONE); // Hide message when not in legacy mode
+//
+//            // New logic for enabling XInput and DInput
+//            cbEnableXInput.setChecked((inputType & WinHandler.FLAG_INPUT_TYPE_XINPUT) == WinHandler.FLAG_INPUT_TYPE_XINPUT);
+//            cbEnableDInput.setChecked((inputType & WinHandler.FLAG_INPUT_TYPE_DINPUT) == WinHandler.FLAG_INPUT_TYPE_DINPUT);
+//
+//            cbEnableDInput.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//                llDInputType.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+//                if (isChecked && cbEnableXInput.isChecked())
+//                    showInputWarning.run();
+//            });
+//
+//            cbEnableXInput.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//                if (isChecked && cbEnableDInput.isChecked())
+//                    showInputWarning.run();
+//            });
+//
+//            SDInputType.setSelection(((inputType & WinHandler.FLAG_DINPUT_MAPPER_STANDARD) == WinHandler.FLAG_DINPUT_MAPPER_STANDARD) ? 0 : 1);
+//            llDInputType.setVisibility(cbEnableDInput.isChecked() ? View.VISIBLE : View.GONE);
+//
+//            btHelpXInput.setOnClickListener(v -> AppUtils.showHelpBox(context, v, R.string.help_xinput));
+//            btHelpDInput.setOnClickListener(v -> AppUtils.showHelpBox(context, v, R.string.help_dinput));
+//        } else {
+//            // Legacy mode handling: disable or hide input-related UI elements
+//            cbEnableXInput.setVisibility(View.GONE);
+//            cbEnableDInput.setVisibility(View.GONE);
+//            llDInputType.setVisibility(View.GONE);
+//            btHelpXInput.setVisibility(View.GONE);
+//            btHelpDInput.setVisibility(View.GONE);
+//            SDInputType.setVisibility(View.GONE);
+//
+//            // Show the legacy input mode message
+//            tvLegacyInputMessage.setVisibility(View.VISIBLE);
+//
+//            // Set inputType to default or legacy-compatible setting
+//            inputType = WinHandler.DEFAULT_INPUT_TYPE;
+//        }
+//
+//        final CheckBox cbSdl2Toggle = view.findViewById(R.id.CBSdl2Toggle);
+//        cbSdl2Toggle.setChecked(isEditMode() && container.getEnvVars().contains("SDL_XINPUT_ENABLED=1"));
 
 
         final EditText etLC_ALL = view.findViewById(R.id.ETlcall);
@@ -570,25 +570,25 @@ public class ContainerDetailFragment extends Fragment {
                 String controllerMapping = getControllerMapping(view);
 
                 // Define final input type
-                int finalInputType = 0;
-                finalInputType |= cbEnableXInput.isChecked() ? WinHandler.FLAG_INPUT_TYPE_XINPUT : 0;
-                finalInputType |= cbEnableDInput.isChecked() ? WinHandler.FLAG_INPUT_TYPE_DINPUT : 0;
-                finalInputType |= SDInputType.getSelectedItemPosition() == 0 ? WinHandler.FLAG_DINPUT_MAPPER_STANDARD : WinHandler.FLAG_DINPUT_MAPPER_XINPUT;
-
-                // Handle SDL2 environment variables based on the toggle state
-                if (cbSdl2Toggle.isChecked()) {
-                    // Add SDL2 environment variables if the toggle is enabled
-                    for (String envVar : SDL2_ENV_VARS) {
-                        if (!envVars.contains(envVar)) {
-                            envVars += (envVars.isEmpty() ? "" : " ") + envVar;
-                        }
-                    }
-                } else {
-                    // Remove SDL2 environment variables if the toggle is disabled
-                    for (String envVar : SDL2_ENV_VARS) {
-                        envVars = envVars.replace(envVar, "").replaceAll("\\s{2,}", " ").trim();
-                    }
-                }
+//                int finalInputType = 0;
+//                finalInputType |= cbEnableXInput.isChecked() ? WinHandler.FLAG_INPUT_TYPE_XINPUT : 0;
+//                finalInputType |= cbEnableDInput.isChecked() ? WinHandler.FLAG_INPUT_TYPE_DINPUT : 0;
+//                finalInputType |= SDInputType.getSelectedItemPosition() == 0 ? WinHandler.FLAG_DINPUT_MAPPER_STANDARD : WinHandler.FLAG_DINPUT_MAPPER_XINPUT;
+//
+//                // Handle SDL2 environment variables based on the toggle state
+//                if (cbSdl2Toggle.isChecked()) {
+//                    // Add SDL2 environment variables if the toggle is enabled
+//                    for (String envVar : SDL2_ENV_VARS) {
+//                        if (!envVars.contains(envVar)) {
+//                            envVars += (envVars.isEmpty() ? "" : " ") + envVar;
+//                        }
+//                    }
+//                } else {
+//                    // Remove SDL2 environment variables if the toggle is disabled
+//                    for (String envVar : SDL2_ENV_VARS) {
+//                        envVars = envVars.replace(envVar, "").replaceAll("\\s{2,}", " ").trim();
+//                    }
+//                }
 
 
 
@@ -610,7 +610,7 @@ public class ContainerDetailFragment extends Fragment {
                     container.setDrives(drives);
                     container.setShowFPS(showFPS);
                     container.setFullscreenStretched(fullscreenStretched);
-                    container.setInputType(finalInputType);
+//                    container.setInputType(finalInputType);
                     container.setWoW64Mode(wow64Mode);
                     container.setRelativeMouseMovement(isRelativeMouseMovement);
                     container.setStartupSelection(startupSelection);
@@ -647,7 +647,7 @@ public class ContainerDetailFragment extends Fragment {
                     data.put("showFPS", showFPS);
                     data.put("relativeMouseMovement", isRelativeMouseMovement);
                     data.put("fullscreenStretched", fullscreenStretched);
-                    data.put("inputType", finalInputType);
+//                    data.put("inputType", finalInputType);
                     data.put("wow64Mode", wow64Mode);
                     data.put("startupSelection", startupSelection);
                     data.put("box64Version", box64Version);

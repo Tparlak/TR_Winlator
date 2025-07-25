@@ -37,11 +37,11 @@ struct gamepad_io {
 };
 
 
-// --- We now need arrays to hold data for each controller ---
+// --- Arrays to hold data for each controller ---
 static volatile struct gamepad_io *io_pads[MAX_GAMEPADS] = {NULL};
 static int vjoy_ids[MAX_GAMEPADS] = {-1};
 
-// The rumble callback now needs to know WHICH controller to vibrate
+// Rumble callback to know WHICH controller to vibrate
 static int OnRumble(void *userdata, uint16_t low_frequency_rumble, uint16_t high_frequency_rumble) {
     int player_index = (int)(intptr_t)userdata;
     if (player_index < 0 || player_index >= MAX_GAMEPADS || !io_pads[player_index]) return -1;

@@ -95,12 +95,6 @@ public class SettingsFragment extends Fragment {
     private CheckBox cbXTouchscreenToggle;
 
     private CheckBox cbGyroEnabled;
-    private SeekBar sbGyroXSensitivity;
-    private SeekBar sbGyroYSensitivity;
-    private SeekBar sbGyroSmoothing;
-    private SeekBar sbGyroDeadzone;
-    private CheckBox cbInvertGyroX;
-    private CheckBox cbInvertGyroY;
 
     private boolean isRestoreAction = false;
 
@@ -172,7 +166,7 @@ public class SettingsFragment extends Fragment {
 
         // Initialize the cursor lock checkbox
         cbCursorLock = view.findViewById(R.id.CBCursorLock);
-        cbCursorLock.setChecked(preferences.getBoolean("cursor_lock", true));
+        cbCursorLock.setChecked(preferences.getBoolean("cursor_lock", false));
 
         // Initialize the xinput toggle checkbox
         cbXinputToggle = view.findViewById(R.id.CBXinputToggle);
@@ -182,24 +176,13 @@ public class SettingsFragment extends Fragment {
         cbXTouchscreenToggle = view.findViewById(R.id.CBXTouchscreenToggle);
         cbXTouchscreenToggle.setChecked(preferences.getBoolean("touchscreen_toggle", false));
 
-        // Inside onCreateView in SettingsFragment.java
-        CheckBox cbLegacyInputMode = view.findViewById(R.id.CBLegacyInputMode);
-        enableLegacyInputMode = preferences.getBoolean("legacy_mode_enabled", false);
-        cbLegacyInputMode.setChecked(enableLegacyInputMode);
-
-        // Listen to changes and update the temporary state
-        cbLegacyInputMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            enableLegacyInputMode = isChecked;
-            preferences.edit().putBoolean("legacy_mode_enabled", isChecked).apply();
-        });
-
 
         // Initialize gyro enable checkbox
         cbGyroEnabled = view.findViewById(R.id.CBGyroEnabled);
         cbGyroEnabled.setChecked(preferences.getBoolean("gyro_enabled", false));
 
-//        CheckBox cbProcessGyroWithLeftTrigger = view.findViewById(R.id.CBProcessGyroWithLeftTrigger);
-//        cbProcessGyroWithLeftTrigger.setChecked(preferences.getBoolean("process_gyro_with_left_trigger", false));
+        // CheckBox cbProcessGyroWithLeftTrigger = view.findViewById(R.id.CBProcessGyroWithLeftTrigger); // Old Method
+        // cbProcessGyroWithLeftTrigger.setChecked(preferences.getBoolean("process_gyro_with_left_trigger", false)); // Old Method
 
         Spinner sbGyroTriggerButton = view.findViewById(R.id.SBGyroTriggerButton);
         RadioGroup rgGyroMode = view.findViewById(R.id.RGyroMode);
@@ -210,25 +193,25 @@ public class SettingsFragment extends Fragment {
         TypedArray keycodeArray = getResources().obtainTypedArray(R.array.button_keycodes);
         int[] keycodes = new int[keycodeArray.length()];
 
-// Log the keycodes for debugging purposes
-        Log.d("SettingsFragment", "Populating keycodes array:");
+        // Log the keycodes for debugging purposes
+        // Log.d("SettingsFragment", "Populating keycodes array:");
 
         for (int i = 0; i < keycodeArray.length(); i++) {
             keycodes[i] = keycodeArray.getResourceId(i, -1); // Get the resource ID
             if (keycodes[i] != -1) {
                 keycodes[i] = getResources().getInteger(keycodes[i]); // Fetch the actual integer value
-                Log.d("SettingsFragment", "Keycode[" + i + "] = " + keycodes[i]); // Log the populated keycode
+                // Log.d("SettingsFragment", "Keycode[" + i + "] = " + keycodes[i]); // Log the populated keycode
             } else {
-                Log.e("SettingsFragment", "Invalid keycode resource at index " + i);
+                // Log.e("SettingsFragment", "Invalid keycode resource at index " + i);
             }
         }
         keycodeArray.recycle(); // Always recycle TypedArray to free up resources
 
-// Now get the currently selected button from SharedPreferences
+        // Now get the currently selected button from SharedPreferences
         int selectedButton = preferences.getInt("gyro_trigger_button", KeyEvent.KEYCODE_BUTTON_L1);
         Log.d("SettingsFragment", "Selected button keycode: " + selectedButton);
 
-// Find the index of the selectedButton in the keycodes array
+        // Find the index of the selectedButton in the keycodes array
         int selectedIndex = -1;
         for (int i = 0; i < keycodes.length; i++) {
             if (keycodes[i] == selectedButton) {
@@ -237,7 +220,7 @@ public class SettingsFragment extends Fragment {
             }
         }
 
-// Ensure a valid index is found, otherwise, handle fallback
+        // Ensure a valid index is found, otherwise, handle fallback
         if (selectedIndex != -1) {
             Log.d("SettingsFragment", "Selected button found at index: " + selectedIndex);
             sbGyroTriggerButton.setSelection(selectedIndex);
@@ -366,15 +349,15 @@ public class SettingsFragment extends Fragment {
         });
         sbCursorSpeed.setProgress((int)(preferences.getFloat("cursor_speed", 1.0f) * 100));
 
-        final RadioGroup rgTriggerType = view.findViewById(R.id.RGTriggerType);
-        final View btHelpTriggerMode = view.findViewById(R.id.BTHelpTriggerMode);
-        List<Integer> triggerRbIds = List.of(R.id.RBTriggerIsButton, R.id.RBTriggerIsAxis, R.id.RBTriggerIsMixed);
-        int triggerType = preferences.getInt("trigger_type", ExternalController.TRIGGER_IS_AXIS);
-
-        if (triggerType >= 0 && triggerType < triggerRbIds.size()) {
-            ((RadioButton) (rgTriggerType.findViewById(triggerRbIds.get(triggerType)))).setChecked(true);
-        }
-        btHelpTriggerMode.setOnClickListener(v -> AppUtils.showHelpBox(context, v, R.string.help_trigger_mode));
+//        final RadioGroup rgTriggerType = view.findViewById(R.id.RGTriggerType);
+//        final View btHelpTriggerMode = view.findViewById(R.id.BTHelpTriggerMode);
+//        List<Integer> triggerRbIds = List.of(R.id.RBTriggerIsButton, R.id.RBTriggerIsAxis, R.id.RBTriggerIsMixed);
+//        int triggerType = preferences.getInt("trigger_type", ExternalController.TRIGGER_IS_AXIS);
+//
+//        if (triggerType >= 0 && triggerType < triggerRbIds.size()) {
+//            ((RadioButton) (rgTriggerType.findViewById(triggerRbIds.get(triggerType)))).setChecked(true);
+//        }
+//        btHelpTriggerMode.setOnClickListener(v -> AppUtils.showHelpBox(context, v, R.string.help_trigger_mode));
 
         final CheckBox cbEnableFileProvider = view.findViewById(R.id.CBEnableFileProvider);
         final View btHelpFileProvider = view.findViewById(R.id.BTHelpFileProvider);
@@ -409,7 +392,6 @@ public class SettingsFragment extends Fragment {
         view.findViewById(R.id.BTConfirm).setOnClickListener((v) -> {
             SharedPreferences.Editor editor = preferences.edit();
 
-            // Save Dark Mode setting
             editor.putBoolean("dark_mode", cbDarkMode.isChecked());
             editor.putString("box64_preset", Box86_64PresetManager.getSpinnerSelectedId(sBox64Preset));
             editor.putBoolean("use_dri3", cbUseDRI3.isChecked());
@@ -417,7 +399,7 @@ public class SettingsFragment extends Fragment {
             editor.putFloat("cursor_speed", sbCursorSpeed.getProgress() / 100.0f);
             editor.putBoolean("enable_wine_debug", cbEnableWineDebug.isChecked());
             editor.putBoolean("enable_box86_64_logs", cbEnableBox86_64Logs.isChecked());
-            editor.putInt("trigger_type", triggerRbIds.indexOf(rgTriggerType.getCheckedRadioButtonId()));
+//            editor.putInt("trigger_type", triggerRbIds.indexOf(rgTriggerType.getCheckedRadioButtonId()));
             editor.putBoolean("cursor_lock", cbCursorLock.isChecked()); // Save cursor lock state
             editor.putBoolean("xinput_toggle", cbXinputToggle.isChecked()); // Save xinput toggle state
             editor.putBoolean("touchscreen_toggle", cbXTouchscreenToggle.isChecked()); // Save touchscreen toggle state
@@ -428,11 +410,11 @@ public class SettingsFragment extends Fragment {
 
             // Save gyro settings
             editor.putBoolean("gyro_enabled", cbGyroEnabled.isChecked());
-//            editor.putBoolean("process_gyro_with_left_trigger", cbProcessGyroWithLeftTrigger.isChecked());
+            //editor.putBoolean("process_gyro_with_left_trigger", cbProcessGyroWithLeftTrigger.isChecked()); // Older method
 
             int selectedKeycode = keycodes[sbGyroTriggerButton.getSelectedItemPosition()];
 
-// Save the selected keycode to preferences
+            // Save the selected keycode to preferences
             editor.putInt("gyro_trigger_button", selectedKeycode);
 
             editor.putInt("gyro_mode", rgGyroMode.getCheckedRadioButtonId() == R.id.RBHoldMode ? 0 : 1);
@@ -453,12 +435,6 @@ public class SettingsFragment extends Fragment {
             saveCustomApiKeySettings(editor);
 
             if (editor.commit()) {
-                // Now perform the extraction based on the saved state
-
-                extractLegacyInputFiles(enableLegacyInputMode);
-
-
-
                 NavigationView navigationView = getActivity().findViewById(R.id.NavigationView);
                 navigationView.setCheckedItem(R.id.main_menu_containers);
                 FragmentManager fragmentManager = getParentFragmentManager();
@@ -511,8 +487,8 @@ public class SettingsFragment extends Fragment {
         TextView tvCustomApiKey = view.findViewById(R.id.TVCustomApiKey);
         applyFieldSetLabelStyle(tvCustomApiKey, isDarkMode);
 
-//        TextView shortcutSettingsLabel = view.findViewById(R.id.TVShortcutSettings);
-//        applyFieldSetLabelStyle(shortcutSettingsLabel, isDarkMode);
+        // TextView shortcutSettingsLabel = view.findViewById(R.id.TVShortcutSettings);
+        // applyFieldSetLabelStyle(shortcutSettingsLabel, isDarkMode);
 
         // Inputs tab labels
         TextView xServerLabel = view.findViewById(R.id.TVXServer);
@@ -706,6 +682,146 @@ public class SettingsFragment extends Fragment {
         editor.apply();
     }
 
+
+
+    private void showBackupConfirmationDialog() {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Backup Data")
+                .setMessage("Do you want to create a backup of the app's data directory?")
+                .setPositiveButton("Yes", (dialog, which) -> backupAppData())
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void backupAppData() {
+        File dataDir = getContext().getFilesDir().getParentFile(); // App's data directory
+        File backupFile = new File(Environment.getExternalStorageDirectory(), "app_data_backup.tar");
+
+        preloaderDialog.showOnUiThread(R.string.backing_up_data);
+
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        ExecutorService compressionExecutor = Executors.newFixedThreadPool(availableProcessors);
+
+        compressionExecutor.execute(() -> {
+            try {
+                TarCompressorUtils.archive(new File[]{dataDir}, backupFile, file -> {
+                    // Exclude the problematic directory
+                    String excludePath = "imagefs/tmp/.sysvshm";
+                    return !file.getAbsolutePath().contains(excludePath);
+                });
+                getActivity().runOnUiThread(() -> {
+                    preloaderDialog.closeOnUiThread();
+                    AppUtils.showToast(getContext(), "Backup completed: " + backupFile.getPath());
+                });
+            } catch (Exception e) {
+                getActivity().runOnUiThread(() -> {
+                    preloaderDialog.closeOnUiThread();
+                    AppUtils.showToast(getContext(), "Backup failed.");
+                });
+            }
+        });
+    }
+
+
+
+    private void selectBackupFileForRestore() {
+        isRestoreAction = true; // Set the flag to indicate a restore operation
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, MainActivity.OPEN_FILE_REQUEST_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            Uri uri = data.getData();
+
+            if (uri != null) {
+                switch (requestCode) {
+                    // Case for File Picker to restore data
+                    case MainActivity.OPEN_FILE_REQUEST_CODE:
+                        if (isRestoreAction) {
+                            restoreAppData(uri);
+                            isRestoreAction = false;  // Reset the flag
+                        }
+                        break;
+
+                    // Case for FilePicker to select frontend export path
+                    case REQUEST_CODE_FRONTEND_EXPORT_PATH:
+                        // Save the selected URI as a string in SharedPreferences
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putString("frontend_export_uri", uri.toString());
+                        editor.apply();
+
+                        // Take persistable URI permission
+                        try {
+                            // Take persistable URI permission with explicit flags
+                            requireContext().getContentResolver().takePersistableUriPermission(
+                                    uri,
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                            );
+                        } catch (SecurityException e) {
+                            AppUtils.showToast(getContext(), "Unable to take persistable permissions: " + e.getMessage());
+                        }
+
+                        // Convert the URI to an absolute path and display it
+                        String fullPath = FileUtils.getFilePathFromUri(getContext(), uri);
+
+                        // Update the TextView with the absolute path or URI string if conversion fails
+                        TextView tvFrontendExportPath = getView().findViewById(R.id.TVFrontendExportPath);
+                        tvFrontendExportPath.setText(fullPath != null ? fullPath : uri.toString());
+                        break;
+
+                    // Case for installing a SoundFont
+                    case REQUEST_CODE_INSTALL_SOUNDFONT:
+                        if (installSoundFontCallback != null) {
+                            try {
+                                installSoundFontCallback.call(uri);
+                            } catch (Exception e) {
+                                AppUtils.showToast(getContext(), R.string.unable_to_install_soundfont);
+                            } finally {
+                                installSoundFontCallback = null;
+                            }
+                        }
+                        break;
+
+                    // Add future cases here for other request codes...
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    private void restoreAppData(Uri backupUri) {
+        if (getActivity() != null) {  // Ensure the activity is not null
+            Intent intent = new Intent(getActivity(), RestoreActivity.class);
+            intent.setData(backupUri);
+            startActivity(intent);
+            getActivity().finish(); // Close the main activity
+        }
+    }
+
+
+    private void onRestoreSuccess() {
+        getActivity().runOnUiThread(() -> {
+            preloaderDialog.closeOnUiThread();
+            AppUtils.showToast(getContext(), "Data restored successfully.");
+            AppUtils.restartApplication(getActivity());  // Restart the app to apply changes
+        });
+    }
+
+    private void onRestoreFailed() {
+        getActivity().runOnUiThread(() -> {
+            preloaderDialog.closeOnUiThread();
+            AppUtils.showToast(getContext(), "Data restore failed.");
+        });
+    }
+
+
     private void showGyroConfigDialog() {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.gyro_config_dialog, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -821,7 +937,7 @@ public class SettingsFragment extends Fragment {
         SensorManager sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
         Sensor gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
-// Define variables for smoothing and deadzone
+        // Define variables for smoothing and deadzone
         final float[] smoothGyroX = {0};
         final float[] smoothGyroY = {0};
         float smoothingFactor = preferences.getFloat("gyro_smoothing", 0.9f);  // User-defined smoothing factor
@@ -904,198 +1020,6 @@ public class SettingsFragment extends Fragment {
         // Show the dialog
         builder.create().show();
     }
-
-
-
-    private void showBackupConfirmationDialog() {
-        new AlertDialog.Builder(getContext())
-                .setTitle("Backup Data")
-                .setMessage("Do you want to create a backup of the app's data directory?")
-                .setPositiveButton("Yes", (dialog, which) -> backupAppData())
-                .setNegativeButton("No", null)
-                .show();
-    }
-
-    private void backupAppData() {
-        File dataDir = getContext().getFilesDir().getParentFile(); // App's data directory
-        File backupFile = new File(Environment.getExternalStorageDirectory(), "app_data_backup.tar");
-
-        preloaderDialog.showOnUiThread(R.string.backing_up_data);
-
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService compressionExecutor = Executors.newFixedThreadPool(availableProcessors);
-
-        compressionExecutor.execute(() -> {
-            try {
-                TarCompressorUtils.archive(new File[]{dataDir}, backupFile, file -> {
-                    // Exclude the problematic directory
-                    String excludePath = "imagefs/tmp/.sysvshm";
-                    return !file.getAbsolutePath().contains(excludePath);
-                });
-                getActivity().runOnUiThread(() -> {
-                    preloaderDialog.closeOnUiThread();
-                    AppUtils.showToast(getContext(), "Backup completed: " + backupFile.getPath());
-                });
-            } catch (Exception e) {
-                getActivity().runOnUiThread(() -> {
-                    preloaderDialog.closeOnUiThread();
-                    AppUtils.showToast(getContext(), "Backup failed.");
-                });
-            }
-        });
-    }
-
-
-
-    private void selectBackupFileForRestore() {
-        isRestoreAction = true; // Set the flag to indicate a restore operation
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("*/*");
-        startActivityForResult(intent, MainActivity.OPEN_FILE_REQUEST_CODE);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == Activity.RESULT_OK && data != null) {
-            Uri uri = data.getData();
-
-            if (uri != null) {
-                switch (requestCode) {
-                    // Case for File Picker to restore data
-                    case MainActivity.OPEN_FILE_REQUEST_CODE:
-                        if (isRestoreAction) {
-                            restoreAppData(uri);
-                            isRestoreAction = false;  // Reset the flag
-                        }
-                        break;
-
-                    // Case for FilePicker to select frontend export path
-                    case REQUEST_CODE_FRONTEND_EXPORT_PATH:
-                        // Save the selected URI as a string in SharedPreferences
-                        SharedPreferences.Editor editor = preferences.edit();
-                        editor.putString("frontend_export_uri", uri.toString());
-                        editor.apply();
-
-                        // Take persistable URI permission
-                        try {
-                            // Take persistable URI permission with explicit flags
-                            requireContext().getContentResolver().takePersistableUriPermission(
-                                    uri,
-                                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                            );
-                        } catch (SecurityException e) {
-                            AppUtils.showToast(getContext(), "Unable to take persistable permissions: " + e.getMessage());
-                        }
-
-                        // Convert the URI to an absolute path and display it
-                        String fullPath = FileUtils.getFilePathFromUri(getContext(), uri);
-
-                        // Update the TextView with the absolute path or URI string if conversion fails
-                        TextView tvFrontendExportPath = getView().findViewById(R.id.TVFrontendExportPath);
-                        tvFrontendExportPath.setText(fullPath != null ? fullPath : uri.toString());
-                        break;
-
-                    // Case for installing a SoundFont
-                    case REQUEST_CODE_INSTALL_SOUNDFONT:
-                        if (installSoundFontCallback != null) {
-                            try {
-                                installSoundFontCallback.call(uri);
-                            } catch (Exception e) {
-                                AppUtils.showToast(getContext(), R.string.unable_to_install_soundfont);
-                            } finally {
-                                installSoundFontCallback = null;
-                            }
-                        }
-                        break;
-
-                    // Add future cases here for other request codes...
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-
-
-
-
-
-
-    private void restoreAppData(Uri backupUri) {
-        if (getActivity() != null) {  // Ensure the activity is not null
-            Intent intent = new Intent(getActivity(), RestoreActivity.class);
-            intent.setData(backupUri);
-            startActivity(intent);
-            getActivity().finish(); // Close the main activity
-        }
-    }
-
-
-    private void moveFiles(File sourceDir, File targetDir) throws IOException {
-        File[] files = sourceDir.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                File targetFile = new File(targetDir, file.getName());
-                if (file.isDirectory()) {
-                    if (!targetFile.exists()) {
-                        targetFile.mkdirs();
-                    }
-                    moveFiles(file, targetFile); // Recursively move directory contents
-                } else {
-                    if (!file.renameTo(targetFile)) {
-                        throw new IOException("Failed to move file: " + file.getAbsolutePath());
-                    }
-                }
-            }
-        }
-        // Clear the temporary directory after moving
-        FileUtils.clear(sourceDir);
-    }
-
-
-    private void onRestoreSuccess() {
-        getActivity().runOnUiThread(() -> {
-            preloaderDialog.closeOnUiThread();
-            AppUtils.showToast(getContext(), "Data restored successfully.");
-            AppUtils.restartApplication(getActivity());  // Restart the app to apply changes
-        });
-    }
-
-    private void onRestoreFailed() {
-        getActivity().runOnUiThread(() -> {
-            preloaderDialog.closeOnUiThread();
-            AppUtils.showToast(getContext(), "Data restore failed.");
-        });
-    }
-
-    private boolean extractLegacyInputFiles(boolean enableLegacyMode) {
-        Context context = getContext();
-        ImageFs imageFs = ImageFs.find(context);
-        File destinationDir = imageFs.getRootDir(); // Assuming you want to extract into the rootDir
-
-        // Determine the correct asset file name based on the mode
-        String assetFileName = enableLegacyMode ? "lj2-7.1.2-xinputdlls.tzst" : "lj2-7.1.3-xinputdlls.tzst";
-
-        // Set the compression type to ZSTD for .tzst files
-        TarCompressorUtils.Type compressionType = TarCompressorUtils.Type.ZSTD;
-
-        // Use the correct method to extract the asset file
-        boolean extractionSuccess = TarCompressorUtils.extract(compressionType, context, assetFileName, destinationDir);
-
-        // Log the result of the extraction process
-        if (extractionSuccess) {
-            String message = enableLegacyMode ? "7.1.2 legacy input files extracted successfully." : "7.1.3 input files extracted successfully.";
-            Log.i("SettingsFragment", message); // Info log for successful extraction
-        } else {
-            Log.e("SettingsFragment", "Failed to extract input files."); // Error log for failed extraction
-        }
-
-        return extractionSuccess;
-    }
-
 
     private void showAnalogStickConfigDialog() {
         // Inflate the dialog layout
@@ -1244,7 +1168,7 @@ public class SettingsFragment extends Fragment {
             // For example:
             // ExternalControllerManager.getInstance().reloadPreferences();
 
-            // For this example, we'll assume ExternalController instances listen to preference changes
+            // We'll assume ExternalController instances listen to preference changes
         });
 
         builder.setNegativeButton("Cancel", null);
@@ -1253,7 +1177,5 @@ public class SettingsFragment extends Fragment {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-
-
 
 }

@@ -273,7 +273,7 @@
                         android:id="@+id/CBCursorLock"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="True Mouse Control (Deactivate with Volume Down)"
+                        android:text="True Mouse Control (Toggle with Volume Down)"
                         android:layout_marginTop="8dp" />
 
                     <!-- New Xinput Toggle Checkbox -->
@@ -281,14 +281,14 @@
                         android:id="@+id/CBXinputToggle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Disable Xinput (Used for Exclusive M/KB support)"
+                        android:text="Disable Controller Input"
                         android:layout_marginTop="8dp" />
 
                     <CheckBox
                         android:id="@+id/CBXTouchscreenToggle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Touchscreen Mode"
+                        android:text="Enable Touchscreen Mode Globally"
                         android:layout_marginTop="8dp" />
 
                 </LinearLayout>
@@ -413,64 +413,64 @@
 
                 <LinearLayout style="@style/FieldSet">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal">-->
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/trigger_type"
-                            android:layout_gravity="center"/>
+<!--                        <TextView-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:text="@string/trigger_type"-->
+<!--                            android:layout_gravity="center"/>-->
 
-                        <ImageView
-                            android:id="@+id/BTHelpTriggerMode"
-                            android:layout_gravity="center"
-                            style="@style/HelpButton" />
-                    </LinearLayout>
+<!--                        <ImageView-->
+<!--                            android:id="@+id/BTHelpTriggerMode"-->
+<!--                            android:layout_gravity="center"-->
+<!--                            style="@style/HelpButton" />-->
+<!--                    </LinearLayout>-->
 
 
-                    <RadioGroup
-                        android:id="@+id/RGTriggerType"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <RadioButton
-                            android:id="@+id/RBTriggerIsButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/as_button"/>
+<!--                    <RadioGroup-->
+<!--                        android:id="@+id/RGTriggerType"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="horizontal">-->
+<!--                        <RadioButton-->
+<!--                            android:id="@+id/RBTriggerIsButton"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:text="@string/as_button"/>-->
 
-                        <RadioButton
-                            android:id="@+id/RBTriggerIsAxis"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/as_axis"/>
+<!--                        <RadioButton-->
+<!--                            android:id="@+id/RBTriggerIsAxis"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:text="@string/as_axis"/>-->
 
-                        <RadioButton
-                            android:id="@+id/RBTriggerIsMixed"
-                            android:visibility="gone"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/mixed"/>
-                    </RadioGroup>
+<!--                        <RadioButton-->
+<!--                            android:id="@+id/RBTriggerIsMixed"-->
+<!--                            android:visibility="gone"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:text="@string/mixed"/>-->
+<!--                    </RadioGroup>-->
 
-                    <CheckBox
-                        android:id="@+id/CBLegacyInputMode"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/enable_legacy_input_mode"
-                        android:layout_marginTop="8dp" />
+<!--                    <CheckBox-->
+<!--                        android:id="@+id/CBLegacyInputMode"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="@string/enable_legacy_input_mode"-->
+<!--                        android:layout_marginTop="8dp" />-->
 
                     <Button
                         android:id="@+id/BTConfigureAnalogSticks"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Configure Analog Sticks"
+                        android:text="Override Joystick Behavior"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="16dp" />
 

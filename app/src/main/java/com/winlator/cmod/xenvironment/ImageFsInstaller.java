@@ -87,9 +87,59 @@ public abstract class ImageFsInstaller {
         });
     }
 
+    public static void installFromAssets(final MainActivity activity, final Runnable onCompletion) {
+        AppUtils.keepScreenOn(activity);
+        ImageFs imageFs = ImageFs.find(activity);
+        File rootDir = imageFs.getRootDir();
+
+        SettingsFragment.resetEmulatorsVersion(activity);
+
+        final DownloadProgressDialog dialog = new DownloadProgressDialog(activity);
+        dialog.show(R.string.installing_system_files);
+        Executors.newSingleThreadExecutor().execute(() -> {
+            clearRootDir(rootDir);
+            final byte compressionRatio = 22;
+            final long contentLength = (long)(FileUtils.getSize(activity, "imagefs.txz") * (100.0f / compressionRatio));
+            AtomicLong totalSizeRef = new AtomicLong();
+
+            boolean success = TarCompressorUtils.extract(TarCompressorUtils.Type.XZ, activity, "imagefs.txz", rootDir, (file, size) -> {
+                if (size > 0) {
+                    long totalSize = totalSizeRef.addAndGet(size);
+                    final int progress = (int)(((float)totalSize / contentLength) * 100);
+                    activity.runOnUiThread(() -> dialog.setProgress(progress));
+                }
+                return file;
+            });
+
+            if (success) {
+                installWineFromAssets(activity);
+                imageFs.createImgVersionFile(LATEST_VERSION);
+                resetContainerImgVersions(activity);
+            }
+            else AppUtils.showToast(activity, R.string.unable_to_install_system_files);
+
+            dialog.closeOnUiThread();
+            if (onCompletion != null) {
+                activity.runOnUiThread(onCompletion);
+            }
+        });
+    }
+
     public static void installIfNeeded(final MainActivity activity) {
         ImageFs imageFs = ImageFs.find(activity);
         if (!imageFs.isValid() || imageFs.getVersion() < LATEST_VERSION) installFromAssets(activity);
+    }
+
+    public static void installIfNeeded(final MainActivity activity, final Runnable onCompletion) {
+        ImageFs imageFs = ImageFs.find(activity);
+        if (!imageFs.isValid() || imageFs.getVersion() < LATEST_VERSION) {
+            // If installation is needed, pass the callback to be run upon completion.
+            installFromAssets(activity, onCompletion);
+        }
+        else if (onCompletion != null) {
+            // If no installation is needed, just run the callback.
+            onCompletion.run();
+        }
     }
 
     private static void clearOptDir(File optDir) {

@@ -627,4 +627,5 @@ E.g. <b>META</b> for <i>META key</i>, \n
     <string name="assign">Assign</string>
     <string name="press_any_button_for_player">Press any button on the controller for</string>
     <string name="restart_required_for_changes">Restart container for changes to take effect</string>
+    <string name="closing_app">Shutting Down...</string>
 </resources>

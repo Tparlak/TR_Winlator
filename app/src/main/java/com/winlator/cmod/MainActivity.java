@@ -81,49 +81,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private boolean isDarkMode;
 
-//    private void cleanupErroneousContainer() {
-//        // Define the specific path to the erroneous directory
-//        File erroneousDir = new File(Environment.getExternalStorageDirectory(), "Android/data/com.winlator/files/Backups");
-//
-//        // Log the contents of the directory
-//        logSpecificDirectoryContents(erroneousDir);
-//
-//        // Check if the directory exists and delete it if found
-//        if (erroneousDir.exists() && erroneousDir.isDirectory()) {
-//            if (FileUtils.delete(erroneousDir)) {
-//                Log.i("MainActivity", "Successfully deleted erroneous container directory: " + erroneousDir.getPath());
-//                Toast.makeText(this, "Erroneous container directory deleted.", Toast.LENGTH_SHORT).show();
-//            } else {
-//                Log.e("MainActivity", "Failed to delete erroneous container directory: " + erroneousDir.getPath());
-//                Toast.makeText(this, "Failed to delete erroneous container directory.", Toast.LENGTH_SHORT).show();
-//            }
-//        } else {
-//            Log.i("MainActivity", "Erroneous container directory not found: " + erroneousDir.getPath());
-//            Toast.makeText(this, "Erroneous container directory not found.", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-//
-//    // Method to log the contents of a specific directory
-//    private void logSpecificDirectoryContents(File directory) {
-//        if (directory == null || !directory.isDirectory()) {
-//            Log.e("MainActivity", "Provided path is not a directory: " + directory);
-//            return;
-//        }
-//
-//        Log.d("MainActivity", "Contents of directory: " + directory.getAbsolutePath());
-//        File[] files = directory.listFiles();
-//        if (files != null) {
-//            for (File file : files) {
-//                Log.d("MainActivity", (file.isDirectory() ? "Directory: " : "File: ") + file.getName());
-//            }
-//        } else {
-//            Log.d("MainActivity", "No files found in directory: " + directory.getAbsolutePath());
-//        }
-//    }
 
     private static final String GUEST_LIB_NAME = "libevshim_guest.so";
     private static final String ASSET_PATH = "x86_64-libs/" + GUEST_LIB_NAME;
     private static final String GUEST_LIB_DIR  = "imagefs/usr/lib/x86_64-libs";
+    private boolean allAccessFilesDialogDismissed = false;
 
     /**
      * Ensures a fresh copy of the guest .so file is present by overwriting any existing version.
@@ -173,9 +135,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.e("GuestLibCopy", "Failed to deploy guest libs", e);
         }
 
-
-
-//        cleanupErroneousContainer();
 
         // Get shared preferences
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -242,20 +201,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 ImageFsInstaller.installIfNeeded(this);
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-                showAllFilesAccessDialog();
+
+            if (!requestAppPermissions()) {
+                ImageFsInstaller.installIfNeeded(this, () -> {
+                    // This code will only run AFTER the installer dialog closes.
+                    if (!allAccessFilesDialogDismissed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                        showAllFilesAccessDialog();
+                    }
+                });
             }
         }
     }
 
     private void showAllFilesAccessDialog() {
         new AlertDialog.Builder(this)
-                .setTitle("All Files Access Required")
-                .setMessage("In order to grant access to additional storage devices such as USB storage device, the All Files Access permission must be granted. Press Okay to grant All Files Access in your Android Settings.")
+                .setTitle("USB Storage Access")
+                .setMessage("In order to grant access to additional storage devices such as USB storage device, the All Files Access permission must be granted. You can leave this disabled, or you can enable it for USB storage support.")
                 .setPositiveButton("Okay", (dialog, which) -> {
                     Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                     intent.setData(Uri.parse("package:" + getPackageName()));
                     startActivity(intent);
+                    allAccessFilesDialogDismissed = true;
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -445,15 +411,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-//    private void show(Fragment fragment) {
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        fragmentManager.beginTransaction()
-//                .replace(R.id.FLFragmentContainer, fragment)
-//                .commit();
-//
-//        drawerLayout.closeDrawer(GravityCompat.START);
-//    }
-
     private void show(Fragment fragment, boolean reverse) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (reverse) {
@@ -512,11 +469,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tvCreditsAndThirdPartyApps.setText(Html.fromHtml(creditsAndThirdPartyAppsHTML, Html.FROM_HTML_MODE_LEGACY));
             tvCreditsAndThirdPartyApps.setMovementMethod(LinkMovementMethod.getInstance());
 
-//            String glibcExpVersionForkHTML = String.join("<br />",
-//                    "longjunyu2's <a href=\"https://github.com/longjunyu2/winlator/tree/use-glibc-instead-of-proot\">(Fork)</a>");
-//            TextView tvGlibcExpVersionFork = dialog.findViewById(R.id.TVGlibcExpVersionFork);
-//            tvGlibcExpVersionFork.setText(Html.fromHtml(glibcExpVersionForkHTML, Html.FROM_HTML_MODE_LEGACY));
-//            tvGlibcExpVersionFork.setMovementMethod(LinkMovementMethod.getInstance());
+            // String glibcExpVersionForkHTML = String.join("<br />",
+            // "longjunyu2's <a href=\"https://github.com/longjunyu2/winlator/tree/use-glibc-instead-of-proot\">(Fork)</a>");
+            // TextView tvGlibcExpVersionFork = dialog.findViewById(R.id.TVGlibcExpVersionFork);
+            // tvGlibcExpVersionFork.setText(Html.fromHtml(glibcExpVersionForkHTML, Html.FROM_HTML_MODE_LEGACY));
+            // tvGlibcExpVersionFork.setMovementMethod(LinkMovementMethod.getInstance());
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
