@@ -334,6 +334,10 @@ public class Container {
         return new File(rootDir, ".wine/drive_c/users/"+ImageFs.USER+"/Desktop/");
     }
 
+    public File getDesktopDirXuser() {
+        return new File(rootDir, ".wine/drive_c/users/xuser/Desktop/");
+    }
+
     public File getStartMenuDir() {
         return new File(rootDir, ".wine/drive_c/ProgramData/Microsoft/Windows/Start Menu/");
     }
@@ -632,5 +636,7 @@ public class Container {
         }
         return false;
     }
+
+
 
 }

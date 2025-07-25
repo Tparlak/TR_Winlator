@@ -285,7 +285,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
 
 
-        final PreloaderDialog preloaderDialog = new PreloaderDialog(this);
+        preloaderDialog = new PreloaderDialog(this);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 
@@ -910,12 +910,16 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     }
 
     public void exitApp() {
-        preloaderDialog.show(R.string.closing_app); // Assuming you add "closing_app" to strings.xml
 
-        // Run cleanup on a background thread
-        Executors.newSingleThreadExecutor().execute(() -> {
+        preloaderDialog.show(R.string.closing_app);
 
-            // --- All long-running cleanup tasks go here ---
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+
+
+            Executors.newSingleThreadExecutor().execute(() -> {
+
+
             savePlaytimeData();
             handler.removeCallbacks(savePlaytimeRunnable);
 
@@ -929,10 +933,11 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
             // Finish the activity on the main UI thread
             runOnUiThread(() -> {
-                preloaderDialog.close();
-                finishAndRemoveTask(); // Or just finish()
+            preloaderDialog.close();
+            AppUtils.restartApplication(getApplicationContext());
+                });
             });
-        });
+        }, 1000);
     }
 
     @Override
@@ -2269,7 +2274,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 //        guestProgramLauncherComponent.setGuestExecutable(wineInfo.getExecutable(this, false)+" explorer /desktop=shell,"+Container.DEFAULT_SCREEN_SIZE+" winecfg");
         guestProgramLauncherComponent.setGuestExecutable("wineboot -u explorer /desktop=shell,"+Container.DEFAULT_SCREEN_SIZE+" winecfg");
 
-        final PreloaderDialog preloaderDialog = new PreloaderDialog(this);
+        preloaderDialog = new PreloaderDialog(this);
         guestProgramLauncherComponent.setTerminationCallback((status) -> Executors.newSingleThreadExecutor().execute(() -> {
             if (status > 0) {
                 showToast(this, R.string.unable_to_install_wine);

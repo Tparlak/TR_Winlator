@@ -12,7 +12,7 @@
     <string name="shortcuts">Shortcuts</string>
     <string name="containers">Containers</string>
     <string name="input_controls">Input Controls</string>
-    <string name="no_items_to_display">No items to display</string>
+    <string name="no_items_to_display">Create an application shortcut from within a container to get started</string>
     <string name="new_container">New Container</string>
     <string name="edit_container">Edit Container</string>
     <string name="creating_container">Creating Container…</string>
@@ -628,4 +628,5 @@ E.g. <b>META</b> for <i>META key</i>, \n
     <string name="press_any_button_for_player">Press any button on the controller for</string>
     <string name="restart_required_for_changes">Restart container for changes to take effect</string>
     <string name="closing_app">Shutting Down...</string>
+    <string name="creating_shortcut">Generating shortcuts...</string>
 </resources>

@@ -358,7 +358,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Calibrate Gyroscope"
-                        android:layout_marginTop="16dp" /> <!-- Add top margin for spacing -->
+                        android:layout_marginTop="16dp" />
 
                 </LinearLayout>
 
@@ -366,6 +366,80 @@
                     android:id="@+id/TVGyroSettings"
                     style="@style/FieldSetLabel"
                     android:text="Gyro Settings" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout style="@style/FieldSet">
+
+                    <!--                    <LinearLayout-->
+                    <!--                        android:layout_width="match_parent"-->
+                    <!--                        android:layout_height="wrap_content"-->
+                    <!--                        android:orientation="horizontal">-->
+
+                    <!--                        <TextView-->
+                    <!--                            android:layout_width="wrap_content"-->
+                    <!--                            android:layout_height="wrap_content"-->
+                    <!--                            android:text="@string/trigger_type"-->
+                    <!--                            android:layout_gravity="center"/>-->
+
+                    <!--                        <ImageView-->
+                    <!--                            android:id="@+id/BTHelpTriggerMode"-->
+                    <!--                            android:layout_gravity="center"-->
+                    <!--                            style="@style/HelpButton" />-->
+                    <!--                    </LinearLayout>-->
+
+
+                    <!--                    <RadioGroup-->
+                    <!--                        android:id="@+id/RGTriggerType"-->
+                    <!--                        android:layout_width="match_parent"-->
+                    <!--                        android:layout_height="wrap_content"-->
+                    <!--                        android:orientation="horizontal">-->
+                    <!--                        <RadioButton-->
+                    <!--                            android:id="@+id/RBTriggerIsButton"-->
+                    <!--                            android:layout_width="wrap_content"-->
+                    <!--                            android:layout_height="wrap_content"-->
+                    <!--                            android:layout_weight="1"-->
+                    <!--                            android:text="@string/as_button"/>-->
+
+                    <!--                        <RadioButton-->
+                    <!--                            android:id="@+id/RBTriggerIsAxis"-->
+                    <!--                            android:layout_width="wrap_content"-->
+                    <!--                            android:layout_height="wrap_content"-->
+                    <!--                            android:layout_weight="1"-->
+                    <!--                            android:text="@string/as_axis"/>-->
+
+                    <!--                        <RadioButton-->
+                    <!--                            android:id="@+id/RBTriggerIsMixed"-->
+                    <!--                            android:visibility="gone"-->
+                    <!--                            android:layout_width="wrap_content"-->
+                    <!--                            android:layout_height="wrap_content"-->
+                    <!--                            android:layout_weight="1"-->
+                    <!--                            android:text="@string/mixed"/>-->
+                    <!--                    </RadioGroup>-->
+
+                    <!--                    <CheckBox-->
+                    <!--                        android:id="@+id/CBLegacyInputMode"-->
+                    <!--                        android:layout_width="wrap_content"-->
+                    <!--                        android:layout_height="wrap_content"-->
+                    <!--                        android:text="@string/enable_legacy_input_mode"-->
+                    <!--                        android:layout_marginTop="8dp" />-->
+
+                    <Button
+                        android:id="@+id/BTConfigureAnalogSticks"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Override Joystick Behavior"
+                        android:layout_marginTop="8dp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/TVGameControllerLabel"
+                    style="@style/FieldSetLabel"
+                    android:text="@string/game_controller" />
             </FrameLayout>
 
             <FrameLayout
@@ -407,80 +481,7 @@
                     android:text="@string/logs" />
             </FrameLayout>
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
 
-                <LinearLayout style="@style/FieldSet">
-
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:orientation="horizontal">-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="@string/trigger_type"-->
-<!--                            android:layout_gravity="center"/>-->
-
-<!--                        <ImageView-->
-<!--                            android:id="@+id/BTHelpTriggerMode"-->
-<!--                            android:layout_gravity="center"-->
-<!--                            style="@style/HelpButton" />-->
-<!--                    </LinearLayout>-->
-
-
-<!--                    <RadioGroup-->
-<!--                        android:id="@+id/RGTriggerType"-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:orientation="horizontal">-->
-<!--                        <RadioButton-->
-<!--                            android:id="@+id/RBTriggerIsButton"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:layout_weight="1"-->
-<!--                            android:text="@string/as_button"/>-->
-
-<!--                        <RadioButton-->
-<!--                            android:id="@+id/RBTriggerIsAxis"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:layout_weight="1"-->
-<!--                            android:text="@string/as_axis"/>-->
-
-<!--                        <RadioButton-->
-<!--                            android:id="@+id/RBTriggerIsMixed"-->
-<!--                            android:visibility="gone"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:layout_weight="1"-->
-<!--                            android:text="@string/mixed"/>-->
-<!--                    </RadioGroup>-->
-
-<!--                    <CheckBox-->
-<!--                        android:id="@+id/CBLegacyInputMode"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="@string/enable_legacy_input_mode"-->
-<!--                        android:layout_marginTop="8dp" />-->
-
-                    <Button
-                        android:id="@+id/BTConfigureAnalogSticks"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Override Joystick Behavior"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="16dp" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/TVGameControllerLabel"
-                    style="@style/FieldSetLabel"
-                    android:text="@string/game_controller" />
-            </FrameLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"

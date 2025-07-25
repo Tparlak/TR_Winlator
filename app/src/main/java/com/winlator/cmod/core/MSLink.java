@@ -1,16 +1,22 @@
 package com.winlator.cmod.core;
 
+import android.util.Log;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 
 public abstract class MSLink {
     public static final byte SW_SHOWNORMAL = 1;
     public static final byte SW_SHOWMAXIMIZED = 3;
     public static final byte SW_SHOWMINNOACTIVE = 7;
     private static final int HasLinkTargetIDList = 1<<0;
+
+    private static final int HasLinkInfo = 1 << 1;
     private static final int HasArguments = 1<<5;
     private static final int HasIconLocation = 1<<6;
     private static final int ForceNoLinkInfo = 1<<8;
@@ -168,5 +174,71 @@ public abstract class MSLink {
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Parses a .lnk file to extract the target path.
+     * @param lnkFile The .lnk file to parse.
+     * @return The absolute path to the shortcut's target, or null if not found.
+     * @throws IOException If there's an error reading the file.
+     */
+    public static String parse(File lnkFile) throws IOException {
+        try (FileInputStream fis = new FileInputStream(lnkFile)) {
+            byte[] fileBytes = new byte[(int) lnkFile.length()];
+            fis.read(fileBytes);
+
+            int linkFlags = readIntLittleEndian(fileBytes, 20);
+
+            // Primary Method: Check for the LinkInfo block
+            if ((linkFlags & HasLinkInfo) != 0) {
+                int currentOffset = 76; // Start after the header
+                if ((linkFlags & HasLinkTargetIDList) != 0) {
+                    int idListSize = readShortLittleEndian(fileBytes, currentOffset);
+                    currentOffset += idListSize + 2;
+                }
+
+                if (currentOffset < fileBytes.length) {
+                    int localBasePathOffsetInBlock = readIntLittleEndian(fileBytes, currentOffset + 28);
+                    if (localBasePathOffsetInBlock > 0) {
+                        String path = readNullTerminatedString(fileBytes, currentOffset + localBasePathOffsetInBlock);
+                        if (path != null && !path.isEmpty()) return path;
+                    }
+                }
+            }
+
+            // Fallback Method: Aggressively scan the entire file for a plausible path
+            Log.w("MSLinkParser", "Primary parse failed. Using aggressive fallback search.");
+            for (int i = 0; i < fileBytes.length - 4; i++) {
+                // Look for a drive letter pattern like "C:\"
+                if (Character.isLetter((char)fileBytes[i]) && fileBytes[i+1] == ':' && fileBytes[i+2] == '\\') {
+                    String potentialPath = readNullTerminatedString(fileBytes, i);
+                    String p = potentialPath.toLowerCase();
+                    if (p.endsWith(".exe") || p.endsWith(".bat") || p.endsWith(".msi")) {
+                        Log.d("MSLinkParser", "Found potential path via fallback: " + potentialPath);
+                        return potentialPath;
+                    }
+                }
+            }
+
+            return null; // Both methods failed
+        }
+    }
+
+    private static String readNullTerminatedString(byte[] data, int offset) {
+        int length = 0;
+        while (offset + length < data.length && data[offset + length] != 0x00) {
+            length++;
+        }
+        return new String(data, offset, length, StandardCharsets.UTF_8);
+    }
+
+    private static int readIntLittleEndian(byte[] data, int offset) {
+        if (offset + 3 >= data.length) return 0;
+        return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8) | ((data[offset + 2] & 0xFF) << 16) | ((data[offset + 3] & 0xFF) << 24);
+    }
+
+    private static int readShortLittleEndian(byte[] data, int offset) {
+        if (offset + 1 >= data.length) return 0;
+        return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8);
     }
 }

@@ -22,9 +22,9 @@ import java.nio.file.Files;
         public final Container container;
         public final String name;
         public final String path;
-        public final Bitmap icon;
+        public Bitmap icon;
         public final File file;
-        public final File iconFile;
+        public File iconFile;
         public final String wmClass;
         private final JSONObject extraData = new JSONObject();
         private Bitmap coverArt; // Changed to private to use getter method
@@ -79,11 +79,22 @@ import java.nio.file.Files;
                 }
             }
 
+            // Check for custom icon path first
+            String customIconPath = getExtra("customIconPath");
+            if (!customIconPath.isEmpty()) {
+                iconFile = new File(customIconPath);
+                if (iconFile.isFile()) {
+                    icon = BitmapFactory.decodeFile(iconFile.getPath());
+                }
+            }
+
             this.name = FileUtils.getBasename(file.getPath());
             this.icon = icon;
             this.iconFile = iconFile;
             this.path = StringUtils.unescape(execArgs.substring(execArgs.lastIndexOf("wine ") + 4));
             this.wmClass = wmClass;
+
+
 
             this.customCoverArtPath = getExtra("customCoverArtPath");
 
@@ -282,6 +293,21 @@ import java.nio.file.Files;
             } catch (Exception e) {
                 Log.e("Shortcut", "Failed to clone shortcut to new container", e);
                 return false;
+            }
+        }
+
+        public void setCustomIconPath(String path) {
+            putExtra("customIconPath", path);
+            saveData();
+
+            if (path != null && !path.isEmpty()) {
+                this.iconFile = new File(path);
+                if (this.iconFile.exists()) {
+                    this.icon = BitmapFactory.decodeFile(this.iconFile.getPath());
+                }
+            } else {
+                this.iconFile = null;
+                this.icon = null; // Or set to a default icon
             }
         }
 

@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileObserver;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +27,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,6 +46,8 @@ import com.winlator.cmod.container.Shortcut;
 import com.winlator.cmod.contentdialog.ContentDialog;
 import com.winlator.cmod.contentdialog.ShortcutSettingsDialog;
 import com.winlator.cmod.core.FileUtils;
+import com.winlator.cmod.core.MSLink;
+import com.winlator.cmod.core.PreloaderDialog;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -52,11 +57,82 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 public class ShortcutsFragment extends Fragment {
     private RecyclerView recyclerView;
     private TextView emptyTextView;
     private ContainerManager manager;
+    private Shortcut currentShortcut;
+
+    private ArrayList<FileObserver> fileObservers = new ArrayList<>();
+    private PreloaderDialog preloaderDialog;
+
+    private final ActivityResultLauncher<Intent> iconPickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null && currentShortcut != null) {
+                        // This is where you will handle the selected .ico file
+                        handleSelectedIcon(uri);
+                    }
+                }
+            });
+
+    private void openIconPicker(Shortcut shortcut) {
+        this.currentShortcut = shortcut;
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/x-icon"); // Set the primary MIME type for .ico files
+
+        // Provide an array of possible MIME types to be more compatible
+        String[] mimeTypes = {"image/x-icon", "image/vnd.microsoft.icon"};
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+
+        iconPickerLauncher.launch(intent);
+    }
+
+    private void showIconPickerConfirmation(final Shortcut shortcut) {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Custom Icon")
+                .setMessage("You will be prompted to select an icon file. Please choose a valid .ico file.")
+                .setPositiveButton("Continue", (dialog, which) -> {
+                    // This will launch the file picker
+                    openIconPicker(shortcut);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void handleSelectedIcon(Uri icoFileUri) {
+        try {
+            File iconsDir = new File(currentShortcut.container.getIconsDir(0).getParentFile(), "custom_icons");
+            if (!iconsDir.exists()) {
+                iconsDir.mkdirs();
+            }
+
+            // Use the shortcut's unique name to create a unique icon filename
+            String newIconFileName = currentShortcut.name + "_" + System.currentTimeMillis() + ".ico";
+            File newIconFile = new File(iconsDir, newIconFileName);
+
+            // Use the correct copy method from your FileUtils class
+            if (FileUtils.copy(getContext(), icoFileUri, newIconFile)) {
+                // Update the shortcut to point to this new icon
+                currentShortcut.setCustomIconPath(newIconFile.getAbsolutePath());
+
+                // Reload the list to show the new icon
+                loadShortcutsList();
+                Toast.makeText(getContext(), "Icon updated successfully.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Failed to copy icon file.", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Failed to update icon.", Toast.LENGTH_SHORT).show();
+            Log.e("ShortcutsFragment", "Error handling selected icon", e);
+        }
+    }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,10 +141,18 @@ public class ShortcutsFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        stopFileObservers(); // Stop watching to prevent memory leaks
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         manager = new ContainerManager(getContext());
+        preloaderDialog = new PreloaderDialog(getActivity());
         loadShortcutsList();
+        startFileObservers(); // Start watching for new file
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(R.string.shortcuts);
     }
 
@@ -86,6 +170,197 @@ public class ShortcutsFragment extends Fragment {
         return frameLayout;
     }
 
+    private Container findContainerForFile(File file) {
+        for (Container container : manager.getContainers()) {
+            if (file.getAbsolutePath().startsWith(container.getDesktopDir().getAbsolutePath())) {
+                return container;
+            }
+        }
+        return null;
+    }
+    private void startFileObservers() {
+        stopFileObservers();
+        ArrayList<Container> containers = manager.getContainers();
+        ArrayList<File> orphanedLinks = new ArrayList<>();
+        Log.d("ShortcutObserver", "Starting observers for " + containers.size() + " containers.");
+
+        for (Container container : containers) {
+            File desktopDir = container.getDesktopDir();
+            Log.d("ShortcutObserver", "Checking container " + container.id + " at path: " + desktopDir.getAbsolutePath());
+
+            if (desktopDir.exists() && desktopDir.isDirectory()) {
+                File[] files = desktopDir.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.getName().toLowerCase().endsWith(".lnk")) {
+                            String desktopFileName = FileUtils.getBasename(file.getName()) + ".desktop";
+                            File desktopFile = new File(desktopDir, desktopFileName);
+                            if (!desktopFile.exists()) {
+                                Log.d("ShortcutObserver", "Found orphaned .lnk file: " + file.getName());
+                                orphanedLinks.add(file);
+                            }
+                        }
+                    }
+                }
+
+                FileObserver observer = new FileObserver(desktopDir, FileObserver.CREATE) {
+                    @Override
+                    public void onEvent(int event, @Nullable String path) {
+                        if (path != null && path.toLowerCase().endsWith(".lnk")) {
+                            Log.d("ShortcutObserver", "New .lnk file created: " + path);
+                            final File newLnkFile = new File(desktopDir, path);
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(() -> {
+                                    preloaderDialog.show(R.string.creating_shortcut);
+                                    processNewLinkFile(newLnkFile, container);
+                                });
+                            }
+                        }
+                    }
+                };
+                observer.startWatching();
+                fileObservers.add(observer);
+            } else {
+                Log.w("ShortcutObserver", "Desktop directory does not exist for container " + container.id + ": " + desktopDir.getAbsolutePath());
+            }
+        }
+
+        if (!orphanedLinks.isEmpty()) {
+            Log.d("ShortcutObserver", "Processing " + orphanedLinks.size() + " orphaned links.");
+            preloaderDialog.show(R.string.creating_shortcut);
+            processOrphanedLinkFiles(orphanedLinks);
+        } else {
+            Log.d("ShortcutObserver", "No orphaned links found.");
+        }
+    }
+
+    private void processOrphanedLinkFiles(ArrayList<File> lnkFiles) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            boolean shortcutsChanged = false;
+            try {
+                for (File lnkFile : lnkFiles) {
+                    Container owner = findContainerForFile(lnkFile);
+                    if (owner != null) {
+                        if (createDesktopFileFromLnk(lnkFile, owner)) {
+                            shortcutsChanged = true;
+                        }
+                    }
+                }
+            } finally {
+                if (getActivity() != null) {
+                    final boolean finalShortcutsChanged = shortcutsChanged;
+                    getActivity().runOnUiThread(() -> {
+                        if (preloaderDialog != null) preloaderDialog.close();
+                        if (finalShortcutsChanged) {
+                            loadShortcutsList();
+                            Toast.makeText(getContext(), "Shortcuts updated.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void processNewLinkFile(File lnkFile, Container container) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            boolean shortcutCreated = false;
+            try {
+                shortcutCreated = createDesktopFileFromLnk(lnkFile, container);
+            } finally {
+                if (getActivity() != null) {
+                    final boolean finalShortcutCreated = shortcutCreated;
+                    getActivity().runOnUiThread(() -> {
+                        if (preloaderDialog != null) preloaderDialog.close();
+                        if (finalShortcutCreated) {
+                            loadShortcutsList();
+                            Toast.makeText(getContext(), "New shortcut created!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+
+
+
+    private boolean createDesktopFileFromLnk(File lnkFile, Container container) {
+        try {
+            Log.d("ShortcutCreation", "Processing .lnk: " + lnkFile.getAbsolutePath());
+            String targetPath = MSLink.parse(lnkFile); // e.g., "D:\\Games\\Example Folder\\Example.exe"
+
+            if (targetPath == null || targetPath.isEmpty() || !targetPath.contains(":")) {
+                Log.e("ShortcutCreation", "Failed to parse a valid target path from " + lnkFile.getName());
+                return false;
+            }
+            Log.d("ShortcutCreation", "Parsed target path: " + targetPath);
+
+            String lnkName = FileUtils.getBasename(lnkFile.getName());
+            File desktopFile = new File(container.getDesktopDir(), lnkName + ".desktop");
+
+            if (desktopFile.exists()) {
+                Log.d("ShortcutCreation", "Skipping existing .desktop file: " + desktopFile.getName());
+                return false;
+            }
+
+            // --- FINAL LOGIC TO MATCH YOUR EXACT EXAMPLE ---
+
+            // 1. Get the app's root files directory to construct the generic path
+            String filesDir = getContext().getFilesDir().getAbsolutePath(); // e.g., /data/user/0/com.winlator.cmod/files
+            String genericHomePath = filesDir + "/imagefs/home/xuser";
+
+            // 2. Construct the specific, complex WINEPREFIX path
+            String winePrefix = genericHomePath + "/.wine/dosdevices/z:" + genericHomePath + "/.wine";
+
+            // 3. To get "\\\\", we need to escape twice. Once for Java, once for the file.
+            String escapedTargetPath = targetPath.replace("\\", "\\\\\\\\");
+
+            // 4. Construct the full Exec command
+            String execCommand = "env WINEPREFIX=\"" + winePrefix + "\" wine " + escapedTargetPath;
+
+            // 5. Construct the working directory Path using the generic dosdevices path
+            File genericDosdevicesDir = new File(genericHomePath, ".wine/dosdevices");
+            String driveLetter = targetPath.substring(0, 1).toLowerCase();
+            File driveSymlink = new File(genericDosdevicesDir, driveLetter + ":");
+            String pathAfterDrive = targetPath.substring(targetPath.indexOf('\\') + 1);
+            String windowsWorkingDir = FileUtils.getDirname(pathAfterDrive);
+            String finalWorkingPath = new File(driveSymlink, windowsWorkingDir).getAbsolutePath();
+
+            // 6. Get the executable name for StartupWMClass
+            String wmClass = FileUtils.getName(targetPath);
+
+            // 7. Construct the final .desktop file content
+            String content =
+                    "[Desktop Entry]\n" +
+                            "Name=" + lnkName + "\n" +
+                            "Exec=" + execCommand + "\n" +
+                            "Type=Application\n" +
+                            "StartupNotify=true\n" +
+                            "Path=" + finalWorkingPath + "\n" +
+                            "Icon=\n" +
+                            "StartupWMClass=" + wmClass + "\n\n" +
+                            "[Extra Data]\n" +
+                            "container_id:" + container.id + "\n";
+
+            FileUtils.writeString(desktopFile, content);
+            Log.d("ShortcutCreation", "SUCCESS: Created .desktop file at " + desktopFile.getAbsolutePath());
+            Log.d("ShortcutCreation", "Content:\n" + content);
+
+            return true;
+        } catch (IOException e) {
+            Log.e("ShortcutCreation", "IOException creating .desktop file from .lnk", e);
+            return false;
+        }
+    }
+
+
+
+    private void stopFileObservers() {
+        for (FileObserver observer : fileObservers) {
+            observer.stopWatching();
+        }
+        fileObservers.clear();
+    }
     public void loadShortcutsList() {
         ArrayList<Shortcut> shortcuts = manager.loadShortcuts();
 
@@ -103,7 +378,7 @@ public class ShortcutsFragment extends Fragment {
 
         private class ViewHolder extends RecyclerView.ViewHolder {
             private final ImageButton menuButton;
-            private final ImageView imageView;
+            private final ImageButton imageView;
             private final TextView title;
             private final TextView subtitle;
             private final View innerArea;
@@ -138,11 +413,31 @@ public class ShortcutsFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             final Shortcut item = data.get(position);
-            if (item.icon != null) holder.imageView.setImageBitmap(item.icon);
-            holder.title.setText(item.name);
+            if (item.icon != null) {
+                holder.imageView.setImageBitmap(item.icon);
+            } else {
+                // Set a default icon if none exists
+                holder.imageView.setImageResource(R.mipmap.ic_launcher_foreground); // Create a default icon drawable
+            }
+            holder.imageView.setOnClickListener(v -> showIconPickerConfirmation(item));            holder.title.setText(item.name);
             holder.subtitle.setText(item.container.getName());
             holder.menuButton.setOnClickListener((v) -> showListItemMenu(v, item));
             holder.innerArea.setOnClickListener((v) -> runFromShortcut(item));
+
+            // Get the context from the item view
+            Context context = holder.itemView.getContext();
+
+            // Check if dark mode is enabled
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            boolean isDarkMode = sharedPreferences.getBoolean("dark_mode", false);
+
+            if (isDarkMode) {
+                // Set the text color to something light for dark backgrounds
+                holder.title.setTextColor(android.graphics.Color.WHITE);
+            } else {
+                // Set the text color to something dark for light backgrounds
+                holder.title.setTextColor(android.graphics.Color.BLACK);
+            }
         }
 
         @Override
@@ -209,7 +504,6 @@ public class ShortcutsFragment extends Fragment {
             });
             listItemMenu.show();
         }
-
 
         // Define the listener interface for selecting a container
         public interface OnContainerSelectedListener {
