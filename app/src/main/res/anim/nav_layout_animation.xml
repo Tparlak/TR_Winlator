@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layoutAnimation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:delay="10%"
+    android:animationOrder="normal"
+    android:interpolator="@android:interpolator/fast_out_slow_in"
+    android:animation="@anim/nav_row_fade_slide_in" />

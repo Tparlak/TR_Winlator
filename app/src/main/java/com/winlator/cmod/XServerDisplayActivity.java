@@ -2,6 +2,11 @@ package com.winlator.cmod;
 
 import static com.winlator.cmod.core.AppUtils.showToast;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -9,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -26,6 +32,9 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
@@ -42,6 +51,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
 import com.winlator.cmod.box86_64.rc.RCFile;
@@ -82,6 +93,7 @@ import com.winlator.cmod.inputcontrols.ControllerManager;
 import com.winlator.cmod.inputcontrols.ControlsProfile;
 import com.winlator.cmod.inputcontrols.ExternalController;
 import com.winlator.cmod.inputcontrols.InputControlsManager;
+import com.winlator.cmod.inputcontrols.MotionControls;
 import com.winlator.cmod.math.Mathf;
 import com.winlator.cmod.math.XForm;
 import com.winlator.cmod.midi.MidiHandler;
@@ -136,8 +148,11 @@ import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -297,7 +312,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         gyroSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
-        boolean gyroEnabled = preferences.getBoolean("gyro_enabled", true);
+        boolean gyroEnabled = preferences.getBoolean("gyro_enabled", false);
 
         if (gyroEnabled) {
             // Register the sensor event listener
@@ -340,7 +355,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
         drawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override public void onDrawerOpened(@NonNull View drawerView) {
-                // nothing; capture was already released before opening
+
             }
             @Override public void onDrawerClosed(@NonNull View drawerView) {
                 // If the user left Relative Mouse enabled, recapture.
@@ -355,22 +370,46 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
 
-        NavigationView navigationView = findViewById(R.id.NavigationView);
+        navigationView = findViewById(R.id.NavigationView);
 
         if (isDarkMode) {
             navigationView.setItemTextColor(ContextCompat.getColorStateList(this, R.color.white));
             navigationView.setBackgroundResource(R.color.content_dialog_background_dark);
         }
 
-        boolean enableLogs = preferences.getBoolean("enable_wine_debug", false) || preferences.getBoolean("enable_box86_64_logs", false);
+        enableLogs = preferences.getBoolean("enable_wine_debug", false)
+                || preferences.getBoolean("enable_box86_64_logs", false);
         Menu menu = navigationView.getMenu();
         menu.findItem(R.id.main_menu_logs).setVisible(enableLogs);
-        if (XrActivity.isEnabled(this)) menu.findItem(R.id.main_menu_magnifier).setVisible(false);
+        menu.findItem(R.id.main_menu_logs).setEnabled(enableLogs);
+        allowMagnifier = !XrActivity.isEnabled(this);
+
+
+
+
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setPointerIcon(PointerIcon.getSystemIcon(this, PointerIcon.TYPE_ARROW));
         navigationView.setOnFocusChangeListener((v, hasFocus) -> navigationFocused = hasFocus);
 
 
+        // restore persisted states (default collapsed = false)
+        expInput   = preferences.getBoolean(PREF_EXP_INPUT,   false);
+        expDisplay = preferences.getBoolean(PREF_EXP_DISPLAY, false);
+        expSystem  = preferences.getBoolean(PREF_EXP_SYSTEM,  false);
+
+        applyGroup(menu, R.id.group_input,   R.id.header_input,   expInput);
+        applyGroup(menu, R.id.group_display, R.id.header_display, expDisplay);
+        applyGroup(menu, R.id.group_system,  R.id.header_system,  expSystem);
+
+        // tune RV
+        RecyclerView rv = navRecycler();
+        if (rv != null) {
+            rv.setItemAnimator(null);               // no default blink
+            rv.setHasFixedSize(true);
+            rv.setOverScrollMode(View.OVER_SCROLL_NEVER);
+            Drawable bg = navigationView.getBackground();
+            if (bg != null) rv.setBackground(bg);
+        }
 
         imageFs = ImageFs.find(this);
 
@@ -1007,67 +1046,371 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     }
 
 
-    @SuppressLint("SourceLockedOrientationActivity")
+    // Fields
+    private static final String PREF_EXP_INPUT   = "drawer_exp_input";
+    private static final String PREF_EXP_DISPLAY = "drawer_exp_display";
+    private static final String PREF_EXP_SYSTEM  = "drawer_exp_system";
+
+    private boolean expInput   = false;
+    private boolean expDisplay = false;
+    private boolean expSystem  = false;
+
+    private NavigationView navigationView;
+
+    private LayoutAnimationController navLayoutAnim;
+
+    private boolean enableLogs = false;
+    private boolean allowMagnifier = true;
+
+    private static final int ANIM_DURATION = 300; // ms
+    private static final float SLIDE_DP = 0f;     // small vertical shift
+
+    private static final float COLLAPSE_TRANSLATION_DP = 6f;
+
+    private float dp(float v) {
+        return v * getResources().getDisplayMetrics().density;
+    }
+
+    @Nullable
+    private RecyclerView navRecycler() {
+        return findNavRecycler(navigationView);
+    }
+
+    private Set<CharSequence> titlesForIds(Menu menu, int[] itemIds) {
+        HashSet<CharSequence> set = new HashSet<>();
+        for (int id : itemIds) {
+            MenuItem mi = menu.findItem(id);
+            if (mi != null && mi.getTitle() != null) set.add(mi.getTitle());
+        }
+        return set;
+    }
+
+    @Nullable
+    private TextView rowTitle(View row) {
+        // Try Material id, then fallback to first TextView
+        int textId = getResources().getIdentifier("design_menu_item_text", "id", getPackageName());
+        View v = textId != 0 ? row.findViewById(textId) : null;
+        if (v instanceof TextView) return (TextView) v;
+
+        if (row instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) row;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                View c = vg.getChildAt(i);
+                if (c instanceof TextView) return (TextView) c;
+            }
+        }
+        return null;
+    }
+
+    private List<View> findVisibleRowsForTitles(Set<CharSequence> wantedTitles) {
+        ArrayList<View> rows = new ArrayList<>();
+        RecyclerView rv = navRecycler();
+        if (rv == null) return rows;
+
+        for (int i = 0; i < rv.getChildCount(); i++) {
+            View row = rv.getChildAt(i);
+            TextView tv = rowTitle(row);
+            if (tv != null && tv.getText() != null && wantedTitles.contains(tv.getText())) {
+                rows.add(row);
+            }
+        }
+        return rows;
+    }
+
+    private void animateInGroupItems(int[] itemIds) {
+        RecyclerView rv = navRecycler();
+        if (rv == null) return;
+
+        // Wait one frame so the rows are laid out after setGroupVisible(true)
+        rv.post(() -> {
+            Menu menu = navigationView.getMenu();
+            Set<CharSequence> titles = titlesForIds(menu, itemIds);
+            List<View> rows = findVisibleRowsForTitles(titles);
+
+            float startTrans = dp(SLIDE_DP);
+            for (View row : rows) {
+                row.setAlpha(0f);
+                row.setTranslationY(startTrans);
+                row.animate()
+                        .alpha(1f)
+                        .translationY(0f)
+                        .setDuration(ANIM_DURATION)
+                        .withLayer()
+                        .start();
+            }
+        });
+    }
+
+    private void animateOutGroupItems(int[] itemIds, Runnable after) {
+        RecyclerView rv = navRecycler();
+        if (rv == null) { after.run(); return; }
+
+        Menu menu = navigationView.getMenu();
+        Set<CharSequence> titles = titlesForIds(menu, itemIds);
+        List<View> rows = findVisibleRowsForTitles(titles);
+
+        if (rows.isEmpty()) { after.run(); return; }
+
+        final int[] remaining = { rows.size() };
+        float endTrans = dp(SLIDE_DP);
+
+        for (View row : rows) {
+            row.animate()
+                    .alpha(0f)
+                    .translationY(endTrans)
+                    .setDuration(ANIM_DURATION)
+                    .withLayer()
+                    .withEndAction(() -> {
+                        if (--remaining[0] == 0) {
+                            after.run();
+                        }
+                    })
+                    .start();
+        }
+    }
+
+    private static final int[] INPUT_IDS = {
+            R.id.main_menu_input_controls,
+            R.id.main_menu_controller_assignment,
+            R.id.main_menu_motion_controls
+    };
+
+    private static final int[] DISPLAY_IDS = {
+            R.id.main_menu_screen_effects,
+            R.id.main_menu_toggle_fullscreen,
+            R.id.main_menu_magnifier,
+            R.id.main_menu_pip_mode
+    };
+
+    private static final int[] SYSTEM_IDS = {
+            R.id.main_menu_task_manager,
+            R.id.main_menu_terminal
+    };
+
+
+    @Nullable
+    private RecyclerView findNavRecycler(View root) {
+        if (root instanceof RecyclerView) return (RecyclerView) root;
+        if (root instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) root;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                RecyclerView rv = findNavRecycler(vg.getChildAt(i));
+                if (rv != null) return rv;
+            }
+        }
+        return null;
+    }
+
+    private void applyGroup(Menu menu, int groupId, int headerId, boolean expanded) {
+        menu.setGroupVisible(groupId, expanded);
+
+        MenuItem header = menu.findItem(headerId);
+        if (header != null) {
+            header.setCheckable(true);
+            header.setChecked(expanded);   // visual cue
+        }
+
+        RecyclerView rv = findNavRecycler(navigationView);
+        if (rv != null) {
+            RecyclerView.Adapter<?> ad = rv.getAdapter();
+            if (ad != null) ad.notifyDataSetChanged();
+            rv.requestLayout();
+            rv.invalidateItemDecorations();
+            rv.postInvalidateOnAnimation();
+        } else {
+            navigationView.invalidate();
+            navigationView.postInvalidateOnAnimation();
+        }
+    }
+
+
+    private void persistSection(String key, boolean value) {
+        preferences.edit().putBoolean(key, value).apply();
+    }
+
+    private void expandGroup(Menu menu, int groupId, int headerId, int[] itemIds) {
+        // Show items first, then animate them in.
+        applyGroup(menu, groupId, headerId, true);
+        animateInGroupItems(itemIds);
+    }
+
+    private void collapseGroup(Menu menu, int groupId, int headerId, int[] itemIds) {
+        RecyclerView rv = navRecycler();
+        if (rv == null) { applyGroup(menu, groupId, headerId, false); return; }
+
+        // Find the currently visible rows for this group
+        Set<CharSequence> titles = titlesForIds(menu, itemIds);
+        List<View> rows = findVisibleRowsForTitles(titles);
+        if (rows.isEmpty()) { applyGroup(menu, groupId, headerId, false); return; }
+
+        rv.suppressLayout(true);
+
+        final int[] remaining = { rows.size() };
+        float endTrans = dp(COLLAPSE_TRANSLATION_DP);
+
+        for (View row : rows) {
+            final View r = row;
+            final int startH = r.getHeight();
+            if (startH <= 0) { if (--remaining[0] == 0) finishCollapse(menu, groupId, headerId, rv); continue; }
+
+            // Height animator
+            ValueAnimator hAnim = ValueAnimator.ofInt(startH, 0);
+            hAnim.addUpdateListener(a -> {
+                int h = (int) a.getAnimatedValue();
+                RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) r.getLayoutParams();
+                lp.height = h;
+                r.setLayoutParams(lp);
+            });
+
+            // Alpha + slight slide
+            ObjectAnimator aAnim = ObjectAnimator.ofFloat(r, View.ALPHA, 1f, 0f);
+            ObjectAnimator tAnim = ObjectAnimator.ofFloat(r, View.TRANSLATION_Y, 0f, endTrans);
+
+            AnimatorSet set = new AnimatorSet();
+            set.setDuration(ANIM_DURATION);
+            set.setInterpolator(new AccelerateDecelerateInterpolator());
+            set.playTogether(hAnim, aAnim, tAnim);
+            set.addListener(new AnimatorListenerAdapter() {
+                @Override public void onAnimationEnd(Animator animation) {
+                    // Restore params so RV can recycle properly next time
+                    RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) r.getLayoutParams();
+                    lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    r.setLayoutParams(lp);
+                    r.setAlpha(1f);
+                    r.setTranslationY(0f);
+
+                    if (--remaining[0] == 0) {
+                        finishCollapse(menu, groupId, headerId, rv);
+                    }
+                }
+            });
+            set.start();
+        }
+    }
+
+    private void finishCollapse(Menu menu, int groupId, int headerId, RecyclerView rv) {
+        applyGroup(menu, groupId, headerId, false); // hides group + notifies adapter
+        rv.suppressLayout(false);
+    }
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         final GLRenderer renderer = xServerView.getRenderer();
-        switch (item.getItemId()) {
+        final int id = item.getItemId();
+        final Menu menu = navigationView.getMenu();
+
+        switch (id) {
+            // ---- Section headers (toggle, do NOT close drawer) ----
+            case R.id.header_input: {
+                boolean wasExpanded = expInput;
+                expInput = !expInput;
+                persistSection(PREF_EXP_INPUT, expInput);
+                if (wasExpanded) {
+                    collapseGroup(menu, R.id.group_input, R.id.header_input, INPUT_IDS);
+                } else {
+                    expandGroup(menu, R.id.group_input, R.id.header_input, INPUT_IDS);
+                }
+                return true;
+            }
+
+            case R.id.header_display: {
+                boolean wasExpanded = expDisplay;
+                expDisplay = !expDisplay;
+                persistSection(PREF_EXP_DISPLAY, expDisplay);
+                if (wasExpanded) {
+                    collapseGroup(menu, R.id.group_display, R.id.header_display, DISPLAY_IDS);
+                } else {
+                    expandGroup(menu, R.id.group_display, R.id.header_display, DISPLAY_IDS);
+                }
+                return true;
+            }
+
+            case R.id.header_system: {
+                boolean wasExpanded = expSystem;
+                expSystem = !expSystem;
+                persistSection(PREF_EXP_SYSTEM, expSystem);
+                if (wasExpanded) {
+                    collapseGroup(menu, R.id.group_system, R.id.header_system, SYSTEM_IDS);
+                } else {
+                    expandGroup(menu, R.id.group_system, R.id.header_system, SYSTEM_IDS);
+                }
+                return true;
+            }
+
+
+            // ---- Top-level quick actions ----
             case R.id.main_menu_relative_mouse:
                 isRelativeMouseMovement = !isRelativeMouseMovement;
                 container.setRelativeMouseMovement(isRelativeMouseMovement);
                 xServer.setRelativeMouseMovement(isRelativeMouseMovement);
                 item.setChecked(isRelativeMouseMovement);
-
                 if (!isRelativeMouseMovement) {
-                    // turned OFF -> ensure capture is dropped
                     releasePointerCaptureIfNeeded("toggle-off");
                     touchpadView.setOnCapturedPointerListener(null);
-                    Toast.makeText(this, "Relative Mouse Movement Disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.relative_mouse_disabled, Toast.LENGTH_SHORT).show();
                 } else {
-                    // turned ON -> capture will be taken when the drawer closes via the global listener
-                    Toast.makeText(this, "Relative Mouse Movement Enabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.relative_mouse_enabled, Toast.LENGTH_SHORT).show();
                 }
-
                 drawerLayout.closeDrawers();
                 return true;
+
             case R.id.main_menu_keyboard:
                 AppUtils.showKeyboard(this);
                 drawerLayout.closeDrawers();
-                break;
-            case R.id.main_menu_input_controls:
-                showInputControlsDialog();
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.main_menu_controller_assignment:
-                ControllerAssignmentDialog.show(this);
-                winHandler.clearIgnoredDevices();
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.main_menu_toggle_fullscreen:
-                renderer.toggleFullscreen();
-                drawerLayout.closeDrawers();
-                touchpadView.toggleFullscreen();
-                break;
+                return true;
+
             case R.id.main_menu_pause:
                 if (isPaused) {
                     ProcessHelper.resumeAllWineProcesses();
                     item.setIcon(R.drawable.icon_pause);
-                }
-                else {
+                } else {
                     ProcessHelper.pauseAllWineProcesses();
                     item.setIcon(R.drawable.icon_play);
                 }
                 isPaused = !isPaused;
                 drawerLayout.closeDrawers();
-                break;
+                return true;
+
+            case R.id.main_menu_logs:
+                debugDialog.show();
+                drawerLayout.closeDrawers();
+                return true;
+
+            case R.id.main_menu_touchpad_help:
+                showTouchpadHelpDialog();
+                drawerLayout.closeDrawers();
+                return true;
+
+            // ---- INPUT group ----
+            case R.id.main_menu_input_controls:
+                showInputControlsDialog();
+                drawerLayout.closeDrawers();
+                return true;
+
+            case R.id.main_menu_controller_assignment:
+                ControllerAssignmentDialog.show(this);
+                winHandler.clearIgnoredDevices();
+                drawerLayout.closeDrawers();
+                return true;
+
+            case R.id.main_menu_motion_controls:
+                MotionControls.getInstance(this)
+                        .attach(winHandler)
+                        .showContentDialog(this, null);
+                drawerLayout.closeDrawers();
+                return true;
+
+            // ---- DISPLAY group ----
+            case R.id.main_menu_toggle_fullscreen:
+                renderer.toggleFullscreen();
+                touchpadView.toggleFullscreen();
+                drawerLayout.closeDrawers();
+                return true;
+
             case R.id.main_menu_pip_mode:
                 enterPictureInPictureMode();
                 drawerLayout.closeDrawers();
-                break;
-            case R.id.main_menu_task_manager:
-                new TaskManagerDialog(this).show();
-                drawerLayout.closeDrawers();
-                break;
+                return true;
+
             case R.id.main_menu_magnifier:
                 if (magnifierView == null) {
                     FrameLayout container = findViewById(R.id.FLXServerDisplay);
@@ -1084,122 +1427,44 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
                     container.addView(magnifierView);
                 }
                 drawerLayout.closeDrawers();
-                break;
-            case R.id.main_menu_screen_effects:
-                Log.d("ScreenEffectDialog", "Initializing ScreenEffectDialog");
-                ScreenEffectDialog screenEffectDialog = new ScreenEffectDialog(this);
-                screenEffectDialog.setOnConfirmCallback(() -> {
-                    Log.d("ScreenEffectDialog", "Confirm callback triggered. About to apply effects.");
-                    GLRenderer currentRenderer = xServerView.getRenderer();
-                    ColorEffect colorEffect = (ColorEffect) currentRenderer.getEffectComposer().getEffect(ColorEffect.class);
-                    FXAAEffect fxaaEffect = (FXAAEffect) currentRenderer.getEffectComposer().getEffect(FXAAEffect.class);
-                    CRTEffect crtEffect = (CRTEffect) currentRenderer.getEffectComposer().getEffect(CRTEffect.class);
-                    ToonEffect toonEffect = (ToonEffect) currentRenderer.getEffectComposer().getEffect(ToonEffect.class);
-                    NTSCCombinedEffect ntscEffect = (NTSCCombinedEffect) currentRenderer.getEffectComposer().getEffect(NTSCCombinedEffect.class);
-
-                    // Check if effects are null before applying
-                    Log.d("ScreenEffectDialog", "ColorEffect: " + (colorEffect != null));
-                    Log.d("ScreenEffectDialog", "FXAAEffect: " + (fxaaEffect != null));
-                    Log.d("ScreenEffectDialog", "CRTEffect: " + (crtEffect != null));
-                    Log.d("ScreenEffectDialog", "ToonEffect: " + (toonEffect != null));
-                    Log.d("ScreenEffectDialog", "NTSCCombinedEffect: " + (ntscEffect != null));
-
-                    Log.d("ScreenEffectDialog", "Calling applyEffects()");
-                    screenEffectDialog.applyEffects(colorEffect, currentRenderer, fxaaEffect, crtEffect, toonEffect, ntscEffect);
-                    Log.d("ScreenEffectDialog", "applyEffects() called.");
-                });
-                Log.d("ScreenEffectDialog", "Showing ScreenEffectDialog");
-                screenEffectDialog.show();
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.main_menu_logs:
-                debugDialog.show();
-                drawerLayout.closeDrawers();
-                break;
-            case R.id.main_menu_touchpad_help:
-                showTouchpadHelpDialog();
-                break;
-            case R.id.main_menu_terminal:  // New case for TerminalActivity
-                openTerminal();
                 return true;
-//            case R.id.main_menu_winetricks:
-//                if (winetricksFloatingView == null) {
-//                    FrameLayout frameLayout = findViewById(R.id.FLXServerDisplay);
-//                    winetricksFloatingView = new WinetricksFloatingView(this);
-//                    winetricksFloatingView.setWinetricksListener(new WinetricksFloatingView.WinetricksListener() {
-//                        @Override
-//                        public void onWinetricksStableClick(String verb, TextView outputView) {
-//                            if (!verb.isEmpty()) {
-//                                runWinetricksWithVerb(container, contentsManager, verb, outputView); // Use container here
-//                            } else {
-//                                Toast.makeText(XServerDisplayActivity.this, "Please enter a Winetricks verb", Toast.LENGTH_SHORT).show();
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onWinetricksLatestClick(String verb, TextView outputView) {
-//                            if (!verb.isEmpty()) {
-//                                runWinetricksLatestWithVerb(container, contentsManager, verb, outputView); // Use container here
-//                            } else {
-//                                Toast.makeText(XServerDisplayActivity.this, "Please enter a Winetricks verb", Toast.LENGTH_SHORT).show();
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onOpenWinetricksFolder(TextView outputView) {
-//                            runWinetricksFolder(container, contentsManager, outputView); // Use container here
-//                        }
-//
-//                        @Override
-//                        public void onToggleTransparency(View floatingView) {
-//                            if (floatingView.getAlpha() < 1.0f) {
-//                                floatingView.setAlpha(1.0f);
-//                            } else {
-//                                floatingView.setAlpha(0.5f);
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onRestartWineserverClick(TextView outputView) {
-//                            // NEW
-//                            try {
-//                                environment.setWinetricksRunning(true);
-//                                // Determine whether to use Glibc or Bionic launcher based on preference
-//                                if (bionicLauncher != null) {
-//                                    bionicLauncher.restartWineServer();
-//                                } else {
-//                                    runOnUiThread(() -> {
-//                                        outputView.append("No valid launcher found; cannot restart Wineserver.\n");
-//                                    });
-//                                    return; // Exit the method early if no valid launcher is found
-//                                }
-//
-//                                // If the environment needs frequent re-initialization
-//                                setupXEnvironment();
-//
-//                                // Confirm to the user in logs
-//                                runOnUiThread(() -> {
-//                                    outputView.append("Wineserver restarted.\n");
-//                                });
-//
-//                            } catch (Exception e) {
-//                            }
-//                            environment.setWinetricksRunning(false);
-//                        }
-//
-//                    });
-//                    frameLayout.addView(winetricksFloatingView);
-//                } else {
-//                    winetricksFloatingView.setVisibility(View.VISIBLE);
-//                }
-//                drawerLayout.closeDrawers();
-//                return true;
+
+            case R.id.main_menu_screen_effects:
+                ScreenEffectDialog dlg = new ScreenEffectDialog(this);
+                dlg.setOnConfirmCallback(() -> {
+                    GLRenderer r = xServerView.getRenderer();
+                    ColorEffect color = r.getEffectComposer().getEffect(ColorEffect.class);
+                    FXAAEffect fxaa = r.getEffectComposer().getEffect(FXAAEffect.class);
+                    CRTEffect crt   = r.getEffectComposer().getEffect(CRTEffect.class);
+                    ToonEffect toon = r.getEffectComposer().getEffect(ToonEffect.class);
+                    NTSCCombinedEffect ntsc = r.getEffectComposer().getEffect(NTSCCombinedEffect.class);
+                    dlg.applyEffects(color, r, fxaa, crt, toon, ntsc);
+                });
+                dlg.show();
+                drawerLayout.closeDrawers();
+                return true;
+
+            // ---- SYSTEM group ----
+            case R.id.main_menu_task_manager:
+                new TaskManagerDialog(this).show();
+                drawerLayout.closeDrawers();
+                return true;
+
+
+            case R.id.main_menu_terminal:
+                openTerminal();
+                drawerLayout.closeDrawers();
+                return true;
+
             case R.id.main_menu_exit:
                 exitApp();
-                break;
+                return true;
         }
+
         return true;
     }
+
+
 
     private void openTerminal() {
         Intent intent = new Intent(this, TerminalActivity.class);

@@ -50,6 +50,10 @@ public class ControllerManager {
     public static final String PREF_PLAYER_SLOT_PREFIX = "controller_slot_";
     public static final String PREF_ENABLED_SLOTS_PREFIX = "enabled_slot_";
 
+    private final boolean[] vibrationEnabled = new boolean[]{ true, true, true, true };
+
+    public static final String PREF_VIBRATE_SLOT_PREFIX = "vibrate_slot_";
+
 
     /**
      * Initializes the manager. This must be called once from the main application context.
@@ -100,6 +104,9 @@ public class ControllerManager {
             // Load whether this slot is enabled. Default P1=true, P2-4=false.
             String enabledKey = PREF_ENABLED_SLOTS_PREFIX + i;
             enabledSlots[i] = preferences.getBoolean(enabledKey, i == 0);
+
+            String vibKey = PREF_VIBRATE_SLOT_PREFIX + i;
+            vibrationEnabled[i] = preferences.getBoolean(vibKey, i == 0);
         }
     }
 
@@ -121,6 +128,9 @@ public class ControllerManager {
             // Save the enabled state
             String enabledKey = PREF_ENABLED_SLOTS_PREFIX + i;
             editor.putBoolean(enabledKey, enabledSlots[i]);
+
+            String vibKey = PREF_VIBRATE_SLOT_PREFIX + i;
+            editor.putBoolean(vibKey, vibrationEnabled[i]);
         }
         editor.apply();
     }
@@ -265,6 +275,16 @@ public class ControllerManager {
         saveAssignments(); // Persist the change immediately.
     }
 
+    public boolean hasEnabledUnassignedSlot() {
+        for (int i = 0; i < 4; i++) {
+            if (enabledSlots[i] && getAssignedDeviceForSlot(i) == null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     /**
      * Clears any device assignment for the given player slot.
      * @param slotIndex The player slot to un-assign (0-3).
@@ -331,6 +351,52 @@ public class ControllerManager {
     public boolean isSlotEnabled(int slotIndex) {
         if (slotIndex < 0 || slotIndex >= 4) return false;
         return enabledSlots[slotIndex];
+    }
+
+    // ControllerManager.java
+
+    private static String sanitizeName(String name) {
+        if (name == null) return "";
+        // Collapse suffixes often used for sensor/touch subdevices.
+        return name.replaceAll("(?i)(\\s*-?\\s*(touch|touchpad|sensor|motion).*)$", "")
+                .trim();
+    }
+
+    public static String makePhysicalGroupKey(InputDevice d) {
+        if (d == null) return null;
+        // Vendor/Product are the anchor; include a sanitized name to reduce
+        // false grouping across very different devices from same vendor.
+        return d.getVendorId() + ":" + d.getProductId() + ":" + sanitizeName(d.getName());
+    }
+
+    public int getSlotForDeviceOrSibling(int deviceId) {
+        InputDevice d = inputManager.getInputDevice(deviceId);
+        if (d == null) return -1;
+
+        // 1) Exact descriptor match first (current behavior)
+        int slot = getSlotForDevice(deviceId);
+        if (slot != -1) return slot;
+
+        // 2) Group match against already-assigned devices
+        String g = makePhysicalGroupKey(d);
+        for (int i = 0; i < 4; i++) {
+            InputDevice assigned = getAssignedDeviceForSlot(i);
+            if (assigned != null) {
+                if (g.equals(makePhysicalGroupKey(assigned))) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    public boolean isVibrationEnabled(int slot) {
+        return (slot >= 0 && slot < 4) && vibrationEnabled[slot];
+    }
+    public void setVibrationEnabled(int slot, boolean enabled) {
+        if (slot < 0 || slot >= 4) return;
+        vibrationEnabled[slot] = enabled;
+        saveAssignments();
     }
 
 

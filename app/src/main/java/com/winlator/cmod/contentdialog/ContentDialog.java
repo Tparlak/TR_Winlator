@@ -10,6 +10,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -35,6 +36,8 @@ public class ContentDialog extends Dialog {
 
     private boolean isDarkMode;
 
+    private Button gyroButton;
+
     public interface OnControllerInputListener {
         void onControllerInput(InputDevice device);
     }
@@ -50,6 +53,7 @@ public class ContentDialog extends Dialog {
     }
 
     private View inflatedLayout;
+
 
     public ContentDialog(@NonNull Context context, int layoutResId) {
         super(context, R.style.ContentDialog);
@@ -316,5 +320,6 @@ public class ContentDialog extends Dialog {
 
         dialog.show();
     }
+
 
 }

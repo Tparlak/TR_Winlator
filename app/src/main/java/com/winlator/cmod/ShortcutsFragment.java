@@ -458,16 +458,29 @@ public class ShortcutsFragment extends Fragment {
                 }
                 else if (itemId == R.id.shortcut_remove) {
                     ContentDialog.confirm(context, R.string.do_you_want_to_remove_this_shortcut, () -> {
-                        boolean fileDeleted = shortcut.file.delete();
-                        boolean iconFileDeleted = shortcut.iconFile != null && shortcut.iconFile.delete();
+                        boolean desktopDeleted  = safeDelete(shortcut.file);
+                        boolean iconDeleted     = safeDelete(shortcut.iconFile);
+                        boolean lnkDeleted      = deletePairedLnkForShortcut(shortcut);
 
-                        if (fileDeleted) {
+                        if (desktopDeleted) {
                             disableShortcutOnScreen(requireContext(), shortcut);
                             loadShortcutsList();
-                            Toast.makeText(context, "Shortcut removed successfully.", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(context, "Failed to remove the shortcut. Please try again.", Toast.LENGTH_SHORT).show();
                         }
+
+                        String msg;
+                        if (desktopDeleted) {
+                            if (lnkDeleted) {
+                                msg = "Shortcut and paired .lnk removed.";
+                            } else {
+                                msg = "Shortcut removed." + (shortcut.file != null
+                                        ? " (No paired .lnk found or could not delete.)"
+                                        : "");
+                            }
+                        } else {
+                            msg = "Failed to remove the shortcut. Please try again.";
+                        }
+
+                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
                     });
                 }
                 else if (itemId == R.id.shortcut_clone_to_container) {
@@ -773,5 +786,33 @@ public class ShortcutsFragment extends Fragment {
                 }
             }
         } catch (Exception e) {}
+    }
+
+    private static boolean safeDelete(@Nullable File f) {
+        try {
+            return f != null && f.exists() && f.delete();
+        } catch (Exception e) {
+            Log.e("ShortcutsFragment", "Delete failed for: " + (f != null ? f.getAbsolutePath() : "null"), e);
+            return false;
+        }
+    }
+
+    /** Delete a sibling .lnk that matches the .desktop basename. */
+    private boolean deletePairedLnkForShortcut(Shortcut shortcut) {
+        if (shortcut == null || shortcut.file == null) return false;
+        File dir = shortcut.file.getParentFile();
+        if (dir == null) return false;
+
+        String base = FileUtils.getBasename(shortcut.file.getName()); // strips extension
+        File lnk = new File(dir, base + ".lnk");
+        boolean deleted = safeDelete(lnk);
+        if (deleted) {
+            Log.d("ShortcutsFragment", "Paired .lnk removed: " + lnk.getAbsolutePath());
+        } else if (lnk.exists()) {
+            Log.w("ShortcutsFragment", "Paired .lnk exists but could not be removed: " + lnk.getAbsolutePath());
+        } else {
+            Log.d("ShortcutsFragment", "No paired .lnk found for " + base);
+        }
+        return deleted;
     }
 }

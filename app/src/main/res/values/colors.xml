@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="seekbar_blue">#2196F3</color>
+    <color name="seekbar_blue_track">#332196F3</color>
+
     <!-- Light Theme Colors -->
     <color name="window_background_color">#fafafa</color>
     <color name="colorPrimary">#2F0B81</color>
@@ -9,7 +12,7 @@
 
     <!-- Dark Theme Colors -->
     <color name="window_background_color_dark">#121212</color>
-    <color name="colorPrimaryDarkMode">#2F0B81</color>
+    <color name="colorPrimaryDarkMode">#390E7A</color>
     <color name="colorPrimaryDarkModeDark">#43197C</color>
     <color name="colorAccentDark">#80d8ff</color>
     <color name="white">#ffffff</color>
