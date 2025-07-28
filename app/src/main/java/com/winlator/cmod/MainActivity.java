@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Load the user's preferred theme
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        isDarkMode = sharedPreferences.getBoolean("dark_mode", true);
+        isDarkMode = sharedPreferences.getBoolean("dark_mode", false);
 
         // Apply the theme based on the preference
         if (isDarkMode) {
@@ -197,19 +197,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             onNavigationItemSelected(navigationView.getMenu().findItem(menuItemId));
             navigationView.setCheckedItem(menuItemId);
 
-            if (!requestAppPermissions()) {
-                ImageFsInstaller.installIfNeeded(this);
-            }
-
-
-            if (!requestAppPermissions()) {
+            // onCreate(), replace the two blocks with this single block
+            boolean waitingForPerms = requestAppPermissions();
+            if (!waitingForPerms) {
                 ImageFsInstaller.installIfNeeded(this, () -> {
-                    // This code will only run AFTER the installer dialog closes.
-                    if (!allAccessFilesDialogDismissed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                    if (!allAccessFilesDialogDismissed
+                            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                            && !Environment.isExternalStorageManager()) {
                         showAllFilesAccessDialog();
                     }
                 });
             }
+
         }
     }
 
@@ -232,9 +231,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_WRITE_EXTERNAL_STORAGE_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                ImageFsInstaller.installIfNeeded(this);
+                ImageFsInstaller.installIfNeeded(this, () -> {
+                    if (!allAccessFilesDialogDismissed
+                            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                            && !Environment.isExternalStorageManager()) {
+                        showAllFilesAccessDialog();
+                    }
+                });
+            } else {
+                finish();
             }
-            else finish();
         }
     }
 

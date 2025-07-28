@@ -232,11 +232,13 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     private Win32AppWorkarounds win32AppWorkarounds;
     private EnvVars overrideEnvVars;
 
-//    private WinetricksFloatingView winetricksFloatingView;
+    private WinetricksFloatingView winetricksFloatingView;
 
     private boolean capturePointerOnNextFocus = false;
 
     private boolean capturePointerOnDrawerClose = false;
+
+    boolean isMouseDisabled;
 
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
@@ -2063,11 +2065,14 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
         globalCursorSpeed = preferences.getFloat("cursor_speed", 1.0f);
         touchpadView = new TouchpadView(this, xServer, timeoutHandler, hideControlsRunnable);
+        isMouseDisabled = preferences.getBoolean("touchscreen_mouse_disabled", false);
+        touchpadView.setTouchscreenMouseDisabled(isMouseDisabled);
         touchpadView.setSensitivity(globalCursorSpeed);
         touchpadView.setFourFingersTapCallback(() -> {
             if (!drawerLayout.isDrawerOpen(GravityCompat.START)) drawerLayout.openDrawer(GravityCompat.START);
         });
         rootView.addView(touchpadView);
+
 
         inputControlsView = new InputControlsView(this, timeoutHandler, hideControlsRunnable);
         inputControlsView.setOverlayOpacity(preferences.getFloat("overlay_opacity", InputControlsView.DEFAULT_OVERLAY_OPACITY));
@@ -2079,7 +2084,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
         startTouchscreenTimeout();
 
-        // Inside onCreate(), after initializing controls
         boolean isTimeoutEnabled = preferences.getBoolean("touchscreen_timeout_enabled", false);
         if (isTimeoutEnabled) {
             startTouchscreenTimeout();
@@ -2212,6 +2216,10 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         final CheckBox cbEnableHaptics = dialog.findViewById(R.id.CBEnableHaptics);
         cbEnableHaptics.setChecked(preferences.getBoolean("touchscreen_haptics_enabled", false));
 
+        final CheckBox cbDisableTouchscreenMouse = dialog.findViewById(R.id.CBDisableTouchscreenMouse);
+        cbDisableTouchscreenMouse.setChecked(preferences.getBoolean("touchscreen_mouse_disabled", false));
+
+
         final Runnable updateProfile = () -> {
             int position = sProfile.getSelectedItemPosition();
             if (position > 0) {
@@ -2238,9 +2246,11 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             inputControlsView.setShowTouchscreenControls(cbShowTouchscreenControls.isChecked());
             boolean isTimeoutEnabled = cbEnableTimeout.isChecked();
             boolean isHapticsEnabled = cbEnableHaptics.isChecked();
+            boolean isMouseDisabled = cbDisableTouchscreenMouse.isChecked();
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean("touchscreen_timeout_enabled", isTimeoutEnabled);
             editor.putBoolean("touchscreen_haptics_enabled", isHapticsEnabled);
+            editor.putBoolean("touchscreen_mouse_disabled", isMouseDisabled);
             editor.apply();
 
             if (isTimeoutEnabled) {
@@ -2248,6 +2258,11 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             } else {
                 touchpadView.setOnTouchListener(null); // Disable the listener if timeout is disabled
             }
+            if (isMouseDisabled) {
+                touchpadView.setTouchscreenMouseDisabled(true);
+            } else
+                touchpadView.setTouchscreenMouseDisabled(false);
+
             int position = sProfile.getSelectedItemPosition();
             if (position > 0) {
                 showInputControls(inputControlsManager.getProfiles().get(position - 1));
@@ -2357,7 +2372,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             controllerManager.setSlotEnabled(0, true);
             // Clear any physical device from P1 to prevent conflicts.
             controllerManager.unassignSlot(0);
-            // Tell WinHandler to update its internal state.
+            // Update its internal state.
             if (winHandler != null) {
                 winHandler.refreshControllerMappings();
             }

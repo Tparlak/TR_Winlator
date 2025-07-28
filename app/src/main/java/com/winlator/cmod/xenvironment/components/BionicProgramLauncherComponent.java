@@ -59,7 +59,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
     private Container container;
     private final Shortcut shortcut;
 
-    private static SysVSharedMemory shmMgr;
+//    private static SysVSharedMemory shmMgr;
     private static XConnectorEpoll shmServer;
     
     public void setWineInfo(WineInfo wineInfo) {
@@ -73,51 +73,51 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
     public void setContainer(Container container) { this.container = container; }
 
 
-    private void ensureSysvServerRunning() {
-
-        if (shmServer != null) return; // already running in this process
-
-
-// Build a UnixSocketConfig object pointing at …/usr/tmp/.sysvshm/SM0
-
-        File rootDir = environment.getImageFs().getRootDir();
-
-        UnixSocketConfig sockConf = UnixSocketConfig.createSocket(
-
-                rootDir.getPath(),
-
-                UnixSocketConfig.SYSVSHM_SERVER_PATH); // relative path constant
-
-
-        shmMgr = new SysVSharedMemory();
-
-        shmServer = new XConnectorEpoll(
-
-                sockConf, // <-- correct type
-
-                new SysVSHMConnectionHandler(shmMgr),
-
-                new SysVSHMRequestHandler());
-
-
-        shmServer.setCanReceiveAncillaryMessages(true); // <-- allow FD passing
-
-
-        shmServer.start(); // non-blocking; runs its own thread
-
-        Log.d("SysVSHM", "server started on " + sockConf.path);
-
-
-// right after shmServer.start();
-
-        int PAD_SIZE = 4096; // sizeof(struct shm_pad)
-
-        int id = shmMgr.get(PAD_SIZE);
-
-        Log.d("SysVSHM", "pre-created pad segment id=" + id);
-
-
-    }
+//    private void ensureSysvServerRunning() {
+//
+//        if (shmServer != null) return; // already running in this process
+//
+//
+//// Build a UnixSocketConfig object pointing at …/usr/tmp/.sysvshm/SM0
+//
+//        File rootDir = environment.getImageFs().getRootDir();
+//
+//        UnixSocketConfig sockConf = UnixSocketConfig.createSocket(
+//
+//                rootDir.getPath(),
+//
+//                UnixSocketConfig.SYSVSHM_SERVER_PATH); // relative path constant
+//
+//
+//        shmMgr = new SysVSharedMemory();
+//
+//        shmServer = new XConnectorEpoll(
+//
+//                sockConf, // <-- correct type
+//
+//                new SysVSHMConnectionHandler(shmMgr),
+//
+//                new SysVSHMRequestHandler());
+//
+//
+//        shmServer.setCanReceiveAncillaryMessages(true); // <-- allow FD passing
+//
+//
+//        shmServer.start(); // non-blocking; runs its own thread
+//
+//        Log.d("SysVSHM", "server started on " + sockConf.path);
+//
+//
+//// right after shmServer.start();
+//
+//        int PAD_SIZE = 4096; // sizeof(struct shm_pad)
+//
+//        int id = shmMgr.get(PAD_SIZE);
+//
+//        Log.d("SysVSHM", "pre-created pad segment id=" + id);
+//
+//
+//    }
 
 
 
@@ -326,21 +326,21 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
         final String shmIdEnvValue;
 
-        SysVSharedMemory shmMgr = SysVSharedMemory.getInstance();
-
-        if (shmMgr != null) {
-            int padShmId = shmMgr.get(4096);
-            if (padShmId != -1) {
-                Log.i("EVSHIM_HOST", "Pre-created gamepad SHM segment with ID: " + padShmId);
-                shmIdEnvValue = String.valueOf(padShmId);
-            } else {
-                Log.e("EVSHIM_HOST", "shmMgr.get() failed!");
-                shmIdEnvValue = null;
-            }
-        } else {
-            Log.e("EVSHIM_HOST", "SysVSharedMemory.getInstance() is null!");
-            shmIdEnvValue = null;
-        }
+//        SysVSharedMemory shmMgr = SysVSharedMemory.getInstance();
+//
+//        if (shmMgr != null) {
+//            int padShmId = shmMgr.get(4096);
+//            if (padShmId != -1) {
+//                Log.i("EVSHIM_HOST", "Pre-created gamepad SHM segment with ID: " + padShmId);
+//                shmIdEnvValue = String.valueOf(padShmId);
+//            } else {
+//                Log.e("EVSHIM_HOST", "shmMgr.get() failed!");
+//                shmIdEnvValue = null;
+//            }
+//        } else {
+//            Log.e("EVSHIM_HOST", "SysVSharedMemory.getInstance() is null!");
+//            shmIdEnvValue = null;
+//        }
 
 
         Context context = environment.getContext();
@@ -349,6 +349,15 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         boolean enableBox86_64Logs = preferences.getBoolean("enable_box86_64_logs", false);
+        boolean openWithAndroidBrowser = preferences.getBoolean("open_with_android_browser", false);
+        boolean shareAndroidClipboard = preferences.getBoolean("share_android_clipboard", false);
+
+        if (openWithAndroidBrowser)
+            envVars.put("WINE_OPEN_WITH_ANDROID_BROWSER", "1");
+        if (shareAndroidClipboard) {
+            envVars.put("WINE_FROM_ANDROID_CLIPBOARD", "1");
+            envVars.put("WINE_TO_ANDROID_CLIPBOARD", "1");
+        }
 
         EnvVars envVars = new EnvVars();
 
@@ -359,9 +368,9 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         envVars.put("EVSHIM_MAX_PLAYERS", String.valueOf(enabledPlayerCount));
 
 
-        if (shmIdEnvValue != null) {
+        if (true) {
 
-            envVars.put("EVSHIM_SHM_ID", shmIdEnvValue);
+            envVars.put("EVSHIM_SHM_ID", 1);
 
         }
 
@@ -447,6 +456,10 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
             envVars.putAll(this.envVars);
         }
 
+        String emulator = container.getEmulator();
+        if (shortcut != null)
+            emulator = shortcut.getExtra("emulator", container.getEmulator());
+
         // Construct the command without Box64 to the Wine executable
         String command = "";
         String overriddenCommand = envVars.get("GUEST_PROGRAM_LAUNCHER_COMMAND");
@@ -457,8 +470,13 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
             command = command.trim();
         }
         else {
-            if (wineInfo.isArm64EC())
+            if (wineInfo.isArm64EC()) {
                 command = winePath + "/" + guestExecutable;
+                if (emulator.toLowerCase().equals("fexcore"))
+                    envVars.put("HODLL", "libwow64fex.dll");
+                else
+                    envVars.put("HODLL", "wowbox64.dll");
+            }
             else
                 command = imageFs.getBinDir() + "/box64 " + guestExecutable;
         }

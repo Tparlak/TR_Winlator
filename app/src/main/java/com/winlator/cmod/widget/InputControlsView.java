@@ -653,7 +653,7 @@ public class InputControlsView extends View {
 
 
     private void resetTouchscreenTimeout() {
-        Log.d("InputControlsView", "Touch detected, resetting timeout.");
+//        Log.d("InputControlsView", "Touch detected, resetting timeout.");
         if (timeoutHandler != null && hideControlsRunnable != null) {
             // Cancel any pending hide requests
             timeoutHandler.removeCallbacks(hideControlsRunnable);

@@ -60,6 +60,7 @@ public class TouchpadView extends View {
 
     private SharedPreferences preferences;
 
+    private boolean touchscreenMouseDisabled = false;
 
     // Flag to control touchpad vs touchscreen mode
 
@@ -168,11 +169,16 @@ public class TouchpadView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         boolean isTouchscreenMode = preferences.getBoolean("touchscreen_toggle", false);
 
-        // Reset the timeout timer to keep controls visible
-        resetTouchscreenTimeout();  // <-- Ensure the controls stay visible
+        resetTouchscreenTimeout();
 
-        // Continue handling touch events as usual
+        // Block finger touches when touchscreen mouse is disabled.
+        // Allow external mouse and stylus to pass through.
         int toolType = event.getToolType(0);
+        if (touchscreenMouseDisabled
+                && toolType != MotionEvent.TOOL_TYPE_STYLUS
+                && !event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            return true; // consume without generating mouse events
+        }
 
         if (toolType == MotionEvent.TOOL_TYPE_STYLUS) {
             return handleStylusEvent(event);
@@ -182,6 +188,7 @@ public class TouchpadView extends View {
             return handleTouchpadEvent(event);
         }
     }
+
 
     private void resetTouchscreenTimeout() {
         //Log.d("TouchpadView", "Touch detected, resetting timeout.");
@@ -697,4 +704,11 @@ public class TouchpadView extends View {
         new Handler().postDelayed(() -> updateXform(getWidth(), getHeight(), xServer.screenInfo.width, xServer.screenInfo.height),
                 UPDATE_FORM_DELAYED_TIME);
     }
+
+
+    public void setTouchscreenMouseDisabled(boolean disabled) {
+        this.touchscreenMouseDisabled = disabled;
+    }
+
+
 }
