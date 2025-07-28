@@ -6,8 +6,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -29,9 +32,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.core.view.ViewCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -61,6 +68,13 @@ public class ContainersFragment extends Fragment {
     private TextView emptyTextView;
     private ContainerManager manager;
     private PreloaderDialog preloaderDialog;
+
+    private MenuItem favoriteItem;
+
+    private static final String PREF_FAVORITE_UUID = "favorite_uuid";
+
+    private ImageView favoriteActionView;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,22 +108,67 @@ public class ContainersFragment extends Fragment {
         if (containers.isEmpty()) emptyTextView.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        // Clear any existing menu items to prevent duplication
-        menu.clear();
-        menuInflater.inflate(R.menu.containers_menu, menu);
-        MenuItem bigPictureItem = menu.findItem(R.id.action_big_picture_mode);
-        MenuItem copyDevLibs = menu.findItem(R.id.action_copy_dev_libs);
-        Drawable icon = bigPictureItem.getIcon();
-        Drawable icon_dev = copyDevLibs.getIcon();
 
-        if (icon != null && icon_dev != null) {
-            icon.mutate(); // Ensure we don't modify other instances of this drawable
-            //icon_dev.mutate();
-            icon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
-            //icon_dev.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
+    @Override
+    public void onResume() {
+        super.onResume();
+        // re-create the menu so the icon always matches current favorite
+        requireActivity().invalidateOptionsMenu();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.containers_menu, menu);
+
+        // Other items tinting...
+        MenuItem bigPictureItem = menu.findItem(R.id.action_big_picture_mode);
+        if (bigPictureItem != null && bigPictureItem.getIcon() != null) {
+            bigPictureItem.getIcon().mutate();
+            bigPictureItem.getIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
         }
+
+        favoriteItem = menu.findItem(R.id.action_favorite_star);
+        if (favoriteItem != null) {
+            // Ensure it shows in the toolbar
+            favoriteItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+            // Create an ImageView as the action view
+            AppCompatImageView iv = new AppCompatImageView(requireContext());
+            int pad = dp(8);
+            iv.setPadding(pad, pad, pad, pad);
+            iv.setAdjustViewBounds(true);
+            iv.setClickable(true);
+            iv.setFocusable(true);
+            iv.setContentDescription(getString(R.string.app_name)); // or "Favorite shortcut"
+            ViewCompat.setTooltipText(iv, "Favorite");
+
+            favoriteItem.setActionView(iv);
+            favoriteActionView = iv;
+
+            // Click => launch (or prompt to choose)
+            iv.setOnClickListener(v -> handleFavoriteClick());
+
+            // Long‑press => clear (if set)
+            iv.setOnLongClickListener(v -> {
+                v.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+                Shortcut fav = getFavoriteShortcut();
+                if (fav == null) {
+                    Toast.makeText(getContext(), "No favorite assigned.", Toast.LENGTH_SHORT).show();
+                } else {
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("Clear favorite")
+                            .setMessage("Remove the current favorite?")
+                            .setPositiveButton("Remove", (d, w) -> clearFavorite())
+                            .setNegativeButton("Cancel", null)
+                            .show();
+                }
+                return true;
+            });
+        }
+
+        // Finally, paint the current icon into the view
+        applyFavoriteIcon();
     }
 
     @Override
@@ -137,13 +196,44 @@ public class ContainersFragment extends Fragment {
 //                openTerminal();
 //                return true;
 
-            case R.id.action_copy_dev_libs:
-                copyDevLibs();
+//            case R.id.action_copy_dev_libs:
+//                copyDevLibs();
+//                return true;
+
+            case R.id.action_favorite_star: {
+                Shortcut fav = getFavoriteShortcut();
+                if (fav == null) {
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("Favorite")
+                            .setMessage("No favorite assigned. Choose one now?")
+                            .setPositiveButton("Choose", (d, w) -> {
+                                getParentFragmentManager().beginTransaction()
+                                        .setCustomAnimations(R.anim.slide_in_up, R.anim.slide_out_down,
+                                                R.anim.slide_in_down, R.anim.slide_out_up)
+                                        .addToBackStack(null)
+                                        .replace(R.id.FLFragmentContainer, new ShortcutsFragment())
+                                        .commit();
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .show();
+                } else {
+                    runShortcut(fav);
+                }
                 return true;
+            }
+
 
             default:
                 return super.onOptionsItemSelected(menuItem);
         }
+    }
+
+    private void runShortcut(Shortcut s) {
+        Intent intent = new Intent(getActivity(), XServerDisplayActivity.class);
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.putExtra("container_id", s.container.id);
+        intent.putExtra("shortcut_path", s.file.getPath());
+        startActivity(intent);
     }
 
     private void copyDevLibs() {
@@ -348,6 +438,32 @@ public class ContainersFragment extends Fragment {
         getActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 
+    @Nullable
+    private Shortcut getFavoriteShortcut() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String uuid = sp.getString(PREF_FAVORITE_UUID, null);
+        if (uuid == null || uuid.isEmpty()) return null;
+
+        if (manager == null) manager = new ContainerManager(getContext());
+        for (Shortcut sc : manager.loadShortcuts()) {
+            if (uuid.equals(sc.getExtra("uuid"))) return sc;
+        }
+        return null;
+    }
+
+    private void setFavorite(@NonNull Shortcut sc) {
+        if (sc.getExtra("uuid").isEmpty()) sc.genUUID();
+        PreferenceManager.getDefaultSharedPreferences(getContext())
+                .edit().putString(PREF_FAVORITE_UUID, sc.getExtra("uuid")).apply();
+        requireActivity().invalidateOptionsMenu();
+    }
+
+    private void clearFavorite() {
+        PreferenceManager.getDefaultSharedPreferences(getContext())
+                .edit().remove(PREF_FAVORITE_UUID).apply();
+        requireActivity().invalidateOptionsMenu();
+    }
+
 
     private class ContainersAdapter extends RecyclerView.Adapter<ContainersAdapter.ViewHolder> {
         private final List<Container> data;
@@ -357,6 +473,8 @@ public class ContainersFragment extends Fragment {
             private final ImageView menuButton; // Changed to ImageButton
             private final ImageView imageView;
             private final TextView title;
+
+            private static final String PREF_FAVORITE_UUID = "favorite_uuid";
 
             private ViewHolder(View view) {
                 super(view);
@@ -491,6 +609,49 @@ public class ContainersFragment extends Fragment {
         }
     }
 
+    private void handleFavoriteClick() {
+        Shortcut fav = getFavoriteShortcut();
+        if (fav == null) {
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Favorite")
+                    .setMessage("No favorite assigned. Choose one now?")
+                    .setPositiveButton("Choose", (d, w) -> {
+                        getParentFragmentManager().beginTransaction()
+                                .setCustomAnimations(R.anim.slide_in_up, R.anim.slide_out_down,
+                                        R.anim.slide_in_down, R.anim.slide_out_up)
+                                .addToBackStack(null)
+                                .replace(R.id.FLFragmentContainer, new ShortcutsFragment())
+                                .commit();
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        } else {
+            runShortcut(fav);
+        }
+    }
 
+    private void applyFavoriteIcon() {
+        if (favoriteItem == null) return;
 
+        Shortcut hit = getFavoriteShortcut();
+        Drawable drawable;
+        if (hit != null && hit.icon != null) {
+            int size = dp(24);
+            Bitmap scaled = Bitmap.createScaledBitmap(hit.icon, size, size, true);
+            drawable = new BitmapDrawable(getResources(), scaled);
+            drawable.setTintList(null);
+        } else {
+            drawable = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_star_border);
+        }
+
+        if (favoriteActionView != null) {
+            favoriteActionView.setImageDrawable(drawable);
+        } else {
+            favoriteItem.setIcon(drawable);
+        }
+    }
+
+    private int dp(int v) {
+        return Math.round(v * getResources().getDisplayMetrics().density);
+    }
 }
