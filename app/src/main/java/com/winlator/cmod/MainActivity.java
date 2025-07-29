@@ -81,45 +81,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private boolean isDarkMode;
 
-
-    private static final String GUEST_LIB_NAME = "libevshim_guest.so";
-    private static final String ASSET_PATH = "x86_64-libs/" + GUEST_LIB_NAME;
-    private static final String GUEST_LIB_DIR  = "imagefs/usr/lib/x86_64-libs";
     private boolean allAccessFilesDialogDismissed = false;
 
-    /**
-     * Ensures a fresh copy of the guest .so file is present by overwriting any existing version.
-     */
-    private void ensureGuestLibsPresent(Context ctx) throws IOException {
-        File dstDir = new File(ctx.getFilesDir(), GUEST_LIB_DIR);
-        // Create the directory if it doesn't already exist.
-        if (!dstDir.exists() && !dstDir.mkdirs()) {
-            throw new IOException("Cannot create destination directory: " + dstDir);
-        }
-
-        File dstFile = new File(dstDir, GUEST_LIB_NAME);
-
-        // Delete the old file if it exists to prepare for a fresh copy.
-        if (dstFile.exists()) {
-            dstFile.delete();
-        }
-
-        // Always copy the file from assets.
-        Log.d("GuestLibCopy", "Deploying " + GUEST_LIB_NAME + "...");
-        try (InputStream in  = ctx.getAssets().open(ASSET_PATH);
-             OutputStream out = new FileOutputStream(dstFile)) {
-
-            byte[] buf = new byte[8192];
-            for (int r; (r = in.read(buf)) != -1;) {
-                out.write(buf, 0, r);
-            }
-        }
-
-        // Set the necessary permissions for the .so file.
-        dstFile.setReadable(true, false);
-        dstFile.setExecutable(true, false);
-        Log.i("GuestLibCopy", "Successfully deployed " + GUEST_LIB_NAME);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,13 +90,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Initialize the controller management system
         ControllerManager.getInstance().init(getApplicationContext());
-
-        // evshim: add x86_64 guest libs
-        try {
-            ensureGuestLibsPresent(this);
-        } catch (IOException e) {
-            Log.e("GuestLibCopy", "Failed to deploy guest libs", e);
-        }
 
 
         // Get shared preferences

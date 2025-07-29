@@ -21,6 +21,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
@@ -78,6 +82,7 @@ public abstract class ImageFsInstaller {
 
             if (success) {
                 installWineFromAssets(activity);
+                installGuestLibs(activity);
                 imageFs.createImgVersionFile(LATEST_VERSION);
                 resetContainerImgVersions(activity);
             }
@@ -113,6 +118,7 @@ public abstract class ImageFsInstaller {
 
             if (success) {
                 installWineFromAssets(activity);
+                installGuestLibs(activity);
                 imageFs.createImgVersionFile(LATEST_VERSION);
                 resetContainerImgVersions(activity);
             }
@@ -168,5 +174,37 @@ public abstract class ImageFsInstaller {
             }
         }
         else rootDir.mkdirs();
+    }
+
+    private static void installGuestLibs(Context context) {
+        final String GUEST_LIB_NAME = "libevshim_guest.so";
+        final String ASSET_PATH = "x86_64-libs/" + GUEST_LIB_NAME;
+        final String GUEST_LIB_DIR = "imagefs/usr/lib/x86_64-libs";
+
+        File dstDir = new File(context.getFilesDir(), GUEST_LIB_DIR);
+        if (!dstDir.exists() && !dstDir.mkdirs()) {
+            android.util.Log.e("ImageFsInstaller", "Cannot create destination directory: " + dstDir);
+            return;
+        }
+
+        File dstFile = new File(dstDir, GUEST_LIB_NAME);
+
+        android.util.Log.d("ImageFsInstaller", "Deploying " + GUEST_LIB_NAME + "...");
+        try (InputStream in = context.getAssets().open(ASSET_PATH);
+             OutputStream out = new FileOutputStream(dstFile)) {
+
+            byte[] buf = new byte[8192];
+            int r;
+            while ((r = in.read(buf)) != -1) {
+                out.write(buf, 0, r);
+            }
+        } catch (IOException e) {
+            android.util.Log.e("ImageFsInstaller", "Failed to deploy guest lib", e);
+            return;
+        }
+
+        dstFile.setReadable(true, false);
+        dstFile.setExecutable(true, false);
+        android.util.Log.i("ImageFsInstaller", "Successfully deployed " + GUEST_LIB_NAME);
     }
 }

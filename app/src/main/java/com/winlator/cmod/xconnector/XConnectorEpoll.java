@@ -121,6 +121,10 @@ public class XConnectorEpoll implements Runnable {
         }
     }
 
+    public SparseArray<Client> getConnectedClients() {
+        return connectedClients;
+    }
+
     public Client getClient(int fd) {
         return connectedClients.get(fd);
     }

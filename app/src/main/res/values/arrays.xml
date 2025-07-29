@@ -28,6 +28,7 @@
         <item>turnip25.1.0</item>
     </string-array>
     <string-array name="audio_driver_entries">
+        <item>ALSA-Reflector</item>
         <item>ALSA</item>
         <item>PulseAudio</item>
     </string-array>
