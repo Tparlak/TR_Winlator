@@ -1,5 +1,6 @@
 package com.winlator.cmod.xenvironment;
 
+import android.app.AlertDialog;
 import android.content.Context;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,7 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class ImageFsInstaller {
-    public static final byte LATEST_VERSION = 22;
+    public static final byte LATEST_VERSION = 23;
 
     private static void resetContainerImgVersions(Context context) {
         ContainerManager manager = new ContainerManager(context);
@@ -138,9 +139,17 @@ public abstract class ImageFsInstaller {
 
     public static void installIfNeeded(final MainActivity activity, final Runnable onCompletion) {
         ImageFs imageFs = ImageFs.find(activity);
+
         if (!imageFs.isValid() || imageFs.getVersion() < LATEST_VERSION) {
-            // If installation is needed, pass the callback to be run upon completion.
-            installFromAssets(activity, onCompletion);
+            // A system files update is required, so show a warning dialog first.
+            new AlertDialog.Builder(activity)
+                    .setTitle("System Files Update Required")
+                    .setMessage(R.string.system_update_warning)
+                    .setCancelable(false) // Prevents the user from dismissing the dialog
+                    .setPositiveButton("Continue", (dialog, which) -> {
+                        installFromAssets(activity, onCompletion);
+                    })
+                    .show();
         }
         else if (onCompletion != null) {
             // If no installation is needed, just run the callback.

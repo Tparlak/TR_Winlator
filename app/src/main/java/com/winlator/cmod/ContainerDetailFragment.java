@@ -116,6 +116,12 @@ public class ContainerDetailFragment extends Fragment {
 //            "SDL_MOUSE_FOCUS_CLICKTHROUGH=1"
 //    };
 
+        private static final String[] MEDIACONV_ENV_VARS = {
+            "MEDIACONV_VIDEO_TRANSCODED_FILE=/sdcard/transcoded.mkv",
+            "MEDIACONV_BLANK_VIDEO_FILE=/sdcard/blank.mkv",
+            "MEDIACONV_AUDIO_DUMP_FILE=/sdcard/audio.dump"
+    };
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -376,6 +382,8 @@ public class ContainerDetailFragment extends Fragment {
 
         view.findViewById(R.id.BTHelpDXWrapper).setOnClickListener((v) -> AppUtils.showHelpBox(context, v, R.string.dxwrapper_help_content));
 
+
+
         Spinner sAudioDriver = view.findViewById(R.id.SAudioDriver);
         AppUtils.setSpinnerSelectionFromIdentifier(sAudioDriver, isEditMode() ? container.getAudioDriver() : Container.DEFAULT_AUDIO_DRIVER);
 
@@ -451,6 +459,15 @@ public class ContainerDetailFragment extends Fragment {
 //        final CheckBox cbSdl2Toggle = view.findViewById(R.id.CBSdl2Toggle);
 //        cbSdl2Toggle.setChecked(isEditMode() && container.getEnvVars().contains("SDL_XINPUT_ENABLED=1"));
 
+        final Runnable showGStreamerWorkaroundWarning = () -> ContentDialog.alert(context, R.string.enable_gstreamer_workaround_alert, null);
+
+        final CheckBox cbGStreamerWorkaroundToggle = view.findViewById(R.id.CBGStreamerWorkaroundToggle);
+        cbGStreamerWorkaroundToggle.setChecked(isEditMode() && container.getEnvVars().contains("MEDIACONV_VIDEO_TRANSCODED_FILE=/sdcard/transcoded.mkv"));
+
+        cbGStreamerWorkaroundToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked && cbGStreamerWorkaroundToggle.isChecked())
+                    showGStreamerWorkaroundWarning.run();
+            });
 
         final EditText etLC_ALL = view.findViewById(R.id.ETlcall);
         Locale systemLocal = Locale.getDefault();
@@ -502,10 +519,10 @@ public class ContainerDetailFragment extends Fragment {
         RCManager.loadRCFileSpinner(rcManager, container == null ? 0 : container.getRCFileId(), sRCFile, id -> rcfileIds[0] = id);
 
         final CPUListView cpuListView = view.findViewById(R.id.CPUListView);
-        final CPUListView cpuListViewWoW64 = view.findViewById(R.id.CPUListViewWoW64);
+//        final CPUListView cpuListViewWoW64 = view.findViewById(R.id.CPUListViewWoW64);
 
         cpuListView.setCheckedCPUList(isEditMode() ? container.getCPUList(true) : Container.getFallbackCPUList());
-        cpuListViewWoW64.setCheckedCPUList(isEditMode() ? container.getCPUListWoW64(true) : Container.getFallbackCPUListWoW64());
+//        cpuListViewWoW64.setCheckedCPUList(isEditMode() ? container.getCPUListWoW64(true) : Container.getFallbackCPUListWoW64());
 
         final Spinner sPrimaryController = view.findViewById(R.id.SPrimaryController);
         sPrimaryController.setSelection(isEditMode() ? container.getPrimaryController() : 1);
@@ -554,7 +571,7 @@ public class ContainerDetailFragment extends Fragment {
                 boolean showFPS = cbShowFPS.isChecked();
                 boolean fullscreenStretched = cbFullscreenStretched.isChecked();
                 String cpuList = cpuListView.getCheckedCPUListAsString();
-                String cpuListWoW64 = cpuListViewWoW64.getCheckedCPUListAsString();
+//                String cpuListWoW64 = cpuListViewWoW64.getCheckedCPUListAsString();
                 boolean wow64Mode = cbWoW64Mode.isChecked();
 //                boolean isRelativeMouseMovement = cbRelativeMouseMovement.isChecked();
                 byte startupSelection = (byte) sStartupSelection.getSelectedItemPosition();
@@ -590,6 +607,21 @@ public class ContainerDetailFragment extends Fragment {
 //                    }
 //                }
 
+                // Handle GStreamer Workaround environment variables based on the toggle state
+                if (cbGStreamerWorkaroundToggle.isChecked()) {
+                    // Add SDL2 environment variables if the toggle is enabled
+                    for (String envVar : MEDIACONV_ENV_VARS) {
+                        if (!envVars.contains(envVar)) {
+                            envVars += (envVars.isEmpty() ? "" : " ") + envVar;
+                        }
+                    }
+                } else {
+                    // Remove GStreamer Workaround environment variables if the toggle is disabled
+                    for (String envVar : MEDIACONV_ENV_VARS) {
+                        envVars = envVars.replace(envVar, "").replaceAll("\\s{2,}", " ").trim();
+                    }
+                }
+
 
 
                 if (isEditMode()) {
@@ -598,7 +630,7 @@ public class ContainerDetailFragment extends Fragment {
                     container.setScreenSize(screenSize);
                     container.setEnvVars(envVars);
                     container.setCPUList(cpuList);
-                    container.setCPUListWoW64(cpuListWoW64);
+//                    container.setCPUListWoW64(cpuListWoW64);
                     container.setGraphicsDriver(graphicsDriver);
                     container.setGraphicsDriverConfig(graphicsDriverConfig);
                     container.setDXWrapper(dxwrapper);
@@ -634,7 +666,7 @@ public class ContainerDetailFragment extends Fragment {
                     data.put("screenSize", screenSize);
                     data.put("envVars", envVars);
                     data.put("cpuList", cpuList);
-                    data.put("cpuListWoW64", cpuListWoW64);
+//                    data.put("cpuListWoW64", cpuListWoW64);
                     data.put("graphicsDriver", graphicsDriver);
                     data.put("graphicsDriverConfig", graphicsDriverConfig);
                     data.put("dxwrapper", dxwrapper);

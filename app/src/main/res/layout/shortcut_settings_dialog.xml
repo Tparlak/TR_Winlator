@@ -534,6 +534,21 @@
                         android:entries="@array/startup_selection_entries" />
                 </LinearLayout>
 
+                <LinearLayout style="@style/FieldSet">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/workarounds" />
+
+                    <CheckBox
+                        android:id="@+id/CBGStreamerWorkaroundToggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/enable_gstreamer_workaround" />
+
+                </LinearLayout>
+
                 <TextView
                     android:id="@+id/TVSystem"
                     style="@style/FieldSetLabel"
@@ -810,18 +825,18 @@
                 android:gravity="center_horizontal"
                 android:layout_marginTop="4dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/processor_affinity_32_bit_apps"
-                android:layout_marginTop="8dp" />
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="@string/processor_affinity_32_bit_apps"-->
+<!--                android:layout_marginTop="8dp" />-->
 
-            <com.winlator.cmod.widget.CPUListView
-                android:id="@+id/CPUListViewWoW64"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:layout_marginTop="4dp" />
+<!--            <com.winlator.cmod.widget.CPUListView-->
+<!--                android:id="@+id/CPUListViewWoW64"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:gravity="center_horizontal"-->
+<!--                android:layout_marginTop="4dp" />-->
 
         </LinearLayout>
     </LinearLayout>

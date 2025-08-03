@@ -462,7 +462,7 @@
     <string name="help_steamgrid">SteamGrid API Key</string>
     <string name="disable_xinput_for_shortcut">Disable Xinput (For Exclusive M/KB Control)</string>
     <string name="fullscreen_stretched">Ignore Aspect Ratio (Fullscreen Stretched)</string>
-    <string name="export_container">Export Container</string>
+    <string name="export_container">Backup Container</string>
     <string name="exporting_container">Exporting Container...</string>
     <string name="importing_container">Importing Container...</string>
 
@@ -698,6 +698,11 @@ E.g. <b>META</b> for <i>META key</i>, \n
     <string name="vkbasalt_sharpness_effects">Sharpness Effect</string>
     <string name="vkbasalt_sharpness_level">Sharpness Level</string>
     <string name="vkbasalt_sharpness_denoise">Sharpeness Denoise</string>
+    <string name="enable_peb_logs">Log Windows PEB Data</string>
+    <string name="enable_gstreamer_workaround">Enable GStreamer Video Decoder Workaround</string>
+    <string name="enable_gstreamer_workaround_alert">Enabling this option will add environmental variables to this container\'s configuration that could impact your ability to launch games. Do not enable this unless you are certain the issue is specific to in-game video playback.</string>
+    <string name="workarounds">Workarounds</string>
+    <string name="system_update_warning"><![CDATA[A mandatory update to the system files is needed to ensure compatibility and stability.\n\nImportant: After the update, your existing containers might have issues. If you experience problems, it is strongly recommended to create a new container and migrate your data.\n\nMigrating Saves:\nUse the Saves Manager from the main menu. Register your saves from the old container by path, then use the pop-up menu on each save to transfer it to the new container.\n\nMigrating Shortcuts:\nWhile you can duplicate shortcuts via their pop-up menu, it is strongly recommend to recreate them manually from inside your new container to prevent issues.]]></string>
 
 
 </resources>

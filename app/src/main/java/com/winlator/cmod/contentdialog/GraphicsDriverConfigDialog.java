@@ -149,11 +149,11 @@ public class GraphicsDriverConfigDialog extends ContentDialog {
 
         HashMap<String, String> config = parseGraphicsDriverConfig(graphicsDriverConfig);
 
-        String initialVersion = config.get("version");
-        String blExtensions = config.get("blacklistedExtensions");
-        String maxDeviceMemory = config.get("maxDeviceMemory");
-        String adrenotoolsTurnip = config.get("adrenotoolsTurnip");
-        String frameSync = config.get("frameSync");
+        String initialVersion = config.getOrDefault("version", DefaultVersion.WRAPPER);
+        String blExtensions = config.getOrDefault("blacklistedExtensions", "");
+        String maxDeviceMemory = config.getOrDefault("maxDeviceMemory", "0");
+        String adrenotoolsTurnip = config.getOrDefault("adrenotoolsTurnip", "1"); // Default to "1" (checked)
+        String frameSync = config.getOrDefault("frameSync", "Normal");
 
         // Update the selectedVersion whenever the user selects a different version
         sVersion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -208,14 +208,15 @@ public class GraphicsDriverConfigDialog extends ContentDialog {
         populateGraphicsDriverVersions(anchor.getContext(), contentsManager, initialVersion, blExtensions, maxDeviceMemory, frameSync, graphicsDriver);
 
         setOnConfirmCallback(() -> {
+            // Reset blacklistedExtensions before rebuilding it
+            blacklistedExtensions = "";
+            ArrayList<String> blacklist = new ArrayList<>();
             for (HashMap.Entry<String, Boolean> entry : extensionsState.entrySet()) {
                 if(!entry.getKey().isEmpty() && !entry.getValue()) {
-                    blacklistedExtensions += entry.getKey() + ",";
+                    blacklist.add(entry.getKey());
                 }
             }
-
-            if (!blacklistedExtensions.isEmpty())
-                blacklistedExtensions = blacklistedExtensions.substring(0, blacklistedExtensions.length() - 1);
+            blacklistedExtensions = String.join(",", blacklist);
 
             if (graphicsDriverVersionView != null)
                 graphicsDriverVersionView.setText(selectedVersion);

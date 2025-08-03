@@ -63,7 +63,6 @@
         <item>2.4-24-gplasync</item>
         <item>2.4.1</item>
         <item>2.4.1-gplasync</item>
-        <item>2.4.1-arm64ec</item>
     </string-array>
     <string-array name="dxvk_max_device_memory_entries">
         <item>0 (Default)</item>
@@ -144,7 +143,6 @@
     <string-array name="startup_selection_entries">
         <item>Normal (Load all services)</item>
         <item>Essential (Load only essential services)</item>
-        <item>Aggressive (Stop services on startup)</item>
     </string-array>
     <string-array name="vkd3d_version_entries">
         <item>2.8</item>
