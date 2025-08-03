@@ -302,7 +302,10 @@ public class ShortcutSettingsDialog extends ContentDialog {
         final Runnable showGStreamerWorkaroundWarning = () -> ContentDialog.alert(context, R.string.enable_gstreamer_workaround_alert, null);
 
         final CheckBox cbGStreamerWorkaroundToggle = findViewById(R.id.CBGStreamerWorkaroundToggle);
-        cbGStreamerWorkaroundToggle.setChecked(shortcut.container.getEnvVars().contains("MEDIACONV_VIDEO_TRANSCODED_FILE=/sdcard/transcoded.mkv"));
+        String isGStreamerWorkaroundEnabled = shortcut.getExtra("gstreamerWorkaround", "0");
+        cbGStreamerWorkaroundToggle.setChecked(isGStreamerWorkaroundEnabled.equals("1") ? true : false);
+
+
 
         cbGStreamerWorkaroundToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked && cbGStreamerWorkaroundToggle.isChecked())
@@ -440,6 +443,9 @@ public class ShortcutSettingsDialog extends ContentDialog {
 
 //                boolean relativeMouseMovement = cbRelativeMouseMovement.isChecked();
 //                shortcut.putExtra("relativeMouseMovement", relativeMouseMovement ? "1" : "0");
+
+                boolean gstreamerWorkaround = cbGStreamerWorkaroundToggle.isChecked();
+                shortcut.putExtra("gstreamerWorkaround", gstreamerWorkaround ? "1" : "0");
 
                 boolean touchscreenMode = cbSimTouchScreen.isChecked();
                 shortcut.putExtra("simTouchScreen", touchscreenMode ? "1" : "0");

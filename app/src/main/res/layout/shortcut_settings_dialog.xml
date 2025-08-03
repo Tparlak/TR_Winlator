@@ -532,9 +532,6 @@
                         android:layout_width="match_parent"
                         android:id="@+id/SStartupSelection"
                         android:entries="@array/startup_selection_entries" />
-                </LinearLayout>
-
-                <LinearLayout style="@style/FieldSet">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -548,6 +545,7 @@
                         android:text="@string/enable_gstreamer_workaround" />
 
                 </LinearLayout>
+
 
                 <TextView
                     android:id="@+id/TVSystem"

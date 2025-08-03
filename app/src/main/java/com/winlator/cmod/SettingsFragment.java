@@ -409,6 +409,7 @@ public class SettingsFragment extends Fragment {
             editor.putBoolean("enable_file_provider", cbEnableFileProvider.isChecked());
             editor.putBoolean("open_with_android_browser", cbOpenInBrowser.isChecked());
             editor.putBoolean("share_android_clipboard", cbShareClipboard.isChecked());
+            editor.putBoolean("enable_peb_logs", CBEnablePebLogs.isChecked());
 
 
             // Save gyro settings
