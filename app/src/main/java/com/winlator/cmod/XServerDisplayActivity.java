@@ -680,6 +680,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
                 setupWineSystemFiles();
                 extractArm64ecInputDLLs(); // REQUIRED: Uses updated xinput1_3 main.c from x86_64 build, prevents crashes with 3+ players, avoids need for input shim dlls.
+//                extractx86_64InputDlls(); // Not needed but just in case.
                 extractGraphicsDriverFiles();
                 changeWineAudioDriver();
 
@@ -1485,6 +1486,18 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         }
         else
             Log.d("XServerDisplayActivity", "Wine version is not proton-9.0-arm64ec, skipping input dlls extraction");
+    }
+
+    private void extractx86_64InputDlls() {
+        String inputAsset = "x86_64_input_dlls.tzst";
+        String wineVersion = container.getWineVersion();
+        Log.d("XServerDisplayActivity", "x86_64 Input DLL Extraction Verification: Container Wine version: " + wineVersion);
+        if ("proton-9.0-x86_64".equals(wineVersion)) {
+            File wineFolder = new File(imageFs.getWinePath() + "/lib/wine/");
+            Log.d("XServerDisplayActivity", "Extracting input dlls to " + wineFolder.getPath());
+        }
+        else
+            Log.d("XServerDisplayActivity", "Wine version is not proton-9.0-x86_64, skipping input dlls extraction");
     }
 
     private void setupWineSystemFiles() {
