@@ -61,11 +61,12 @@ public class ShortcutSettingsDialog extends ContentDialog {
     private String box64Version;
 
     private static final String[] MEDIACONV_ENV_VARS = {
-            "MEDIACONV_VIDEO_TRANSCODED_FILE=/sdcard/transcoded.mkv",
-            "MEDIACONV_BLANK_VIDEO_FILE=/sdcard/blank.mkv",
-            "MEDIACONV_AUDIO_DUMP_FILE=/sdcard/audio.dump",
-            "WINE_NEW_MEDIASOURCE=0",
-            "WINE_DO_NOT_CREATE_DXGI_DEVICE_MANAGER=1"
+            "MEDIACONV_AUDIO_DUMP_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/audio.dmp",
+            "MEDIACONV_VIDEO_DUMP_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/video.dmp",
+            "MEDIACONV_VIDEO_TRANSCODED_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/transcoded.mkv",
+            "MEDIACONV_AUDIO_TRANSCODED_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/transcoded.wav",
+            "MEDIACONV_BLANK_AUDIO_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/blank.wav",
+            "MEDIACONV_BLANK_VIDEO_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/blank.mkv",
     };
 
 
@@ -483,20 +484,6 @@ public class ShortcutSettingsDialog extends ContentDialog {
 
 
                 String envVars = envVarsView.getEnvVars();
-
-                if (cbGStreamerWorkaroundToggle.isChecked()) {
-                    // Add GStreamer workaround environment variables if the toggle is enabled
-                    for (String envVar : MEDIACONV_ENV_VARS) {
-                        if (!envVars.contains(envVar)) {
-                            envVars += (envVars.isEmpty() ? "" : " ") + envVar;
-                        }
-                    }
-                } else {
-                    // Remove GStreamer workaround environment variables if the toggle is disabled
-                    for (String envVar : MEDIACONV_ENV_VARS) {
-                        envVars = envVars.replace(envVar, "").replaceAll("\\s{2,}", " ").trim();
-                    }
-                }
 
                 shortcut.putExtra("envVars", !envVars.isEmpty() ? envVars : null);
 

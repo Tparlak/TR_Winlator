@@ -248,6 +248,15 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     private AudioDeviceCallback audioDeviceCallback;
     private AudioManager audioManager;
 
+    private static final String[] MEDIACONV_ENV_VARS = {
+            "MEDIACONV_AUDIO_DUMP_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/audio.dmp",
+            "MEDIACONV_VIDEO_DUMP_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/video.dmp",
+            "MEDIACONV_VIDEO_TRANSCODED_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/transcoded.mkv",
+            "MEDIACONV_AUDIO_TRANSCODED_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/transcoded.wav",
+            "MEDIACONV_BLANK_AUDIO_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/blank.wav",
+            "MEDIACONV_BLANK_VIDEO_FILE=/data/data/com.winlator.cmod/files/imagefs/home/xuser/blank.mkv",
+    };
+
 
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
@@ -1479,7 +1488,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         Log.d("XServerDisplayActivity", "arm64ec Input DLL Extraction Verification: Container Wine version: " + wineVersion);
 
         // Check if the wineVersion string is not null and contains "arm64ec"
-        if (wineVersion != null && wineVersion.contains("arm64ec")) {
+        if (wineVersion != null && wineVersion.contains("proton-9.0-arm64ec")) {
             File wineFolder = new File(imageFs.getWinePath() + "/lib/wine/");
             Log.d("XServerDisplayActivity", "Wine version contains arm64ec. Extracting input dlls to " + wineFolder.getPath());
             boolean success = TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, this, inputAsset, wineFolder);
@@ -1655,6 +1664,20 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         if (overrideEnvVars != null) {
             envVars.putAll(overrideEnvVars);
             overrideEnvVars.clear(); // Clear overrideEnvVars as per smali logic
+        }
+
+        boolean enableGstreamer = container.isGstreamerWorkaround();
+        if (shortcut != null && shortcut.hasExtra("gstreamerWorkaround")) {
+            enableGstreamer = shortcut.getExtra("gstreamerWorkaround").equals("1");
+        }
+
+        if (enableGstreamer) {
+            for (String envVar : Container.MEDIACONV_ENV_VARS) {
+                String[] parts = envVar.split("=", 2);
+                if (parts.length == 2) {
+                    envVars.put(parts[0], parts[1]);
+                }
+            }
         }
 
         // Create our overall XEnvironment with various components
@@ -2224,10 +2247,37 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         envVars.put("GALLIUM_DRIVER", "zink");
         envVars.put("LIBGL_KOPPER_DISABLE", "true");
 
-        if (firstTimeBoot) {
-            Log.d("XServerDisplayActivity", "First time container boot, re-extracting wrapper");
-            TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, this, "graphics_driver/wrapper" + ".tzst", rootDir);
-            TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, this, "graphics_driver/extra_libs" + ".tzst", rootDir);
+//        if (firstTimeBoot) {
+//            Log.d("XServerDisplayActivity", "First time container boot, re-extracting wrapper");
+//            TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, this, "graphics_driver/wrapper" + ".tzst", rootDir);
+//            TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, this, "graphics_driver/extra_libs" + ".tzst", rootDir);
+//        }
+
+        // 1. Get the main WRAPPER selection (e.g., "Wrapper-v2") from the class field.
+        String mainWrapperSelection = this.graphicsDriver;
+
+        // 2. Get the WRAPPER that was last saved to the container's settings.
+        String lastInstalledMainWrapper = container.getExtra("lastInstalledMainWrapper");
+
+        // 3. Check if we need to extract a new wrapper file.
+        if (firstTimeBoot || !mainWrapperSelection.equals(lastInstalledMainWrapper)) {
+            // We only extract if the selection is actually a wrapper file.
+            if (mainWrapperSelection.toLowerCase().startsWith("wrapper")) {
+                String assetPath = "graphics_driver/" + mainWrapperSelection.toLowerCase() + ".tzst";
+                Log.d("GraphicsDriverExtraction", "WRAPPER selection changed or first boot. Extracting: " + assetPath);
+                boolean success = TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, this, assetPath, rootDir);
+                if (success) {
+                    // After success, save the new version so we don't re-extract next time.
+                    container.putExtra("lastInstalledMainWrapper", mainWrapperSelection);
+                    container.saveData();
+                }
+            }
+
+            // 4. Extract common libraries, but only when the container is first created.
+            if (firstTimeBoot) {
+                Log.d("XServerDisplayActivity", "First time container boot, extracting extra_libs.tzst");
+                TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, this, "graphics_driver/extra_libs.tzst", rootDir);
+            }
         }
 
         if (adrenoToolsDriverId != "System") {

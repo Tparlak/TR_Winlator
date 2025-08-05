@@ -334,4 +334,7 @@ import java.nio.file.Files;
             return exe;
         }
 
+        public boolean hasExtra(String name) {
+            return this.extraData != null && this.extraData.has(name);
+        }
     }

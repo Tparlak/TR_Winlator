@@ -360,31 +360,31 @@ public class WinHandler {
         }
 
         // Prompt for inactive/unassigned controllers
-        String groupKey = ControllerManager.makePhysicalGroupKey(device);
-        if ((assignedSlot == -1 || !controllerManager.isSlotEnabled(assignedSlot))
-                && !ignoredDeviceIds.contains(deviceId)
-                && !ignoredGroups.contains(groupKey)) {
-
-            if (!isShowingAssignDialog) {
-                isShowingAssignDialog = true;
-                activity.runOnUiThread(() -> {
-                    String checkboxMessage = "Don't prompt for this controller again.";
-                    ContentDialog.confirmWithCheckbox(
-                            activity,
-                            device.getName() + " Detected\n\nThis controller is not active. Open assignment menu?",
-                            checkboxMessage,
-                            (result) -> {
-                                if (result.confirmed) {
-                                    ControllerAssignmentDialog.show(activity);
-                                } else if (result.checkboxChecked) {
-                                    ignoredDeviceIds.add(deviceId);
-                                }
-                                isShowingAssignDialog = false;
-                            });
-                });
-            }
-            return true;
-        }
+//        String groupKey = ControllerManager.makePhysicalGroupKey(device);
+//        if ((assignedSlot == -1 || !controllerManager.isSlotEnabled(assignedSlot))
+//                && !ignoredDeviceIds.contains(deviceId)
+//                && !ignoredGroups.contains(groupKey)) {
+//
+//            if (!isShowingAssignDialog) {
+//                isShowingAssignDialog = true;
+//                activity.runOnUiThread(() -> {
+//                    String checkboxMessage = "Don't prompt for this controller again.";
+//                    ContentDialog.confirmWithCheckbox(
+//                            activity,
+//                            device.getName() + " Detected\n\nThis controller is not active. Open assignment menu?",
+//                            checkboxMessage,
+//                            (result) -> {
+//                                if (result.confirmed) {
+//                                    ControllerAssignmentDialog.show(activity);
+//                                } else if (result.checkboxChecked) {
+//                                    ignoredDeviceIds.add(deviceId);
+//                                }
+//                                isShowingAssignDialog = false;
+//                            });
+//                });
+//            }
+//            return true;
+//        }
 
         // P1
         if (assignedSlot == 0) {
@@ -454,28 +454,28 @@ public class WinHandler {
         }
 
         // Prompt for inactive/unassigned on DOWN
-        if (isDown
-                && ((assignedSlot == -1 || !controllerManager.isSlotEnabled(assignedSlot))
-                && !ignoredGroups.contains(ControllerManager.makePhysicalGroupKey(device))
-                && !ignoredDeviceIds.contains(deviceId))) {
-
-            if (!isShowingAssignDialog) {
-                isShowingAssignDialog = true;
-                activity.runOnUiThread(() -> {
-                    String msg = "This controller is not active. Open assignment menu? (" + device.getName() + ")";
-                    String checkboxMessage = "Don't prompt for this controller again.";
-                    ContentDialog.confirmWithCheckbox(activity, msg, checkboxMessage, result -> {
-                        if (result.confirmed) {
-                            ControllerAssignmentDialog.show(activity);
-                        } else if (result.checkboxChecked) {
-                            ignoredDeviceIds.add(deviceId);
-                        }
-                        isShowingAssignDialog = false;
-                    });
-                });
-            }
-            return true;
-        }
+//        if (isDown
+//                && ((assignedSlot == -1 || !controllerManager.isSlotEnabled(assignedSlot))
+//                && !ignoredGroups.contains(ControllerManager.makePhysicalGroupKey(device))
+//                && !ignoredDeviceIds.contains(deviceId))) {
+//
+//            if (!isShowingAssignDialog) {
+//                isShowingAssignDialog = true;
+//                activity.runOnUiThread(() -> {
+//                    String msg = "This controller is not active. Open assignment menu? (" + device.getName() + ")";
+//                    String checkboxMessage = "Don't prompt for this controller again.";
+//                    ContentDialog.confirmWithCheckbox(activity, msg, checkboxMessage, result -> {
+//                        if (result.confirmed) {
+//                            ControllerAssignmentDialog.show(activity);
+//                        } else if (result.checkboxChecked) {
+//                            ignoredDeviceIds.add(deviceId);
+//                        }
+//                        isShowingAssignDialog = false;
+//                    });
+//                });
+//            }
+//            return true;
+//        }
 
         if (assignedSlot == -1) return false;
 

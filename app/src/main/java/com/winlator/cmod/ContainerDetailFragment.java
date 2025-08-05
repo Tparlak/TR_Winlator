@@ -116,14 +116,6 @@ public class ContainerDetailFragment extends Fragment {
 //            "SDL_MOUSE_FOCUS_CLICKTHROUGH=1"
 //    };
 
-        private static final String[] MEDIACONV_ENV_VARS = {
-            "MEDIACONV_VIDEO_TRANSCODED_FILE=/sdcard/transcoded.mkv",
-            "MEDIACONV_BLANK_VIDEO_FILE=/sdcard/blank.mkv",
-            "MEDIACONV_AUDIO_DUMP_FILE=/sdcard/audio.dump",
-            "WINE_NEW_MEDIASOURCE=0",
-            "WINE_DO_NOT_CREATE_DXGI_DEVICE_MANAGER=1"
-    };
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -464,7 +456,8 @@ public class ContainerDetailFragment extends Fragment {
         final Runnable showGStreamerWorkaroundWarning = () -> ContentDialog.alert(context, R.string.enable_gstreamer_workaround_alert, null);
 
         final CheckBox cbGStreamerWorkaroundToggle = view.findViewById(R.id.CBGStreamerWorkaroundToggle);
-        cbGStreamerWorkaroundToggle.setChecked(isEditMode() && container.getEnvVars().contains("MEDIACONV_VIDEO_TRANSCODED_FILE=/sdcard/transcoded.mkv"));
+        // In ContainerDetailFragment.java
+        cbGStreamerWorkaroundToggle.setChecked(isEditMode() && container.isGstreamerWorkaround());
 
         cbGStreamerWorkaroundToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked && cbGStreamerWorkaroundToggle.isChecked())
@@ -572,6 +565,7 @@ public class ContainerDetailFragment extends Fragment {
                 String drives = getDrives(view);
                 boolean showFPS = cbShowFPS.isChecked();
                 boolean fullscreenStretched = cbFullscreenStretched.isChecked();
+
                 String cpuList = cpuListView.getCheckedCPUListAsString();
 //                String cpuListWoW64 = cpuListViewWoW64.getCheckedCPUListAsString();
                 boolean wow64Mode = cbWoW64Mode.isChecked();
@@ -610,19 +604,7 @@ public class ContainerDetailFragment extends Fragment {
 //                }
 
                 // Handle GStreamer Workaround environment variables based on the toggle state
-                if (cbGStreamerWorkaroundToggle.isChecked()) {
-                    // Add SDL2 environment variables if the toggle is enabled
-                    for (String envVar : MEDIACONV_ENV_VARS) {
-                        if (!envVars.contains(envVar)) {
-                            envVars += (envVars.isEmpty() ? "" : " ") + envVar;
-                        }
-                    }
-                } else {
-                    // Remove GStreamer Workaround environment variables if the toggle is disabled
-                    for (String envVar : MEDIACONV_ENV_VARS) {
-                        envVars = envVars.replace(envVar, "").replaceAll("\\s{2,}", " ").trim();
-                    }
-                }
+                boolean gstreamerWorkaround = cbGStreamerWorkaroundToggle.isChecked();
 
 
 
@@ -657,6 +639,7 @@ public class ContainerDetailFragment extends Fragment {
                     container.setLC_ALL(lc_all);
                     container.setPrimaryController(primaryController);
                     container.setControllerMapping(controllerMapping);
+                    container.setGstreamerWorkaround(gstreamerWorkaround);
                     container.saveData();
                     saveWineRegistryKeys(view);
                     FEXCoreManager.saveFEXCoreSpinners(container, sFEXCoreTSOPreset, sFEXCoreMultiBlock, sFEXCoreX87ReducedPrecision);
@@ -694,6 +677,7 @@ public class ContainerDetailFragment extends Fragment {
                     data.put("lc_all", lc_all);
                     data.put("primaryController", primaryController);
                     data.put("controllerMapping", controllerMapping);
+                    data.put("gstreamerWorkaround", gstreamerWorkaround);
 
                     preloaderDialog.show(R.string.creating_container);
 
