@@ -7,6 +7,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.winlator.cmod.core.EvshimPatcher;
 import com.winlator.cmod.core.FileUtils;
 import com.winlator.cmod.core.TarCompressorUtils;
 
@@ -429,7 +430,16 @@ public class ContentsManager {
             }
         }
         else {
-            // TODO: do nothing?
+            // If we end up needing to inject winebus.so into user-installed contents
+//            File installDir = getInstallDir(context, profile);
+//            boolean arm64ec = profile.verName.contains("arm64ec");
+//            File wineRoot = new File(installDir,        // root of the .wcp
+//                    profile.type == ContentProfile.ContentType.CONTENT_TYPE_PROTON
+//                            ? profile.protonLibPath     // “proton-…”
+//                            : profile.wineLibPath       // “wine-…”
+//            ).getParentFile().getParentFile().getParentFile(); // climb back to top
+//
+//            EvshimPatcher.patchWineTree(context, wineRoot, arm64ec);
         }
         return true;
     }

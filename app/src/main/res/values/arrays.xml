@@ -119,8 +119,8 @@
         <item>0.3.7</item>
     </string-array>
     <string-array name="box64_version_entries">
-<!--        <item>0.3.6</item>-->
         <item>0.3.2</item>
+        <item>0.3.6</item>
         <item>0.3.7</item>
     </string-array>
     <string-array name="wowbox64_version_entries">

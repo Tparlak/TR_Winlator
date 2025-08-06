@@ -25,8 +25,6 @@ import java.util.concurrent.Executors;
 
 public class WineRequestHandler {
 
-
-
     abstract class RequestCodes {
         static final int OPEN_URL = 1;
         static final int GET_WINE_CLIPBOARD = 2;
@@ -170,25 +168,27 @@ public class WineRequestHandler {
             dumpDirectory.mkdirs();
         }
 
-        String dxWrapper, dxwrapperConfig, graphicsDriverConfig, box64Preset, box64Version,
+        String screenSize, dxWrapper, dxwrapperConfig, graphicsDriverConfig, box64Preset, box64Version,
                 startupSelection, winComponents, audioDriver, ddraWrapper, emulator,
                 fexcoreVersion, fexcorePreset, cpuList;
 
         if (shortcut != null) {
-            dxWrapper = shortcut.getExtra("dxwrapper", shortcut.container.getDXWrapper());
-            dxwrapperConfig = shortcut.getExtra("dxwrapperConfig", shortcut.container.getEnvVars());
-            graphicsDriverConfig = shortcut.getExtra("graphicsDriverConfig", shortcut.container.getGraphicsDriverConfig());
-            box64Preset = shortcut.getExtra("box64Preset", shortcut.container.getBox64Preset());
-            box64Version = shortcut.getExtra("box64Version", shortcut.container.getBox64Version());
-            startupSelection = shortcut.getExtra("startupSelection", String.valueOf(shortcut.container.getStartupSelection()));
-            winComponents = shortcut.getExtra("wincomponents", shortcut.container.getWinComponents());
-            audioDriver = shortcut.getExtra("audioDriver", shortcut.container.getAudioDriver());
-            ddraWrapper = shortcut.getExtra("ddrawrapper", shortcut.container.getDDrawWrapper());
-            emulator = shortcut.getExtra("emulator", shortcut.container.getEmulator());
-            fexcoreVersion = shortcut.getExtra("fexcoreVersion", shortcut.container.getFEXCoreVersion());
-            fexcorePreset = FEXCoreManager.printFEXCoreSettings(context, shortcut);
-            cpuList = shortcut.getExtra("cpuList", shortcut.container.getCPUList());
+            screenSize = shortcut.getExtra("screenSize", this.container.getScreenSize());
+            dxWrapper = shortcut.getExtra("dxwrapper", this.container.getDXWrapper());
+            dxwrapperConfig = shortcut.getExtra("dxwrapperConfig", this.container.getDXWrapperConfig());
+            graphicsDriverConfig = shortcut.getExtra("graphicsDriverConfig", this.container.getGraphicsDriverConfig());
+            box64Preset = shortcut.getExtra("box64Preset", this.container.getBox64Preset());
+            box64Version = shortcut.getExtra("box64Version", this.container.getBox64Version());
+            startupSelection = shortcut.getExtra("startupSelection", String.valueOf(this.container.getStartupSelection()));
+            winComponents = shortcut.getExtra("wincomponents", this.container.getWinComponents());
+            audioDriver = shortcut.getExtra("audioDriver", this.container.getAudioDriver());
+            ddraWrapper = shortcut.getExtra("ddrawrapper", this.container.getDDrawWrapper());
+            emulator = shortcut.getExtra("emulator", this.container.getEmulator());
+            fexcoreVersion = shortcut.getExtra("fexcoreVersion", this.container.getFEXCoreVersion());
+            fexcorePreset = FEXCoreManager.printFEXCoreSettings(context, this.shortcut);
+            cpuList = shortcut.getExtra("cpuList", this.container.getCPUList());
         } else {
+            screenSize = container.getScreenSize();
             dxWrapper = container.getDXWrapper();
             dxwrapperConfig = container.getDXWrapperConfig();
             graphicsDriverConfig = container.getGraphicsDriverConfig();
@@ -230,6 +230,7 @@ public class WineRequestHandler {
                 bw.write(String.format("fexcoreVersion: %s\n", fexcoreVersion));
                 bw.write(String.format("fexcorePreset: %s\n", fexcorePreset));
             }
+            bw.write(String.format("screenSize: %s\n", screenSize));
             bw.write(String.format("dxwrapper: %s\n", dxWrapper.toUpperCase()));
             bw.write(String.format("dxwrapperConfig: %s\n", dxwrapperConfig));
             bw.write(String.format("startupSelection: %s\n", startupSelection));

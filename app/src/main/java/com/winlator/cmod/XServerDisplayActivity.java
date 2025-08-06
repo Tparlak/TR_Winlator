@@ -293,6 +293,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         AppUtils.keepScreenOn(this);
         setContentView(R.layout.xserver_display_activity);
 
+        ControllerManager.getInstance().init(this);
+
         setupAudioDeviceListener();
 
 
@@ -716,8 +718,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             try (BufferedReader reader = new BufferedReader(new FileReader(desktopFile))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    if (line.startsWith("container_id:")) {
-                        containerId = Integer.parseInt(line.split(":")[1].trim());
+                    if (line.startsWith("container_id=")) {
+                        containerId = Integer.parseInt(line.split("=")[1].trim());
                         break;
                     }
                 }
@@ -1758,7 +1760,14 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         // Start the WinHandler
         winHandler.start();
 
-        if (wineRequestHandler != null) wineRequestHandler.start();
+        // Properly initialize the WineRequestHandler with all necessary context before starting it
+        if (wineRequestHandler != null) {
+            wineRequestHandler.setContainer(this.container);
+            wineRequestHandler.setShortcut(this.shortcut);
+            wineRequestHandler.setEnvVars(this.envVars);
+            wineRequestHandler.setWineInfo(this.wineInfo);
+            wineRequestHandler.start();
+        }
 
         // Clear envVars if needed
         // envVars.clear();

@@ -35,7 +35,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class ImageFsInstaller {
-    public static final byte LATEST_VERSION = 22;
+    public static final byte LATEST_VERSION = 24;
 
     private static void resetContainerImgVersions(Context context) {
         ContainerManager manager = new ContainerManager(context);
@@ -87,7 +87,7 @@ public abstract class ImageFsInstaller {
 
             if (success) {
                 installWineFromAssets(activity);
-                installGuestLibs(activity);
+//                installGuestLibs(activity); // If evshim.tzst ends up being used
                 imageFs.createImgVersionFile(LATEST_VERSION);
                 resetContainerImgVersions(activity);
             }
@@ -108,7 +108,7 @@ public abstract class ImageFsInstaller {
         dialog.show(R.string.installing_system_files);
         Executors.newSingleThreadExecutor().execute(() -> {
             clearRootDir(rootDir);
-            final byte compressionRatio = 23;
+            final byte compressionRatio = 24;
             final long contentLength = (long)(FileUtils.getSize(activity, "imagefs.txz") * (100.0f / compressionRatio));
             AtomicLong totalSizeRef = new AtomicLong();
 
@@ -125,7 +125,7 @@ public abstract class ImageFsInstaller {
 
             if (success) {
                 installWineFromAssets(activity);
-                installGuestLibs(activity);
+//                installGuestLibs(activity); // If evshim.tzst ends up being used
                 imageFs.createImgVersionFile(LATEST_VERSION);
                 resetContainerImgVersions(activity);
             }
@@ -191,35 +191,24 @@ public abstract class ImageFsInstaller {
         else rootDir.mkdirs();
     }
 
-    private static void installGuestLibs(Context context) {
-        final String GUEST_LIB_NAME = "libevshim_guest.so";
-        final String ASSET_PATH = "x86_64-libs/" + GUEST_LIB_NAME;
-        final String GUEST_LIB_DIR = "imagefs/usr/lib/x86_64-libs";
-
-        File dstDir = new File(context.getFilesDir(), GUEST_LIB_DIR);
-        if (!dstDir.exists() && !dstDir.mkdirs()) {
-            android.util.Log.e("ImageFsInstaller", "Cannot create destination directory: " + dstDir);
-            return;
-        }
-
-        File dstFile = new File(dstDir, GUEST_LIB_NAME);
-
-        android.util.Log.d("ImageFsInstaller", "Deploying " + GUEST_LIB_NAME + "...");
-        try (InputStream in = context.getAssets().open(ASSET_PATH);
-             OutputStream out = new FileOutputStream(dstFile)) {
-
-            byte[] buf = new byte[8192];
-            int r;
-            while ((r = in.read(buf)) != -1) {
-                out.write(buf, 0, r);
-            }
+    private static void installGuestLibs(Context ctx) {
+        final String ASSET_TAR = "evshim.tzst";          // ➊  add this to assets/
+        File imagefs = new File(ctx.getFilesDir(), "imagefs");
+        // ➋  Unpack straight into imagefs, preserving relative paths.
+        try (InputStream in  = ctx.getAssets().open(ASSET_TAR)) {
+            TarCompressorUtils.extract(
+                    TarCompressorUtils.Type.ZSTD,      // you said .tzst
+                    in, imagefs);                      // helper already exists in the project
         } catch (IOException e) {
-            android.util.Log.e("ImageFsInstaller", "Failed to deploy guest lib", e);
+            Log.e("ImageFsInstaller", "evshim deploy failed", e);
             return;
         }
 
-        dstFile.setReadable(true, false);
-        dstFile.setExecutable(true, false);
-        android.util.Log.i("ImageFsInstaller", "Successfully deployed " + GUEST_LIB_NAME);
+        // ➌  Make sure the new libs are world-readable / executable
+        chmod(new File(imagefs, "lib/libevshim.so"));
+        chmod(new File(imagefs, "lib/libSDL2.so"));
+        chmod(new File(imagefs, "lib/libSDL2-2.0.so"));
+        chmod(new File(imagefs, "lib/libSDL2-2.0.so.0"));
     }
+    private static void chmod(File f) { if (f.exists()) FileUtils.chmod(f, 0755);}
 }
