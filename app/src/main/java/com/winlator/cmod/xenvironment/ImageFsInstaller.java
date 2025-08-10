@@ -148,8 +148,14 @@ public abstract class ImageFsInstaller {
     public static void installIfNeeded(final MainActivity activity, final Runnable onCompletion) {
         ImageFs imageFs = ImageFs.find(activity);
 
-        if (!imageFs.isValid() || imageFs.getVersion() < LATEST_VERSION) {
-            // A system files update is required, so show a warning dialog first.
+        // Fresh Install. The imagefs is not valid/doesn't exist.
+        if (!imageFs.isValid()) {
+            // Silently install without showing a warning dialog.
+            installFromAssets(activity, onCompletion);
+        }
+        // Update. The imagefs exists but is an old version.
+        else if (imageFs.getVersion() < LATEST_VERSION) {
+            // Show the warning dialog because the user is updating.
             String htmlMessageString = activity.getString(R.string.system_update_warning);
             CharSequence formattedMessage;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -160,15 +166,15 @@ public abstract class ImageFsInstaller {
             }
             new AlertDialog.Builder(activity)
                     .setTitle("System Files Update Required")
-                    .setMessage(formattedMessage) // Set the Spanned CharSequence
+                    .setMessage(formattedMessage)
                     .setCancelable(false)
                     .setPositiveButton("Continue", (dialog, which) -> {
-                         installFromAssets(activity, onCompletion);
+                        installFromAssets(activity, onCompletion);
                     })
                     .show();
         }
+        // Already Up-to-Date.
         else if (onCompletion != null) {
-            // If no installation is needed, just run the callback.
             onCompletion.run();
         }
     }

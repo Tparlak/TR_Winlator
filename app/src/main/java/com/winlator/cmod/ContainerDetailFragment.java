@@ -782,7 +782,7 @@ public class ContainerDetailFragment extends Fragment {
             List<String> rendererList = Arrays.asList(context.getString(R.string.gl), context.getString(R.string.vulkan), context.getString(R.string.gdi));
             Spinner sRenderer = view.findViewById(R.id.SRenderer);
             sRenderer.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, rendererList));
-            AppUtils.setSpinnerSelectionFromValue(sRenderer, registryEditor.getStringValue("Software\\Wine\\Direct3D", "renderer", "vulkan"));
+            AppUtils.setSpinnerSelectionFromValue(sRenderer, registryEditor.getStringValue("Software\\Wine\\Direct3D", "renderer", "gl"));
 
             List<String> stateList = Arrays.asList(context.getString(R.string.disable), context.getString(R.string.enable));
             Spinner sCSMT = view.findViewById(R.id.SCSMT);

@@ -103,6 +103,15 @@ import java.nio.file.Files;
                 this.path = "";        // or leave null / handle however you prefer
             }
 
+            // Check for custom icon path first
+            String customIconPath = getExtra("customIconPath");
+            if (!customIconPath.isEmpty()) {
+                iconFile = new File(customIconPath);
+                if (iconFile.isFile()) {
+                    icon = BitmapFactory.decodeFile(iconFile.getPath());
+                }
+            }
+
             /* --- everything else unchanged ------------------------------------ */
             this.name     = FileUtils.getBasename(file.getPath());
             this.icon     = icon;

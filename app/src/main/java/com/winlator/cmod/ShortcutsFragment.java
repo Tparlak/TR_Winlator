@@ -393,7 +393,13 @@ public class ShortcutsFragment extends Fragment {
         }
 
         // ---- UI update ----
-//        Collections.sort(shortcuts);           // keep existing order logic
+        Collections.sort(shortcuts, (a, b) -> {
+            if (a == null || b == null) return 0;
+            String an = a.name == null ? "" : a.name;
+            String bn = b.name == null ? "" : b.name;
+            return an.compareToIgnoreCase(bn);
+        });
+
         recyclerView.setAdapter(new ShortcutsAdapter(shortcuts));
         emptyTextView.setVisibility(shortcuts.isEmpty() ? View.VISIBLE : View.GONE);
 
