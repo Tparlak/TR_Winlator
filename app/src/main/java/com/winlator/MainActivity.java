@@ -448,7 +448,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             tvCreditsAndThirdPartyApps.setMovementMethod(LinkMovementMethod.getInstance());
 
             String glibcExpVersionForkHTML = String.join("<br />",
-                    "longjunyu2's <a href=\"https://github.com/longjunyu2/winlator/tree/use-glibc-instead-of-proot\">(Fork)</a> + cmod by coffincolors");
+                    "TR_Winlator - Developed by <a href=\"https://github.com/Tparlak\">@Tparlak</a>",
+                    "Based on coffincolors cmod");
             TextView tvGlibcExpVersionFork = dialog.findViewById(R.id.TVGlibcExpVersionFork);
             tvGlibcExpVersionFork.setText(Html.fromHtml(glibcExpVersionForkHTML, Html.FROM_HTML_MODE_LEGACY));
             tvGlibcExpVersionFork.setMovementMethod(LinkMovementMethod.getInstance());
