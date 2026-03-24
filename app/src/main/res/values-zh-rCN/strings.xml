@@ -89,7 +89,7 @@
     <string name="touchpad_help_main_menu_description">四指点击</string>
     <string name="duplicate">复制</string>
     <string name="about">关于</string>
-    <string name="credits_and_third_party_apps">鸣谢与第三方应用</string>
+    <string name="credits_and_third_party_apps">TR_Winlator Project - Based on coffincolors mod</string>
     <string name="external_controllers">外部控制器</string>
     <string name="graphics_driver">图形驱动程序</string>
     <string name="audio_driver">音频驱动程序</string>

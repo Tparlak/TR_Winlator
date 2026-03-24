@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import com.winlator.xenvironment.ImageFsInstaller;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -111,7 +112,10 @@ public class ContainersFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.containers_menu_add:
-                if (!ImageFs.find(getContext()).isValid()) return false;
+                if (!ImageFs.find(getContext()).isValid()) {
+                    ImageFsInstaller.installIfNeeded((MainActivity) getActivity());
+                    return true;
+                }
                 FragmentManager fragmentManager = getParentFragmentManager();
                 fragmentManager.beginTransaction()
                         .setCustomAnimations(R.anim.slide_in_up, R.anim.slide_out_down, R.anim.slide_in_down, R.anim.slide_out_up)

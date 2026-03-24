@@ -15,6 +15,10 @@ import com.winlator.core.FileUtils;
 import com.winlator.core.PreloaderDialog;
 import com.winlator.core.TarCompressorUtils;
 import com.winlator.core.WineInfo;
+import android.content.DialogInterface;
+import androidx.appcompat.app.AlertDialog;
+import android.os.Build;
+import android.text.Html;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,6 +47,11 @@ public abstract class ImageFsInstaller {
     }
 
     public static void installFromAssets(final MainActivity activity) {
+        if (FileUtils.getSize(activity, "imagefs.txz") == 0) {
+            showMissingRootFSDialog(activity);
+            return;
+        }
+
         AppUtils.keepScreenOn(activity);
         ImageFs imageFs = ImageFs.find(activity);
         final File rootDir = imageFs.getRootDir();
@@ -74,6 +83,28 @@ public abstract class ImageFsInstaller {
 
             dialog.closeOnUiThread();
         });
+    }
+
+    private static void showMissingRootFSDialog(final MainActivity activity) {
+        String message = "<b>System Files Missing!</b><br><br>" +
+                "The core system file (imagefs.txz) was not found in the APK assets.<br><br>" +
+                "1. Ensure you have placed <b>imagefs.txz</b> in <i>app/src/main/assets/</i> before building.<br>" +
+                "2. Or place the OBB file in <i>/sdcard/Android/obb/com.winlator/</i> on your device.<br><br>" +
+                "Would you like to initialize a <b>Stub Filesystem</b> to explore the UI? (Note: Containers may not run without the actual RootFS).";
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+                .setTitle("Installation Error")
+                .setMessage(Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY))
+                .setCancelable(false)
+                .setPositiveButton("Create Stub", (dialog, which) -> {
+                    ImageFs imageFs = ImageFs.find(activity);
+                    imageFs.createImgVersionFile(LATEST_VERSION);
+                    AppUtils.showToast(activity, "Stub RootFS initialized.");
+                    activity.recreate();
+                })
+                .setNegativeButton("Exit", (dialog, which) -> activity.finish());
+        
+        builder.show();
     }
 
     public static void installIfNeeded(final MainActivity activity) {
