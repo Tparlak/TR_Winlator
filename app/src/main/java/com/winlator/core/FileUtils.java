@@ -429,11 +429,15 @@ public abstract class FileUtils {
     }
 
     public static long getSize(Context context, String assetFile) {
-        try (InputStream inStream = context.getAssets().open(assetFile)) {
-            return inStream.available();
-        }
-        catch (IOException e) {
-            return 0;
+        try {
+            return context.getAssets().openFd(assetFile).getLength();
+        } catch (IOException e) {
+            try (InputStream inStream = context.getAssets().open(assetFile)) {
+                return inStream.available();
+            }
+            catch (IOException e2) {
+                return 0;
+            }
         }
     }
 

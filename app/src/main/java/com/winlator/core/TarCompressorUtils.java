@@ -114,9 +114,16 @@ public abstract class TarCompressorUtils {
 
     public static boolean extract(Type type, Context context, String assetFile, File destination, OnExtractFileListener onExtractFileListener) {
         try {
-            return extract(type, context.getAssets().open(assetFile), destination, onExtractFileListener);
+            InputStream is;
+            try {
+                is = context.getAssets().openFd(assetFile).createInputStream();
+            } catch (IOException e) {
+                is = context.getAssets().open(assetFile);
+            }
+            return extract(type, is, destination, onExtractFileListener);
         }
         catch (IOException e) {
+            e.printStackTrace();
             return false;
         }
     }

@@ -79,7 +79,9 @@ public abstract class ImageFsInstaller {
                 imageFs.createImgVersionFile(LATEST_VERSION);
                 resetContainerImgVersions(activity);
             }
-            else AppUtils.showToast(activity, R.string.unable_to_install_system_files);
+            else {
+                activity.runOnUiThread(() -> AppUtils.showToast(activity, "Failed to extract imagefs.txz. Size: " + contentLength));
+            }
 
             dialog.closeOnUiThread();
         });
