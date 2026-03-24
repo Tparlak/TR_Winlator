@@ -14,7 +14,7 @@
             android:id="@+id/main_menu_input_controls"
             android:title="@string/input_controls" />
         <item
-            android:icon="@drawable/icon_screen_effect"
+            android:icon="@drawable/ic_picture_in_picture_alt"
             android:id="@+id/main_menu_screen_effects"
             android:title="@string/screen_effect" />
         <item

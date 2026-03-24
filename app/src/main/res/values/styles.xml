@@ -637,7 +637,7 @@
     <style name="Toolbox">
         <item name="android:gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
-        <item name="android:background">@drawable/toolbox</item>
+        <item name="android:background">@drawable/bordered_panel</item>
         <item name="android:paddingLeft">8.0dip</item>
         <item name="android:paddingTop">2.0dip</item>
         <item name="android:paddingRight">8.0dip</item>

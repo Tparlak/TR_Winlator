@@ -27,7 +27,7 @@
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="@color/colorPrimary"
-                    android:text="Winlator-glibc+cmod" />
+                    android:text="TR_Winlator-glibc+cmod" />
 
                 <TextView
                     android:id="@+id/TVWebpage"

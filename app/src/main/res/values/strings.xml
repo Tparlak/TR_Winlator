@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Winlator</string>
+    <string name="app_name">TR_Winlator</string>
     <string name="run">Run</string>
     <string name="edit">Edit</string>
     <string name="remove">Remove</string>
@@ -236,6 +236,7 @@
     <string name="as_button">Is Button</string>
     <string name="as_axis">Is Axis</string>
     <string name="both">Both</string>
+    <string name="trigger_mode">Trigger Mode</string>
     <string name="trigger_type">Trigger Type</string>
     <string name="use_glibc">Use native Glibc instead of Proot</string>
     <string name="experimental">Experimental</string>

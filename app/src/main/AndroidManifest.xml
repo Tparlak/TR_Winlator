@@ -35,7 +35,7 @@
         android:isGame="true"
         android:extractNativeLibs="true"
         android:allowAudioPlaybackCapture="true"
-        android:label="Winlator.glibcmod">
+        android:label="TR_Winlator.glibcmod">
 
         <activity android:name="com.winlator.MainActivity"
             android:theme="@style/AppTheme.Dark"
