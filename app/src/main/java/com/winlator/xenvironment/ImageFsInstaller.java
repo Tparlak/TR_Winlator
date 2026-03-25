@@ -18,6 +18,7 @@ import com.winlator.core.WineInfo;
 import android.content.DialogInterface;
 import androidx.appcompat.app.AlertDialog;
 import android.os.Build;
+import android.os.StatFs;
 import android.text.Html;
 import android.util.Log;
 
@@ -26,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
@@ -48,6 +50,8 @@ public abstract class ImageFsInstaller {
     }
 
     public static void installFromAssets(final MainActivity activity) {
+        if (!hasEnoughStorage(activity)) return;
+
         long assetSize = FileUtils.getSize(activity, "imagefs.txz");
         Log.d("TR_Winlator", "imagefs.txz asset boyutu: " + assetSize + " byte");
 
@@ -57,12 +61,19 @@ public abstract class ImageFsInstaller {
             return;
         }
 
-        // LFS pointer kontrolü: gerçek dosya en az 1MB olmalı
-        if (assetSize < 1_000_000) {
-            Log.e("TR_Winlator", "imagefs.txz çok küçük (" + assetSize + " byte). Muhtemelen Git LFS pointer'ı. Gerçek dosyayı assets klasörüne koyun.");
-            activity.runOnUiThread(() -> AppUtils.showToast(activity,
-                "HATA: imagefs.txz geçersiz (" + assetSize + " byte). Git LFS pointer olabilir. Gerçek dosyayı assets klasörüne koyun."));
-            return;
+        // LFS pointer ve Bozuk dosya kontrolü: gerçek dosya en az 50MB olmalı
+        try {
+            android.content.res.AssetFileDescriptor afd = activity.getAssets().openFd("imagefs.txz");
+            long realSize = afd.getLength();
+            Log.d("TR_Winlator", "imagefs.txz gerçek boyut (openFd): " + realSize + " byte");
+            if (realSize < 50_000_000L) {
+                Log.e("TR_Winlator", "imagefs.txz boyutu çok küçük (" + realSize + " byte). Dosya bozuk veya LFS pointer!");
+                activity.runOnUiThread(() -> AppUtils.showToast(activity,
+                    "HATA: Sistem dosyası (190MB+) eksik veya bozuk (" + realSize + " byte)."));
+                return;
+            }
+        } catch (IOException e) {
+            Log.e("TR_Winlator", "AssetFileDescriptor okuma hatası: " + e.getMessage());
         }
 
         AppUtils.keepScreenOn(activity);
@@ -74,34 +85,45 @@ public abstract class ImageFsInstaller {
         final DownloadProgressDialog dialog = new DownloadProgressDialog(activity);
         dialog.show(R.string.installing_system_files);
         Executors.newSingleThreadExecutor().execute(() -> {
-            clearRootDir(rootDir);
-            final byte compressionRatio = 22;
-            final long contentLength = (long)(assetSize * (100.0f / compressionRatio));
-            AtomicLong totalSizeRef = new AtomicLong();
+            try {
+                clearRootDir(rootDir);
+                final byte compressionRatio = 22;
+                final long contentLength = (long)(assetSize * (100.0f / compressionRatio));
+                AtomicLong totalSizeRef = new AtomicLong();
 
-            Log.d("TR_Winlator", "imagefs.txz çıkarma başlıyor. Tahmini boyut: " + contentLength + " byte");
+                Log.d("TR_Winlator", "imagefs.txz çıkarma başlıyor. Tahmini boyut: " + contentLength + " byte");
 
-            boolean success = TarCompressorUtils.extract(TarCompressorUtils.Type.XZ, activity, "imagefs.txz", rootDir, (file, size) -> {
-                if (size > 0) {
-                    long totalSize = totalSizeRef.addAndGet(size);
-                    final int progress = (int)(((float)totalSize / contentLength) * 100);
-                    activity.runOnUiThread(() -> dialog.setProgress(progress));
+                boolean success = TarCompressorUtils.extract(TarCompressorUtils.Type.XZ, activity, "imagefs.txz", rootDir, (file, size) -> {
+                    if (size > 0) {
+                        long totalSize = totalSizeRef.addAndGet(size);
+                        final int progress = (int)(((float)totalSize / contentLength) * 100);
+                        activity.runOnUiThread(() -> dialog.setProgress(progress));
+                        if (file != null) Log.d("TR_Winlator_INSTALL", "Çıkarılıyor: " + file.getName() + " | İlerleme: " + progress + "% | Boyut: " + size);
+                    }
+                    return file;
+                });
+
+                if (success) {
+                    Log.d("TR_Winlator", "imagefs.txz başarıyla çıkarıldı.");
+                    imageFs.createImgVersionFile(LATEST_VERSION);
+                    resetContainerImgVersions(activity);
+                    markInstallationComplete(activity);
                 }
-                return file;
-            });
+                else {
+                    Log.e("TR_Winlator", "imagefs.txz çıkarılamadı. Boyut: " + assetSize + " byte");
+                    activity.runOnUiThread(() -> showInstallErrorDialog(activity, "Çıkarma başarısız. Lütfen uygulamanın verilerini silip APK'yı baştan kurun."));
+                }
 
-            if (success) {
-                Log.d("TR_Winlator", "imagefs.txz başarıyla çıkarıldı.");
-                imageFs.createImgVersionFile(LATEST_VERSION);
-                resetContainerImgVersions(activity);
+            } catch (OutOfMemoryError oom) {
+                Log.e("TR_Winlator", "BELLEK HATASI: " + oom.getMessage());
+                activity.runOnUiThread(() -> showInstallErrorDialog(activity, "Yetersiz bellek (RAM). Arka plan uygulamalarını kapatıp baştan deneyin."));
+            } catch (Throwable e) {
+                Log.e("TR_Winlator", "BİLİNMEYEN HATA: " + e.getMessage());
+                e.printStackTrace();
+                activity.runOnUiThread(() -> showInstallErrorDialog(activity, "Sistem hatası: " + e.getMessage()));
+            } finally {
+                dialog.closeOnUiThread();
             }
-            else {
-                Log.e("TR_Winlator", "imagefs.txz çıkarılamadı. Boyut: " + assetSize + " byte");
-                activity.runOnUiThread(() -> AppUtils.showToast(activity,
-                    "imagefs.txz çıkarılamadı. Boyut: " + assetSize + " byte. Lütfen APK'yı yeniden derleyin."));
-            }
-
-            dialog.closeOnUiThread();
         });
     }
 
@@ -129,8 +151,56 @@ public abstract class ImageFsInstaller {
     }
 
     public static void installIfNeeded(final MainActivity activity) {
+        if (!isInstallationComplete(activity)) {
+            clearPartialInstallation(activity);
+        }
         ImageFs imageFs = ImageFs.find(activity);
-        if (!imageFs.isValid() || imageFs.getVersion() < LATEST_VERSION) installFromAssets(activity);
+        if (!imageFs.isValid() || !isInstallationComplete(activity) || imageFs.getVersion() < LATEST_VERSION) installFromAssets(activity);
+    }
+
+    public static boolean isInstallationComplete(Context context) {
+        File sentinel = new File(context.getFilesDir(), "imagefs/.installation_complete");
+        return sentinel.exists();
+    }
+
+    public static void markInstallationComplete(Context context) {
+        try {
+            File sentinel = new File(context.getFilesDir(), "imagefs/.installation_complete");
+            if (sentinel.getParentFile() != null) sentinel.getParentFile().mkdirs();
+            sentinel.createNewFile();
+        } catch (IOException e) {
+            Log.e("TR_Winlator", "Sentinel oluşturulamadı: " + e.getMessage());
+        }
+    }
+
+    public static void clearPartialInstallation(Context context) {
+        File imageFsDir = new File(context.getFilesDir(), "imagefs");
+        if (imageFsDir.exists()) {
+            FileUtils.delete(imageFsDir);
+            Log.d("TR_Winlator", "Yarım kurulum temizlendi, yeniden başlatılıyor...");
+        }
+    }
+
+    private static boolean hasEnoughStorage(Context context) {
+        StatFs stat = new StatFs(context.getFilesDir().getPath());
+        long availableBytes = stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
+        long requiredBytes = 2L * 1024 * 1024 * 1024; // 2GB
+        Log.d("TR_Winlator", "Mevcut alan: " + (availableBytes / 1024 / 1024) + " MB");
+        if (availableBytes < requiredBytes) {
+            final long mb = availableBytes / 1024 / 1024;
+            showInstallErrorDialog(context, "Yetersiz depolama alanı. En az 2GB boş alan gerekli. Mevcut: " + mb + " MB");
+            return false;
+        }
+        return true;
+    }
+
+    private static void showInstallErrorDialog(Context context, String message) {
+        new AlertDialog.Builder(context)
+            .setTitle("Kurulum Hatası")
+            .setMessage(message)
+            .setCancelable(false)
+            .setPositiveButton("Tamam", null)
+            .show();
     }
 
     private static void clearOptDir(File optDir) {

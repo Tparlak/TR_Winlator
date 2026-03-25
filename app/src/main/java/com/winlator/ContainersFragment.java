@@ -112,9 +112,12 @@ public class ContainersFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.containers_menu_add:
-                if (!ImageFs.find(getContext()).isValid()) {
-                    AppUtils.showToast(getContext(), "Sistem dosyaları henüz kurulmamış. Lütfen bekleyin veya uygulamayı yeniden başlatın.");
-                    ImageFsInstaller.installIfNeeded((MainActivity) getActivity());
+                if (!ImageFsInstaller.isInstallationComplete(getContext())) {
+                    new AlertDialog.Builder(getContext())
+                        .setTitle("Sistem Kurulmamış")
+                        .setMessage("Sistem dosyaları henüz kurulmamış veya kurulum tamamlanmamış.\n\nUygulamayı tamamen kapatıp yeniden açın ve kurulumun bitmesini bekleyin.")
+                        .setPositiveButton("Tamam", null)
+                        .show();
                     return true;
                 }
                 FragmentManager fragmentManager = getParentFragmentManager();
