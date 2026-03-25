@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TR_Winlator</string>
+    <string name="run">Çalıştır</string>
+    <string name="edit">Düzenle</string>
+    <string name="remove">Kaldır</string>
+    <string name="add">Ekle</string>
+    <string name="shortcuts">Kısayollar</string>
+    <string name="containers">Kapsayıcılar</string>
+    <string name="input_controls">Giriş Kontrolleri</string>
+    <string name="no_items_to_display">Görüntülenecek öğe yok</string>
+    <string name="new_container">Yeni Kapsayıcı</string>
+    <string name="edit_container">Kapsayıcıyı Düzenle</string>
+    <string name="creating_container">Kapsayıcı Oluşturuluyor…</string>
+    <string name="removing_container">Kapsayıcı Kaldırılıyor…</string>
+    <string name="duplicating_container">Kapsayıcı Kopyalanıyor…</string>
+    <string name="installing_system_files">Sistem Dosyaları Kuruluyor…</string>
+    <string name="updating_system_files">Sistem Dosyaları Güncelleniyor…</string>
+    <string name="starting_up">Başlatılıyor…</string>
+    <string name="unable_to_install_system_files">Sistem dosyaları kurulamadı</string>
+    <string name="keyboard">Klavye</string>
+    <string name="toggle_fullscreen">Tam Ekran</string>
+    <string name="exit">Çıkış</string>
+    <string name="no_control_element_selected">Hiçbir kontrol elemanı seçilmedi</string>
+    <string name="scale">Ölçek</string>
+    <string name="shape">Şekil</string>
+    <string name="type">Tip</string>
+    <string name="binding">Bağlama</string>
+    <string name="binding_up">Yukarı Bağlama</string>
+    <string name="binding_right">Sağa Bağlama</string>
+    <string name="binding_down">Aşağı Bağlama</string>
+    <string name="binding_left">Sola Bağlama</string>
+    <string name="overlay_opacity">Arayüz Opaklığı</string>
+    <string name="profile">Profil</string>
+    <string name="select_profile">Profil Seç</string>
+    <string name="profile_name">Profil Adı</string>
+    <string name="name">Ad</string>
+    <string name="ok">Tamam</string>
+    <string name="cancel">İptal</string>
+    <string name="untitled">İsimsiz</string>
+    <string name="no_profile_selected">Profil seçilmedi</string>
+    <string name="no_profile_found">Profil bulunamadı</string>
+    <string name="do_you_want_to_remove_this_profile">Bu profili kaldırmak istiyor musunuz?</string>
+    <string name="do_you_want_to_duplicate_this_profile">Bu profili kopyalamak istiyor musunuz?</string>
+    <string name="do_you_want_to_duplicate_this_preset">Bu önayarı kopyalamak istiyor musunuz?</string>
+    <string name="do_you_want_to_remove_this_container">Bu kapsayıcıyı kaldırmak istiyor musunuz?</string>
+    <string name="do_you_want_to_duplicate_this_container">Bu kapsayıcıyı kopyalamak istiyor musunuz?</string>
+    <string name="do_you_want_to_remove_this_shortcut">Bu kısayolu kaldırmak istiyor musunuz?</string>
+    <string name="do_you_want_to_remove_this_controller">Bu kontrolcüyü kaldırmak istiyor musunuz?</string>
+    <string name="do_you_want_to_remove_this_wine_version">Bu Wine sürümünü kaldırmak istiyor musunuz?</string>
+    <string name="do_you_want_to_remove_this_preset">Bu önayarı kaldırmak istiyor musunuz?</string>
+    <string name="do_you_want_to_end_this_process">Bu işlemi sonlandırmak istiyor musunuz?</string>
+    <string name="controls_editor">Kontrol Düzenleyici</string>
+    <string name="enabled">Etkin</string>
+    <string name="disabled">Devre Dışı</string>
+    <string name="container">Kapsayıcı</string>
+    <string name="screen_size">Ekran Boyutu</string>
+    <string name="new_environment_variable">Yeni Ortam Değişkeni</string>
+    <string name="environment_variables">Ortam Değişkenleri</string>
+    <string name="value">Değer</string>
+    <string name="processor_affinity">İşlemci İlgisi</string>
+    <string name="processor_affinity_32_bit_apps">İşlemci İlgisi (32-bit uygulamalar)</string>
+    <string name="cursor_speed">İmleç Hızı</string>
+    <string name="relative_mouse_movement">Bağıl Fare Hareketi</string>
+    <string name="toggle_switch">Geçiş Anahtarı</string>
+    <string name="profile_exported_to">Profil dışa aktarıldı</string>
+    <string name="unable_to_import_profile">Profil içe aktarılamadı</string>
+    <string name="wine_configuration">Wine Yapılandırması</string>
+    <string name="registry_keys">Kayıt Defteri Anahtarları</string>
+    <string name="csmt">CSMT (Komut Akışı Çoklu İşparçacığı)</string>
+    <string name="gpu_name">GPU Adı</string>
+    <string name="offscreen_rendering_mode">Ekran Dışı İşleme Modu</string>
+    <string name="strict_shader_math">Katı Gölgelendirici Matematiği</string>
+    <string name="video_memory_size">Video Belleği Boyutu</string>
+    <string name="show_fps">FPS Göster</string>
+    <string name="none">Yok</string>
+    <string name="custom_text">Özel Metin</string>
+    <string name="icon">Simge</string>
+    <string name="import_profile">Profili İçe Aktar</string>
+    <string name="export_profile">Profili Dışa Aktar</string>
+    <string name="touchpad_help">Dokunmatik Yüzey Yardımı</string>
+    <string name="touchpad_help_mouse_left_click_title">Fare Sol Tık</string>
+    <string name="touchpad_help_mouse_left_click_description">Tek parmakla kısa dokunuş</string>
+    <string name="touchpad_help_mouse_right_click_title">Fare Sağ Tık</string>
+    <string name="touchpad_help_mouse_right_click_description">Bir parmakla dokunup diğer parmakla kısa dokunuş</string>
+    <string name="touchpad_help_mouse_scroll_wheel_title">Fare Kaydırma Tekerleği</string>
+    <string name="touchpad_help_mouse_scroll_wheel_description">İki parmakla dokunup hareket ettirme</string>
+    <string name="touchpad_help_main_menu_title">Ana Menü</string>
+    <string name="touchpad_help_main_menu_description">Dört parmakla dokunuş</string>
+    <string name="duplicate">Kopyala</string>
+    <string name="about">Hakkında</string>
+    <string name="credits_and_third_party_apps">TR_Winlator - @Tparlak tarafından geliştirilmiştir (coffincolors tabanlıdır)</string>
+    <string name="external_controllers">Harici Kontrolcüler</string>
+    <string name="graphics_driver">Grafik Sürücüsü</string>
+    <string name="audio_driver">Ses Sürücüsü</string>
+    <string name="loading">Yükleniyor…</string>
+    <string name="press_any_button_on_your_controller">Kontrolcünüzdeki herhangi bir tuşa basın</string>
+    <string name="bindings">bağlamalar</string>
+    <string name="show_touchscreen_controls">Dokunmatik Ekran Kontrollerini Göster</string>
+    <string name="dxwrapper">DX Sarıcı (Wrapper)</string>
+    <string name="mouse_warp_override">Fare Kırpma Geçersiz Kılma</string>
+    <string name="direct3d">Direct3D</string>
+    <string name="directsound">DirectSound</string>
+    <string name="directmusic">DirectMusic</string>
+    <string name="directplay">DirectPlay</string>
+    <string name="directshow">DirectShow</string>
+    <string name="directx">DirectX</string>
+    <string name="vcrun2010">Visual C++ 2010</string>
+    <string name="wmdecoder">Windows Medya Kod Çözücü</string>
+    <string name="settings">Ayarlar</string>
+    <string name="exec_arguments">Çalıştırma Argümanları</string>
+    <string name="win_components">Win Bileşenleri</string>
+    <string name="drives">Sürücüler</string>
+    <string name="force_fullscreen">Zorunlu Tam Ekran</string>
+    <string name="range">Aralık</string>
+    <string name="enable">Etkinleştir</string>
+    <string name="disable">Devre Dışı Bırak</string>
+    <string name="force">Zorla</string>
+    <string name="installed_wine">Kurulu Wine</string>
+    <string name="install_wine">Wine Kur</string>
+    <string name="arch">Mimari</string>
+    <string name="version">v1.0.0-Standalone</string>
+    <string name="unable_to_install_wine">Wine kurulamadı</string>
+    <string name="unable_to_remove_this_wine_version">Bu wine sürümü kaldırılamadı</string>
+    <string name="wine_version">Wine Sürümü</string>
+    <string name="removing_wine">Wine Kaldırılıyor…</string>
+    <string name="preparing_installation">Kuruluma hazırlanıyor…</string>
+    <string name="finishing_installation">Kurulum tamamlanıyor…</string>
+    <string name="storage_info">Depolama Bilgisi</string>
+    <string name="drive_c">C: Sürücüsü</string>
+    <string name="cache">Önbellek</string>
+    <string name="total">Toplam</string>
+    <string name="clear_cache">Önbelleği Temizle</string>
+    <string name="estimated_used_space">Tahmini Kullanılan Alan</string>
+    <string name="advanced">Gelişmiş</string>
+    <string name="box86_box64">Box86/Box64</string>
+    <string name="system">Sistem</string>
+    <string name="box86_preset">Box86 Önayarı</string>
+    <string name="box64_preset">Box64 Önayarı</string>
+    <string name="box86_version">Box86 Sürümü</string>
+    <string name="box64_version">Box64 Sürümü</string>
+    <string name="letter">Harf</string>
+    <string name="target_path">Hedef Yol</string>
+    <string name="xserver">XServer</string>
+    <string name="use_dri3_extension">DRI3 uzantısını kullan</string>
+    <string name="width">Genişlik</string>
+    <string name="height">Yükseklik</string>
+    <string name="old">eski</string>
+    <string name="_new">yeni</string>
+    <string name="task_manager">Görev Yöneticisi</string>
+    <string name="process_name">İşlem Adı</string>
+    <string name="pid">PID</string>
+    <string name="memory">Bellek</string>
+    <string name="end_process">İşlemi Sonlandır</string>
+    <string name="new_task">Yeni Görev</string>
+    <string name="processes">İşlemler</string>
+    <string name="orientation">Yönlendirme</string>
+    <string name="horizontal">Yatay</string>
+    <string name="vertical">Dikey</string>
+    <string name="open_file">Dosya Aç</string>
+    <string name="download_file">Dosya İndir</string>
+    <string name="do_you_want_to_download_the_selected_profiles">Seçilen profilleri indirmek istiyor musunuz?</string>
+    <string name="downloading_file">Dosya İndiriliyor...</string>
+    <string name="unable_to_load_profile_list">Profil listesi yüklenemedi</string>
+    <string name="copy">Kopyala</string>
+    <string name="installed_version">Kurulu Sürüm</string>
+    <string name="unable_to_download_file">Dosya indirilemedi</string>
+    <string name="stability">Kararlılık</string>
+    <string name="compatibility">Uyumluluk</string>
+    <string name="intermediate">Orta Düzey</string>
+    <string name="performance">Performans</string>
+    <string name="preset">Önayar</string>
+    <string name="you_cannot_remove_this_preset">Bu önayarı kaldıramazsınız</string>
+    <string name="dxwrapper_help_content"><![CDATA[
+        <i><b>WineD3D</b></i> DirectX 1-11\'in OpenGL\'e çeviri katmanıdır.<br /><br />
+        <i><b>DXVK</b></i> Direct3D 9-11\'in Vulkan\'a çeviri katmanıdır.<br /><br />
+        <i><b>VKD3D</b></i> Direct3D 12 API\'sinin Vulkan\'a çeviri katmanıdır.<br /><br />
+        <i><b>CNC DDraw</b></i> klasik oyunlarla daha iyi uyumluluk için DirectDraw uygulamasıdır.
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_safeflags"><![CDATA[
+        CALL/RET kodlarında bayrak (flag) yönetimi<br /><br />
+        <b>0</b> : CALL/RET bayrağa hiç ihtiyaç duymuyormuş gibi davranır (daha hızlı, kararsız)<br />
+        <b>1</b> : Çoğu RET bayrağa ihtiyaç duyar, çoğu CALLS duymaz<br />
+        <b>2</b> : Tüm CALL/RET işlemleri bayrağa ihtiyaç duyar (daha yavaş)
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_fastnan">x86 gibi -NAN üretimi</string>
+    <string name="box86_64_env_var_help__dynarec_fastround">Kesin x86 yuvarlama üretimi</string>
+    <string name="box86_64_env_var_help__dynarec_x87double">x87 emülasyonu için Float/Double kullanımı</string>
+    <string name="box86_64_env_var_help__dynarec_bigblock"><![CDATA[
+        Dynarec BigBlock yapısı<br /><br />
+        <b>0</b> : Olabildiğince büyük blok oluşturmaya çalışma<br />
+        <b>1</b> : Dynarec bloğunu olabildiğince büyük oluştur<br />
+        <b>2</b> : Dynarec bloğunu daha büyük oluştur (bloklar örtüştüğünde devam et, ama sadece elf belleğindeki bloklar için)<br />
+        <b>3</b> : Dynarec bloğunu daha büyük oluştur (tüm bellek türleri için örtüşmelerde devam et)
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_strongmem"><![CDATA[
+        Güçlü Bellek modelinin simülasyonu<br /><br />
+        <b>0</b> : Özel bir şey deneme<br />
+        <b>1</b> : Belleğe (bazı MOV işlemlerine) yazarken Bellek Bariyerini etkinleştir<br />
+        <b>2</b> : Seçenek 1\'e ek olarak MOV kullanan her bellek yazımında Bellek Bariyeri kullan<br />
+        <b>3</b> : Seçenek 2\'ye ek olarak bellekten okurken ve bazı SSE/SSE2 işlemlerinde Bellek Bariyeri kullan
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_forward">Blok oluştururken izin verilen maksimum ileri (forward) değeri belirler</string>
+    <string name="box86_64_env_var_help__dynarec_callret">CALL/RET işlemlerinin optimizasyonu</string>
+    <string name="box86_64_env_var_help__dynarec_wait">Dynarec\'in FillBlock\'un hazır olmasını bekleyip beklemeyeceğini tanımlar</string>
+    <string name="box86_64_env_var_help__avx"><![CDATA[
+        AVX ve AVX2 uygulandı, ayrıca BMI1, BMI2, ADX, FMA, F16C ve RDRAND eklentileri!<br /><br />
+        <b>0</b> : AVX uzantısını devre dışı bırak<br />
+        <b>1</b> : AVX, BMI1, F16C ve VAES uzantılarını etkinleştir.<br />
+        <b>2</b> : Seçenek 1\'e ek olarak AVX2, BMI2, FMA, ADX, VPCLMULQDQ ve RDRAND etkinleştir.<br />\
+    ]]></string>
+    <string name="box86_64_env_var_help__unityplayer">UnityPlayer.dll\'i algıla ve strongmem ayarlarını uygula</string>
+    <string name="columns">Sütunlar</string>
+    <string name="directinput_mapper_type">DirectInput Eşleyici (Mapper) Tipi</string>
+    <string name="desktop">Masaüstü</string>
+    <string name="theme">Tema</string>
+    <string name="background">Arkaplan</string>
+    <string name="max_device_memory">Maksimum Cihaz Belleği</string>
+    <string name="frame_rate">Kare Hızı (FPS)</string>
+    <string name="configuration">Yapılandırma</string>
+    <string name="browse">Gözat</string>
+    <string name="magnifier">Büyüteç</string>
+    <string name="bring_to_front">Öne Getir</string>
+    <string name="options">Seçenekler</string>
+    <string name="enable_experimental_wow64_mode">Deneysel WoW64 modunu etkinleştir</string>
+    <string name="logs">Günlükler (Logs)</string>
+    <string name="enable_wine_debug">Wine hata ayıklamayı etkinleştir</string>
+    <string name="enable_box86_64_logs">Box86/Box64 günlüklerini etkinleştir</string>
+    <string name="export">Dışa Aktar</string>
+    <string name="logs_exported_to">Günlüklerin dışa aktarıldığı yer:</string>
+    <string name="general">Genel</string>
+    <string name="msg_warning_install_wine">Uyarı: Yeni Wine sürümü kurulumu sadece test amaçlı önerilir.</string>
+    <string name="startup_selection">Başlangıç Seçimi</string>
+    <string name="wine_debug_channel">Wine Debug Kanalı</string>
+    <string name="game_controller">Oyun Kontrolcüsü</string>
+    <string name="as_button">Düğme Olarak</string>
+    <string name="as_axis">Eksen Olarak</string>
+    <string name="both">İkisi de</string>
+    <string name="trigger_mode">Tetikleyici Modu (Trigger Mode)</string>
+    <string name="trigger_type">Tetikleyici Tipi</string>
+    <string name="use_glibc">Proot yerine yerel Glibc kullan</string>
+    <string name="experimental">Deneysel</string>
+    <string name="glibc_exp_edition">Glibc Deneysel Sürüm</string>
+    <string name="enabled_async">Async\'i Etkinleştir</string>
+    <string name="enabled_async_cache">Async Önbelleği Etkinleştir</string>
+    <string name="vkd3d_feature_level">VKD3D Özellik Seviyesi</string>
+    <string name="box64_rc_file">Box64 RC Dosyası</string>
+    <string name="filter">Filtre</string>
+    <string name="all">Tümü</string>
+    <string name="group">Grup</string>
+    <string name="new_group">Yeni Grup</string>
+    <string name="import_group">Grubu İçe Aktar</string>
+    <string name="new_file">Yeni Dosya</string>
+    <string name="new_item">Yeni Öğe</string>
+    <string name="group_edit">Grup Düzenle</string>
+    <string name="group_name">Grup Adı</string>
+    <string name="do_you_want_to_duplicate_this_group">Bu grubu kopyalamak istiyor musunuz?</string>
+    <string name="do_you_want_to_remove_this_group">Bu grubu kaldırmak istiyor musunuz?</string>
+    <string name="do_you_want_to_duplicate_this_process">Bu işlemi kopyalamak istiyor musunuz?</string>
+    <string name="do_you_want_to_remove_this_process">Bu işlemi kaldırmak istiyor musunuz?</string>
+    <string name="do_you_want_to_remove_this_variable">Bu değişkeni kaldırmak istiyor musunuz?</string>
+    <string name="variable_name">Değişken Adı</string>
+    <string name="variable_already_exists">Değişken zaten var</string>
+    <string name="cannot_remove_default_profile">Varsayılan profil kaldırılamaz.</string>
+    <string name="cannot_edit_default_profile">Varsayılan profil düzenlenemez.</string>
+    <string name="do_you_want_to_restore_default_profile">Varsayılan profili geri yüklemek istiyor musunuz?</string>
+    <string name="box86_64_rc_files">RC Dosyası</string>
+    <string name="simulate_touch_screen">Dokunmatik ekranı simüle et</string>
+    <string name="install_content">İçerik Kur</string>
+    <string name="content_type">İçerik Tipi</string>
+    <string name="contents">İçerikler</string>
+    <string name="do_you_want_to_install_content">Ek içerik kurmak istiyor musunuz?</string>
+    <string name="pls_make_sure_content_trustworthy">İçerik çalıştırılabilir dosyalar bulundurur. Güvensiz çalıştırılabilir dosyalar verilerinizi ve güvenliğinizi tehlikeye atabilir. Kurulumdan önce, ek içeriğin GÜVENİLİR olduğundan LÜTFEN emin olun.</string>
+    <string name="content_suffix_is_wcp_packed_xz_zst">İçerik dosyaları .wcp uzantısına sahiptir ve xz ya da zst kullanılarak sıkıştırılmıştır.</string>
+    <string name="installing_content">İçerik Kuruluyor…</string>
+    <string name="unable_to_install_content">İçerik kurulamadı.</string>
+    <string name="install_failed">Kurulum Başarısız</string>
+    <string name="file_cannot_be_recognied">Dosya tanınamadı.</string>
+    <string name="profile_not_found_in_content">Profil içerikte bulunamadı.</string>
+    <string name="profile_cannot_be_recognized">Profil tanınamadı</string>
+    <string name="content_already_exist">Kurmaya çalıştığınız içerik zaten var.</string>
+    <string name="content_info">İçerik Bilgisi</string>
+    <string name="version_code">Sürüm Kodu</string>
+    <string name="description">Açıklama</string>
+    <string name="file_list">Dosya Listesi</string>
+    <string name="_continue">Devam Et</string>
+    <string name="content_installed_success">İçerik başarıyla kuruldu!</string>
+    <string name="content_cannot_be_trusted">İçeriğe güvenilemez.</string>
+    <string name="content_is_incomplete">İçerik eksik.</string>
+    <string name="warning_content_has_untrusted_files">Uyarı: Ek içerik güvenilmeyen dosyalar barındırıyor. Genellikle, aşağıdaki dosyalar değiştirilmemelidir. Lütfen kuruluma devam edip etmeyeceğinize karar verin.</string>
+    <string name="warning">Uyarı</string>
+    <string name="do_you_want_to_remove_this_content">Bu içeriği kaldırmak istiyor musunuz?</string>
+    <string name="add_to_home_screen">Ana Ekrana Ekle</string>
+    <string name="shortcut_not_available">Bu kısayol artık mevcut değil. Lütfen silin veya yeniden oluşturun.</string>
+    <string name="enable_file_provider">Dosya Sağlayıcıyı Etkinleştir (File Provider)</string>
+    <string name="take_effect_next_startup">Bu seçenek bir sonraki başlangıçta etkili olacaktır.</string>
+    <string name="imagefs">Imagefs</string>
+    <string name="reinstall_imagefs">Imagefs Yeniden Yükle</string>
+    <string name="do_you_want_to_reinstall_imagefs">imagefs\'i yeniden kurmak istiyor musunuz? Bu işlem sistem dosyalarını sıfırlayacaktır, kapsayıcılarınız (containers) etkilenmeyecektir.</string>
+    <string name="unable_to_remove_content_since_container_using">Bu içerik şu an bir kapsayıcı (container) tarafından kullanıldığından kaldırılamaz.</string>
+    <string name="get_more_contents_form_github">Daha fazla içerik için https://github.com/longjunyu2/winlator/releases adresini ziyaret edebilirsiniz.</string>
+    <string name="setup_failed">Kurulum başarısız</string>
+    <string name="graphics_driver_configuration">Grafik Sürücüsü Yapılandırması</string>
+    <string name="select_graphics_driver_version">Grafik Sürücüsü Sürümünü Seçin:</string>
+    <string name="graphics_driver_version">Grafik Sürücüsü Sürümü:</string>
+    <string name="add_to_homescreen">Ana Ekrana Ekle</string>
+    <string name="add_save">Kayıt Ekle</string>
+    <string name="saves">Kayıtlar (Saves)</string>
+    <string name="import_save">Kaydı İçe Aktar</string>
+    <string name="transfer">Aktar</string>
+    <string name="share">Paylaş</string>
+    <string name="unregister">Kaydı Sil</string>
+    <string name="no_saves_to_display">Görüntülenecek kayıt yok</string>
+    <string name="new_save">Bir Kayıt (Save) Dosyası Ekle</string>
+    <string name="save_path">Kayıt Yolu</string>
+    <string name="save_title">Kayıt Adı</string>
+    <string name="save_container">Seçili Kapsayıcı</string>
+    <string name="select_save_path">Kayıt Klasörünü Bul</string>
+    <string name="select_container_first">Lütfen kaydınızı içeren kapsayıcıyı seçin.</string>
+    <string name="fill_all_fields">Yol ve Kayıt Adı gereklidir</string>
+    <string name="invalid_path">Geçerli bir kayıt dizini yolu değil</string>
+    <string name="confirm_selection">Seçimi Onayla</string>
+    <string name="select_directory">Kayıt dizininizi seçin</string>
+    <string name="invalid_container">Geçersiz Yol</string>
+    <string name="up_directory">Üst Dizin</string>
+    <string name="edit_save_title">Kayıt başlığını güncelle</string>
+    <string name="edit_save">Kaydı düzenle</string>
+    <string name="original_save_path">Kayıtlı yol</string>
+    <string name="updated_save_path">Güncellenen kayıt yolu</string>
+    <string name="confirmation">Onaylama</string>
+    <string name="yes">Evet</string>
+    <string name="no">Hayır</string>
+    <string name="path_not_changed_prompt">Yol değiştirilmedi. Devam etmek istiyor musunuz?</string>
+    <string name="save_transfer">Kaydı Aktar</string>
+    <string name="select_container">Hedef Kapsayıcı:</string>
+    <string name="transfer_complete">Aktarım tamamlandı</string>
+    <string name="transfer_failed">Aktarım başarısız</string>
+    <string name="unable_to_transfer_save">Kayıt aktarılamadı</string>
+    <string name="spinner_container_selection">Aktarılıyor...</string>
+    <string name="name_required">İsim gerekli</string>
+    <string name="exporting_save">Kayıt dışa aktarılıyor...</string>
+    <string name="importing_save">Kayıt içe aktarılıyor...</string>
+    <string name="_copy">kopya</string>
+    <string name="backing_up_data">Veriler yedekleniyor...</string>
+    <string name="restoring_data">Veriler geri yükleniyor...</string>
+    <string name="midi_sound_font">MIDI Ses Dosyası (SoundFont)</string>
+    <string name="sound">Ses</string>
+    <string name="do_you_want_to_remove_this_sound_font">Bu ses dosyasını kaldırmak istiyor musunuz?</string>
+    <string name="sound_font_removed_success">Ses dosyası başarıyla kaldırıldı!</string>
+    <string name="sound_font_removed_failed">Ses dosyası kaldırılamadı!</string>
+    <string name="sound_font_installed_success">Ses dosyası başarıyla kuruldu!</string>
+    <string name="sound_font_installed_failed">Ses dosyası kurulumu başarısız!</string>
+    <string name="sound_font_already_exist">Kurmak istediğiniz ses dosyası zaten var.</string>
+    <string name="unable_to_install_soundfont">Ses dosyası kurulamadı.</string>
+    <string name="installing_soundfont">Ses Dosyası Kuruluyor…</string>
+    <string name="sound_font_bad_format">Hatalı Ses Dosyası (SoundFont) Biçimi.</string>
+    <string name="cannot_remove_default_sound_font">Varsayılan ses dosyası (SoundFont) kaldırılamaz</string>
+    <string name="enable_dinput_for_wine_game">Wine\'daki Oyunlar için DInput Etkinleştir</string>
+    <string name="enable_xinput_for_wine_game">Wine\'daki Oyunlar için XInput Etkinleştir</string>
+    <string name="dinput_legacy">Eski (Eski Oyun Kolları)</string>
+    <string name="dinput_modern">Modern (Xinput benzeri)</string>
+    <string name="mixed">Karışık</string>
+    <string name="help_xinput"><![CDATA[
+        Oyununuz oyun kontrolcüsü desteği için <i><b>XInput API</b></i>\'sini kullanıyorsa, lütfen bu seçeneği etkinleştirin.<br/><br/>
+        Bu seçenek hem <i><b>sanal</b></i> (Giriş Kontrolleri tarafından sağlanan) hem de <i><b>fiziksel</b></i> oyun kontrolcülerini etkiler.
+    ]]></string>
+    <string name="help_dinput"><![CDATA[
+        Oyununuz oyun kontrolcüsü desteği için <i><b>DInput API</b></i>\'sini kullanıyorsa, lütfen bu seçeneği etkinleştirin.<br/><br/>
+        Bu seçenek hem <i><b>sanal</b></i> (Giriş Kontrolleri tarafından sağlanan) hem de <i><b>fiziksel</b></i> oyun kontrolcülerini etkiler.
+    ]]></string>
+    <string name="enable_xinput_and_dinput_same_time">Bazı oyunlar her iki API\'yi de destekleyebilir. Bu oyunlarda XInput ve DInput\'un aynı anda etkinleştirilmesi, The Binding of Isaac ve Resident Evil serisi gibi oyunlarda kontrol sorunlarına neden olabilir.</string>
+    <string name="startup_normal">Normal (Tüm servisleri yükle)</string>
+    <string name="startup_essential">Gerekli (Sadece gerekli servisleri yükle)</string>
+    <string name="startup_aggressive">Agresif (Başlangıçta servisleri durdur)</string>
+    <string name="lc_all" translatable="false">LC_ALL</string>
+    <string name="help_trigger_mode"><![CDATA[
+        Bu seçenek kullandığınız <i><b>Fiziksel Kontrolcüye</b></i> bağlıdır.<br/><br/>
+        <i><b>Eksen Olarak</b></i>: Kontrolcünüzdeki tetikleyici (trigger) doğrusal ise (hareket algılayan) bunu seçin.<br/><br/>
+        <i><b>Düğme Olarak</b></i>: Kontrolcünüzdeki tetikleyici bir düğme şeklindeyse (anahtar gibi) bunu seçin.<br/><br/>
+        <i><b>Not</b></i>: Doğrusal tetikleyicilerde <i><b>Düğme Olarak</b></i> kullanılması, haritalandırırken doğrusal veri kaybına neden olacaktır.<br/>
+    ]]></string>
+    <string name="toggle_orientation">Ekran Yönünü Değiştir</string>
+    <string name="help_file_provider"><![CDATA[
+        <i><b>Dosya Sağlayıcı (File Provider)</b></i> android dosya yöneticisi üzerinden Winlator\'un dahili verilerine erişime izin verir.<br/><br/>
+    ]]></string>
+    <string name="reconfigure">Yeniden Yapılandır (Reconfigure)</string>
+    <string name="do_you_want_to_reconfigure_wine">Bu kapsayıcıyı bir sonraki başlangıçta yeniden yapılandırmak istiyor musunuz? Bu, Wine Yapılandırmasını tetikleyecek zaman damgasını silecektir.</string>
+    
+    <string name="xr" translatable="false">XR</string>
+    <string name="primary_controller">Birincil kontrolcü</string>
+    <string name="left_controller">Sol kontrolcü</string>
+    <string name="right_controller">Sağ kontrolcü</string>
+    <string name="button_a">A Tuşu</string>
+    <string name="button_b">B Tuşu</string>
+    <string name="button_x">X Tuşu</string>
+    <string name="button_y">Y Tuşu</string>
+    <string name="button_grip">Kavrama (Grip) tuşu</string>
+    <string name="button_trigger">Tetik (Trigger) tuşu</string>
+    <string name="thumbstick_left">Sol Analog (Thumbstick)</string>
+    <string name="thumbstick_right">Sağ Analog (Thumbstick)</string>
+    <string name="thumbstick_up">Analog Yukarı</string>
+    <string name="thumbstick_down">Analog Aşağı</string>
+    <string name="secondary_executable">Yol:</string>
+    <string name="enter_secondary_exec_path"> ör: "D:/Oyunlar/Oyunum/My Game.exe"</string>
+    <string name="exec_delay">Gecikmeli Çalıştırma (saniye):</string>
+    <string name="enter_delay_seconds">Gecikmeyi saniye cinsinden girin:</string>
+    <string name="use_secondary_executable">İkincil çalıştırılabilir dosya kullanılsın mı?</string>
+    <string name="secondary_exec">İkincil Çalıştırılabilir (Executable)</string>
+    <string name="secondary_exe_path_subtext">(Yoldaki boşluklar tırnak içine alınmalıdır)</string>
+    <string name="pip_mode">PiP (Resim içinde Resim) Modu</string>
+    <string name="configure">Yapılandır</string>
+    <string name="enable_legacy_input_mode">7.1.2 Eski Giriş Modunu Etkinleştir (Legacy Input Mode)</string>
+    <string name="enable_touchscreen_timeout">Dokunmatik Ekran Zaman Aşımı (Yeniden Başlatma Gerektirir)</string>
+    <string name="enable_touchscreen_haptics">Dokunmatik Ekran Titreşim Geri Bildirimini Etkinleştir</string>
+    <string name="help_steamgrid">SteamGrid API Anahtarı</string>
+    <string name="disable_xinput_for_shortcut">Xinput\'u Devre Dışı Bırak (M/KB Özel Kontrolü İçin)</string>
+    <string name="fullscreen_stretched">Tam Ekranı (Genişletilmiş) Etkinleştir</string>
+    <string name="export_container">Kapsayıcıyı Dışa Aktar</string>
+    <string name="exporting_container">Kapsayıcı Dışa Aktarılıyor...</string>
+    <string name="importing_container">Kapsayıcı İçe Aktarılıyor...</string>
+    
+    <string name="brightness">Parlaklık</string>
+    <string name="contrast">Kontrast</string>
+    <string name="gamma">Gama</string>
+    <string name="color_adjustment">Renk Ayarı</string>
+    <string name="enable_fxaa">FXAA Etkinleştir</string>
+    <string name="enable_crt_shader">CRT Gölgelendirici (Shader) Etkinleştir</string>
+    
+    <string name="do_you_want_to_add_a_new_profile">Yeni bir profil eklemek istiyor musunuz?</string>
+    
+    <string name="default_profile">Varsayılan Profil</string>
+    
+    <string name="reset">Sıfırla</string>
+    
+    <string name="screen_effect">Ekran Efektleri</string>
+    
+    <string name="enable_toon_shader">Toon Gölgelendirici Etkinleştir</string>
+    <string name="enable_ntsc_effect">NTSC Efekti Etkinleştir</string>
+    <string name="enter_profile_name">Profil Adını Girin</string>
+
+    <string name="failed_to_extract">Çıkarma başarısız oldu. Boyut: %1$d</string>
+    <string name="installation_complete">Kayıt oluşturma tamamlandı!</string>
+    <string name="please_wait">Lütfen bekleyin…</string>
+    <string name="container_name">Kapsayıcı Adı</string>
+    <string name="create_container">Kapsayıcı Oluştur</string>
+    <string name="extracting_files">Dosyalar Çıkarılıyor...</string>
+    <string name="installing">Kuruluyor…</string>
+</resources>

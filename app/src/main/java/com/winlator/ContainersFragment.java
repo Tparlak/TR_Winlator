@@ -113,6 +113,7 @@ public class ContainersFragment extends Fragment {
         switch (menuItem.getItemId()) {
             case R.id.containers_menu_add:
                 if (!ImageFs.find(getContext()).isValid()) {
+                    AppUtils.showToast(getContext(), "Sistem dosyaları henüz kurulmamış. Lütfen bekleyin veya uygulamayı yeniden başlatın.");
                     ImageFsInstaller.installIfNeeded((MainActivity) getActivity());
                     return true;
                 }

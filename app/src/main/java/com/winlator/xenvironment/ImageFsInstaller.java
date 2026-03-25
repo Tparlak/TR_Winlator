@@ -19,6 +19,7 @@ import android.content.DialogInterface;
 import androidx.appcompat.app.AlertDialog;
 import android.os.Build;
 import android.text.Html;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,8 +48,20 @@ public abstract class ImageFsInstaller {
     }
 
     public static void installFromAssets(final MainActivity activity) {
-        if (FileUtils.getSize(activity, "imagefs.txz") == 0) {
+        long assetSize = FileUtils.getSize(activity, "imagefs.txz");
+        Log.d("TR_Winlator", "imagefs.txz asset boyutu: " + assetSize + " byte");
+
+        if (assetSize == 0) {
+            Log.e("TR_Winlator", "imagefs.txz bulunamadı (boyut 0). Assets klasörünü kontrol edin.");
             showMissingRootFSDialog(activity);
+            return;
+        }
+
+        // LFS pointer kontrolü: gerçek dosya en az 1MB olmalı
+        if (assetSize < 1_000_000) {
+            Log.e("TR_Winlator", "imagefs.txz çok küçük (" + assetSize + " byte). Muhtemelen Git LFS pointer'ı. Gerçek dosyayı assets klasörüne koyun.");
+            activity.runOnUiThread(() -> AppUtils.showToast(activity,
+                "HATA: imagefs.txz geçersiz (" + assetSize + " byte). Git LFS pointer olabilir. Gerçek dosyayı assets klasörüne koyun."));
             return;
         }
 
@@ -63,8 +76,10 @@ public abstract class ImageFsInstaller {
         Executors.newSingleThreadExecutor().execute(() -> {
             clearRootDir(rootDir);
             final byte compressionRatio = 22;
-            final long contentLength = (long)(FileUtils.getSize(activity, "imagefs.txz") * (100.0f / compressionRatio));
+            final long contentLength = (long)(assetSize * (100.0f / compressionRatio));
             AtomicLong totalSizeRef = new AtomicLong();
+
+            Log.d("TR_Winlator", "imagefs.txz çıkarma başlıyor. Tahmini boyut: " + contentLength + " byte");
 
             boolean success = TarCompressorUtils.extract(TarCompressorUtils.Type.XZ, activity, "imagefs.txz", rootDir, (file, size) -> {
                 if (size > 0) {
@@ -76,11 +91,14 @@ public abstract class ImageFsInstaller {
             });
 
             if (success) {
+                Log.d("TR_Winlator", "imagefs.txz başarıyla çıkarıldı.");
                 imageFs.createImgVersionFile(LATEST_VERSION);
                 resetContainerImgVersions(activity);
             }
             else {
-                activity.runOnUiThread(() -> AppUtils.showToast(activity, "Failed to extract imagefs.txz. Size: " + contentLength));
+                Log.e("TR_Winlator", "imagefs.txz çıkarılamadı. Boyut: " + assetSize + " byte");
+                activity.runOnUiThread(() -> AppUtils.showToast(activity,
+                    "imagefs.txz çıkarılamadı. Boyut: " + assetSize + " byte. Lütfen APK'yı yeniden derleyin."));
             }
 
             dialog.closeOnUiThread();
@@ -88,23 +106,24 @@ public abstract class ImageFsInstaller {
     }
 
     private static void showMissingRootFSDialog(final MainActivity activity) {
-        String message = "<b>System Files Missing!</b><br><br>" +
-                "The core system file (imagefs.txz) was not found in the APK assets.<br><br>" +
-                "1. Ensure you have placed <b>imagefs.txz</b> in <i>app/src/main/assets/</i> before building.<br>" +
-                "2. Or place the OBB file in <i>/sdcard/Android/obb/com.winlator/</i> on your device.<br><br>" +
-                "Would you like to initialize a <b>Stub Filesystem</b> to explore the UI? (Note: Containers may not run without the actual RootFS).";
+        Log.w("TR_Winlator", "showMissingRootFSDialog: imagefs.txz APK assets içinde bulunamadı.");
+        String message = "<b>Sistem Dosyaları Eksik!</b><br><br>" +
+                "Temel sistem dosyası (imagefs.txz) APK assets klasöründe bulunamadı.<br><br>" +
+                "1. Derlemeden önce <b>imagefs.txz</b> dosyasını <i>app/src/main/assets/</i> klasörüne koyduğunuzdan emin olun.<br>" +
+                "2. Veya OBB dosyasını cihazınızda <i>/sdcard/Android/obb/com.winlator/</i> konumuna yerleştirin.<br><br>" +
+                "Arayüzü keşfetmek için <b>Taslak Dosya Sistemi</b> başlatmak ister misiniz? (Not: Gerçek RootFS olmadan container'lar çalışmayabilir).";
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity)
-                .setTitle("Installation Error")
+                .setTitle("Kurulum Hatası")
                 .setMessage(Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY))
                 .setCancelable(false)
-                .setPositiveButton("Create Stub", (dialog, which) -> {
+                .setPositiveButton("Taslak Oluştur", (dialog, which) -> {
                     ImageFs imageFs = ImageFs.find(activity);
                     imageFs.createImgVersionFile(LATEST_VERSION);
-                    AppUtils.showToast(activity, "Stub RootFS initialized.");
+                    AppUtils.showToast(activity, "Taslak RootFS başlatıldı.");
                     activity.recreate();
                 })
-                .setNegativeButton("Exit", (dialog, which) -> activity.finish());
+                .setNegativeButton("Çıkış", (dialog, which) -> activity.finish());
         
         builder.show();
     }
