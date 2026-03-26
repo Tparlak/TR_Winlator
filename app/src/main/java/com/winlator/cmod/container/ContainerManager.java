@@ -242,6 +242,11 @@ public class ContainerManager {
         File srcDir = new File(wineInfo.path + "/lib/wine/" + srcName);
 
         File[] srcfiles = srcDir.listFiles(file -> file.isFile());
+        
+        if (srcfiles == null) {
+            Log.e("ContainerManager", "Failed to extract common DLLs: directory not found or inaccessible -> " + srcDir.getPath());
+            return;
+        }
 
         for (File file : srcfiles) {
             String dllName = file.getName();

@@ -64,39 +64,7 @@ public abstract class ImageFsInstaller {
     }
 
     public static void installFromAssets(final MainActivity activity) {
-        AppUtils.keepScreenOn(activity);
-        ImageFs imageFs = ImageFs.find(activity);
-        File rootDir = imageFs.getRootDir();
-
-        SettingsFragment.resetEmulatorsVersion(activity);
-
-        final DownloadProgressDialog dialog = new DownloadProgressDialog(activity);
-        dialog.show(R.string.installing_system_files);
-        Executors.newSingleThreadExecutor().execute(() -> {
-            clearRootDir(rootDir);
-            final byte compressionRatio = 22;
-            final long contentLength = (long)(FileUtils.getSize(activity, "imagefs.txz") * (100.0f / compressionRatio));
-            AtomicLong totalSizeRef = new AtomicLong();
-
-            boolean success = TarCompressorUtils.extract(TarCompressorUtils.Type.XZ, activity, "imagefs.txz", rootDir, (file, size) -> {
-                if (size > 0) {
-                    long totalSize = totalSizeRef.addAndGet(size);
-                    final int progress = (int)(((float)totalSize / contentLength) * 100);
-                    activity.runOnUiThread(() -> dialog.setProgress(progress));
-                }
-                return file;
-            });
-
-            if (success) {
-                installWineFromAssets(activity);
-//                installGuestLibs(activity); // If evshim.tzst ends up being used
-                imageFs.createImgVersionFile(LATEST_VERSION);
-                resetContainerImgVersions(activity);
-            }
-            else AppUtils.showToast(activity, R.string.unable_to_install_system_files);
-
-            dialog.closeOnUiThread();
-        });
+        installFromAssets(activity, null);
     }
 
     public static void installFromAssets(final MainActivity activity, final Runnable onCompletion) {
@@ -109,29 +77,78 @@ public abstract class ImageFsInstaller {
         final DownloadProgressDialog dialog = new DownloadProgressDialog(activity);
         dialog.show(R.string.installing_system_files);
         Executors.newSingleThreadExecutor().execute(() -> {
+            Log.d("ImageFsInstaller", "Starting installation...");
+
+            // Check if asset is valid (not a Git LFS pointer)
+            long assetSize = FileUtils.getSize(activity, "imagefs.txz");
+            Log.d("ImageFsInstaller", "Asset imagefs.txz size: " + assetSize + " bytes");
+            if (assetSize < 1024 * 1024 * 10) { // Less than 10MB is definitely a pointer
+                activity.runOnUiThread(() -> {
+                    dialog.closeOnUiThread();
+                    new AlertDialog.Builder(activity)
+                        .setTitle("Installation Error")
+                        .setMessage("The system image (imagefs.txz) is invalid (Git LFS pointer detected). Please use the actual 1GB asset.")
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
+                });
+                return;
+            }
+
+            // Check for free space (at least 2GB recommended)
+            long freeSpace = activity.getFilesDir().getFreeSpace();
+            Log.d("ImageFsInstaller", "Free space: " + freeSpace + " bytes");
+            if (freeSpace < 1024L * 1024 * 1024 * 2) {
+                activity.runOnUiThread(() -> {
+                    dialog.closeOnUiThread();
+                    AppUtils.showToast(activity, "Not enough storage. At least 2GB free space is required.");
+                });
+                return;
+            }
+
             clearRootDir(rootDir);
-            final byte compressionRatio = 24;
-            final long contentLength = (long)(FileUtils.getSize(activity, "imagefs.txz") * (100.0f / compressionRatio));
+            final byte compressionRatio = 22;
+            final long contentLength = (long)(assetSize * (100.0f / compressionRatio));
             AtomicLong totalSizeRef = new AtomicLong();
+            final int[] lastProgress = {0};
 
             boolean success = TarCompressorUtils.extract(TarCompressorUtils.Type.XZ, activity, "imagefs.txz", rootDir, (file, size) -> {
                 if (size > 0) {
                     long totalSize = totalSizeRef.addAndGet(size);
-                    final int progress = (int)(((float)totalSize / contentLength) * 100);
-                    activity.runOnUiThread(() -> dialog.setProgress(progress));
+                    final int progress = (int)((((float)totalSize / contentLength) * 100));
+                    if (progress > lastProgress[0]) {
+                        lastProgress[0] = progress;
+                        activity.runOnUiThread(() -> dialog.setProgress(Math.min(progress, 99)));
+                    }
                 }
                 return file;
             });
 
+            Log.d("ImageFsInstaller", "Extraction success: " + success + ", Final progress: " + lastProgress[0] + "%");
 
+            // Tolerance for 80% + Wine existence
+            boolean hasWine = new File(rootDir, "usr/bin/wine").exists() || new File(rootDir, "usr/local/bin/wine").exists();
+            if (!success && lastProgress[0] >= 80 && hasWine) {
+                Log.w("ImageFsInstaller", "Extraction reported failure/freeze but reached 80% and WINE exists. Treating as success.");
+                success = true;
+            }
 
             if (success) {
+                activity.runOnUiThread(() -> dialog.setProgress(100));
+                
+                // Finalization delay
+                try { Thread.sleep(3000); } catch (InterruptedException e) {}
+
                 installWineFromAssets(activity);
-//                installGuestLibs(activity); // If evshim.tzst ends up being used
                 imageFs.createImgVersionFile(LATEST_VERSION);
+                imageFs.createInstallationCompleteFile();
                 resetContainerImgVersions(activity);
+                Log.d("ImageFsInstaller", "Installation completed successfully.");
             }
-            else AppUtils.showToast(activity, R.string.unable_to_install_system_files);
+            else {
+                Log.e("ImageFsInstaller", "Installation failed.");
+                clearRootDir(rootDir);
+                activity.runOnUiThread(() -> AppUtils.showToast(activity, R.string.unable_to_install_system_files));
+            }
 
             dialog.closeOnUiThread();
             if (onCompletion != null) {

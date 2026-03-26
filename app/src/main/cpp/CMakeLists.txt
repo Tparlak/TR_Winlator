@@ -37,7 +37,7 @@ target_link_libraries(winlator
 
 
 # ---- EVSHIM (phase-0 stub) -----------------------------------
-add_library(evshim SHARED winlator/evshim.c)
+# add_library(evshim SHARED winlator/evshim.c)
 
 # ---------- SDL2 library (Build from source) ----------
 # Add SDL2 as a library target.
@@ -53,20 +53,21 @@ add_subdirectory(sdl2) # This will create an SDL2 target (often named SDL2::SDL2
 
 
 # Tell evshim's compiler where to find SDL2 headers (still needed)
-target_include_directories(evshim PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/sdl2/include" # Adjust if SDL headers are elsewhere in your sdl2 dir
-)
+# target_include_directories(evshim PRIVATE
+#        "${CMAKE_CURRENT_LIST_DIR}/sdl2/include" # Adjust if SDL headers are elsewhere in your sdl2 dir
+# )
 
 # ---------- link everything ----------
-target_link_libraries(evshim PRIVATE # Or PUBLIC
-        SDL2            # If add_subdirectory(sdl2) created a target named SDL2
-        # Or MySDL2     # If you used add_library(MySDL2 ...)
-        # Or SDL2::SDL2 # Common imported target name for modern CMake SDL2
-        log
-        dl
-)
+# target_link_libraries(evshim PRIVATE # Or PUBLIC
+#        SDL2            # If add_subdirectory(sdl2) created a target named SDL2
+#        # Or MySDL2     # If you used add_library(MySDL2 ...)
+#        # Or SDL2::SDL2 # Common imported target name for modern CMake SDL2
+#        log
+#        dl
+# )
 
 # drop .so into jniLibs/<abi> so Gradle packs it automatically
-set_target_properties(evshim PROPERTIES
-        LIBRARY_OUTPUT_DIRECTORY
-        "${CMAKE_CURRENT_SOURCE_DIR}/jniLibs/${ANDROID_ABI}")
+# set_target_properties(evshim PROPERTIES
+#        LIBRARY_OUTPUT_DIRECTORY
+#        "${CMAKE_CURRENT_SOURCE_DIR}/jniLibs/${ANDROID_ABI}")
+

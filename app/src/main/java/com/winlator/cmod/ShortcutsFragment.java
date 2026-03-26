@@ -639,8 +639,8 @@ public class ShortcutsFragment extends Fragment {
                 // Convert DocumentFile to a File object for further processing
                 frontendDir = new File(FileUtils.getFilePathFromUri(getContext(), folderUri));
             } else {
-                // Default to Downloads\Winlator\Frontend if no custom URI is set
-                frontendDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Winlator/Frontend");
+                // Default to Downloads\\TR_Winlator\\Frontend if no custom URI is set
+                frontendDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "TR_Winlator/Frontend");
                 if (!frontendDir.exists() && !frontendDir.mkdirs()) {
                     Toast.makeText(getContext(), "Failed to create default directory", Toast.LENGTH_SHORT).show();
                     return;
@@ -658,8 +658,8 @@ public class ShortcutsFragment extends Fragment {
                     writer.write("2. Navigate to the Settings tab.\n");
                     writer.write("3. Navigate to Settings\\Library\n");
                     writer.write("4. Select, Import from Pegasus\n");
-                    writer.write("5. Add the metadata.pegasus.txt file located in this directory (Downloads\\Winlator\\Frontend)\n");
-                    writer.write("6. Set the Sync path to Downloads\\Winlator\\Frontend\n");
+                    writer.write("5. Add the metadata.pegasus.txt file located in this directory (Downloads\\TR_Winlator\\Frontend)\n");
+                    writer.write("6. Set the Sync path to Downloads\\TR_Winlator\\Frontend\n");
                     writer.write("7. Start your game!\n\n");
                     writer.write("Beacon:\n\n");
                     writer.write("1. Navigate to Settings\n");
@@ -668,8 +668,8 @@ public class ShortcutsFragment extends Fragment {
                     writer.write("Platform Type: Custom\n");
                     writer.write("Name: Windows (or Winlator, whatever you prefer)\n");
                     writer.write("Short name: windows\n");
-                    writer.write("Player app: Select Winlator Cmod (or whichever fork you are using that has adopted this code)\n");
-                    writer.write("ROMs folder: Use Android FilePicker to select the Downloads\\Winlator\\Frontend directory\n");
+                    writer.write("Player app: Select TR_Winlator (or whichever fork you are using that has adopted this code)\n");
+                    writer.write("ROMs folder: Use Android FilePicker to select the Downloads\\TR_Winlator\\Frontend directory\n");
                     writer.write("Expand Advanced:\n");
                     writer.write("File handling: Default\n");
                     writer.write("Use custom launch: True\n");

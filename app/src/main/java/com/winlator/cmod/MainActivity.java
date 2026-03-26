@@ -585,6 +585,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             ((TextView) dialog.findViewById(R.id.TVAppVersion)).setText(getString(R.string.version) + " " + pInfo.versionName);
 
             String creditsAndThirdPartyAppsHTML = String.join("<br />",
+                    "<b>TR_Winlator</b> by <a href=\"https://github.com/Tparlak\">@Tparlak</a> (Turkish Localization & Fixes)",
                     "Winlator was created by Brunodev85 (<a href=\"https://github.com/brunodev85\">Git</a>)",
                     "Winlator Cmod by <a href=\"https://github.com/coffincolors/winlator\">coffincolors</a>, <a href=\"https://github.com/Pipetto-crypto/winlator\">Pipetto-crypto</a>",
                     "Winlator Glibc by longjunyu2 (<a href=\"https://github.com/longjunyu2/winlator/\">Fork</a>)",

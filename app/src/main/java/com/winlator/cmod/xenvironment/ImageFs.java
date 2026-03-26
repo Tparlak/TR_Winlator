@@ -46,7 +46,11 @@ public class ImageFs {
     }
 
     public boolean isValid() {
-        return rootDir.isDirectory() && getImgVersionFile().exists();
+        return rootDir.isDirectory() && getImgVersionFile().exists() && isInstallationComplete();
+    }
+
+    public boolean isInstallationComplete() {
+        return getInstallationCompleteFile().exists();
     }
 
     public int getVersion() {
@@ -62,8 +66,19 @@ public class ImageFs {
         getConfigDir().mkdirs();
         File file = getImgVersionFile();
         try {
-            file.createNewFile();
+            if (!file.exists()) file.createNewFile();
             FileUtils.writeString(file, String.valueOf(version));
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createInstallationCompleteFile() {
+        getConfigDir().mkdirs();
+        File file = getInstallationCompleteFile();
+        try {
+            if (!file.exists()) file.createNewFile();
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -84,6 +99,10 @@ public class ImageFs {
 
     public File getImgVersionFile() {
         return new File(getConfigDir(), ".img_version");
+    }
+
+    public File getInstallationCompleteFile() {
+        return new File(getConfigDir(), ".installation_complete");
     }
 
     public File getInstalledWineDir() {
